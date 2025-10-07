@@ -1,0 +1,27 @@
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace UTB_AP5PW_Invoicer.Domain.Entities
+{
+    public class Payment
+    {
+        [Key]
+        public int PaymentId { get; set; }
+
+        [ForeignKey(nameof(Invoice))]
+        public int InvoiceId { get; set; }
+
+        [Required]
+        public DateTime PaymentDate { get; set; }
+
+        [Required]
+        public decimal Amount { get; set; }
+
+        [Required]
+        public string PaymentMethod { get; set; }
+
+        public DateTime CreatedAt { get; set; }
+
+        public Invoice Invoice { get; set; }
+    }
+}
