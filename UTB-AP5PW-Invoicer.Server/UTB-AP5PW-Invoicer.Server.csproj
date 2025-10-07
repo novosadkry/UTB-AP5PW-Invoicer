@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>UTB_AP5PW_Invoicer.Server</RootNamespace>
+    <UserSecretsId>4cf3be1c-bc09-4e5f-9c1c-9d1b63a252ca</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UTB-AP5PW-Invoicer.Application\UTB-AP5PW-Invoicer.Application.csproj" />
+    <ProjectReference Include="..\utb-ap5pw-invoicer.client\UTB-AP5PW-Invoicer.Client.esproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\UTB-AP5PW-Invoicer.ServiceDefaults\UTB-AP5PW-Invoicer.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+</Project>
