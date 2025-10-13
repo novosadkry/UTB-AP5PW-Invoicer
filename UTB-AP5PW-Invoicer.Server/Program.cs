@@ -1,41 +1,40 @@
-
-namespace UTB_AP5PW_Invoicer.Server;
-
-public class Program
+namespace UTB_AP5PW_Invoicer.Server
 {
-    public static void Main(string[] args)
+    public class Program
     {
-        var builder = WebApplication.CreateBuilder(args);
-        builder.AddServiceDefaults();
-
-        // Add services to the container.
-
-        builder.Services.AddControllers();
-        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-        builder.Services.AddOpenApi();
-
-        var app = builder.Build();
-
-        app.MapDefaultEndpoints();
-
-        app.UseDefaultFiles();
-        app.MapStaticAssets();
-
-        // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
+        public static void Main(string[] args)
         {
-            app.MapOpenApi();
+            var builder = WebApplication.CreateBuilder(args);
+            builder.AddServiceDefaults();
+
+            builder.Services.AddControllers();
+            builder.Services.AddOpenApi();
+            builder.Services.AddSwaggerGen();
+
+            var app = builder.Build();
+
+            app.MapDefaultEndpoints();
+
+            app.UseDefaultFiles();
+            app.MapStaticAssets();
+
+            // Configure the HTTP request pipeline.
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+
+                app.MapOpenApi();
+                app.MapSwagger();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseAuthorization();
+
+            app.MapControllers();
+            app.MapFallbackToFile("/index.html");
+
+            app.Run();
         }
-
-        app.UseHttpsRedirection();
-
-        app.UseAuthorization();
-
-
-        app.MapControllers();
-
-        app.MapFallbackToFile("/index.html");
-
-        app.Run();
     }
 }

@@ -1,7 +1,8 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
 var server = builder.AddProject<Projects.UTB_AP5PW_Invoicer_Server>("utb-ap5pw-invoicer-server")
-    .WithExternalHttpEndpoints();
+    .WithExternalHttpEndpoints()
+    .PublishAsDockerFile();
 
 builder.AddNpmApp("utb-ap5pw-invoicer-client", "../UTB-AP5PW-Invoicer.Client")
     .WithReference(server)

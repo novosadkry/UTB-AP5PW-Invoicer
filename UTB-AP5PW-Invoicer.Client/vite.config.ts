@@ -3,12 +3,27 @@ import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-    const env = loadEnv(mode, process.cwd(), '');
+  const env = loadEnv(mode, process.cwd(), '');
 
-    return {
-        plugins: [react()],
-        server: {
-            port: parseInt(env.VITE_PORT)
+  return {
+    plugins: [react()],
+    server: {
+      port: parseInt(env.VITE_PORT),
+      proxy: {
+        '/api': {
+          target: process.env['services__utb-ap5pw-invoicer-server__https__0'] ||
+            process.env['services__utb-ap5pw-invoicer-server__http__0'],
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, ''),
+          secure: false,
         }
+      }
+    },
+    build: {
+      outDir: 'dist',
+      rollupOptions: {
+        input: './index.html'
+      }
     }
+  }
 })
