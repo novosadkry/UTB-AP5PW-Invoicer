@@ -1,6 +1,0 @@
-@UTB_AP5PW_Invoicer.Server_HostAddress = http://localhost:5201
-
-GET {{UTB_AP5PW_Invoicer.Server_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
