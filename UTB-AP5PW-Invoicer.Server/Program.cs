@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using UTB_AP5PW_Invoicer.Infrastructure;
 using UTB_AP5PW_Invoicer.Server.Extensions;
 using UTB_AP5PW_Invoicer.Server.Utilities;
 
@@ -10,6 +11,7 @@ namespace UTB_AP5PW_Invoicer.Server
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.AddServiceDefaults();
+            builder.AddNpgsqlDbContext<AppDbContext>("database");
 
             builder.Services
                 .AddConfigurationOptions(builder.Configuration)

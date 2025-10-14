@@ -1,6 +1,14 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
+var database = builder.AddPostgres("utb-ap5pw-invoicer-db")
+    .WithDataVolume()
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithPgAdmin()
+    .AddDatabase("utb-ap5pw-invoicer");
+
 var server = builder.AddProject<Projects.UTB_AP5PW_Invoicer_Server>("utb-ap5pw-invoicer-server")
+    .WithReference(database)
+    .WaitFor(database)
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile();
 
