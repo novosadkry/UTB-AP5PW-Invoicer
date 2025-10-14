@@ -8,13 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\UTB-AP5PW-Invoicer.Domain\UTB-AP5PW-Invoicer.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.5.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UTB-AP5PW-Invoicer.Application\UTB-AP5PW-Invoicer.Application.csproj" />
   </ItemGroup>
 
 </Project>

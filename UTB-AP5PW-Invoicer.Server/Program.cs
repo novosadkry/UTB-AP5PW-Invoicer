@@ -15,7 +15,8 @@ namespace UTB_AP5PW_Invoicer.Server
 
             builder.Services
                 .AddConfigurationOptions(builder.Configuration)
-                .AddAuthentication(builder.Configuration);
+                .AddAuthentication(builder.Configuration)
+                .AddAppServices(builder.Configuration);
 
             builder.Services.AddControllers(options =>
             {

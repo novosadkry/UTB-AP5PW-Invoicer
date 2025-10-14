@@ -1,12 +1,22 @@
 ﻿using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using UTB_AP5PW_Invoicer.Application.Services;
+using UTB_AP5PW_Invoicer.Infrastructure.Services;
 using UTB_AP5PW_Invoicer.Server.Configuration;
 
 namespace UTB_AP5PW_Invoicer.Server.Extensions
 {
     public static class ServicesExtensions
     {
+        public static IServiceCollection AddAppServices(
+            this IServiceCollection services,
+            IConfiguration configuration)
+        {
+            return services
+                .AddScoped<IInvoiceService, InvoiceService>();
+        }
+
         public static IServiceCollection AddAuthentication(
             this IServiceCollection services,
             IConfiguration configuration)

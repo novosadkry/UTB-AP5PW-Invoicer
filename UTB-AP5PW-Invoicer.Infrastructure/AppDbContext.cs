@@ -3,7 +3,7 @@ using UTB_AP5PW_Invoicer.Domain.Entities;
 
 namespace UTB_AP5PW_Invoicer.Infrastructure
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Company> Companies { get; set; }
