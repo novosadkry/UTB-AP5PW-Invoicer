@@ -4,6 +4,6 @@
     {
         public const string SectionName = "JwtSettings";
 
-        public string? SecretKey { get; set; }
+        public string SecretKey { get; set; }
     }
 }

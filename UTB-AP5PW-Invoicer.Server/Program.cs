@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
-using UTB_AP5PW_Invoicer.Infrastructure;
 using UTB_AP5PW_Invoicer.Server.Extensions;
 using UTB_AP5PW_Invoicer.Server.Utilities;
 
@@ -11,12 +10,14 @@ namespace UTB_AP5PW_Invoicer.Server
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.AddServiceDefaults();
-            builder.AddNpgsqlDbContext<AppDbContext>("database");
 
             builder.Services
+                .AddDatabase(builder.Configuration)
                 .AddConfigurationOptions(builder.Configuration)
                 .AddAuthentication(builder.Configuration)
-                .AddAppServices(builder.Configuration);
+                .AddServicesFromAssembly(builder.Configuration)
+                .AddFeaturesFromAssembly(builder.Configuration)
+                .AddSwaggerApi(builder.Configuration);
 
             builder.Services.AddControllers(options =>
             {
@@ -24,11 +25,9 @@ namespace UTB_AP5PW_Invoicer.Server
                     new RouteTokenTransformerConvention(new SlugifyParameterTransformer()));
             });
 
-            builder.Services.AddOpenApi();
-            builder.Services.AddSwaggerGen();
-
             var app = builder.Build();
 
+            app.UseDatabase();
             app.MapDefaultEndpoints();
 
             app.UseDefaultFiles();
@@ -46,6 +45,7 @@ namespace UTB_AP5PW_Invoicer.Server
 
             app.UseCors();
             app.UseHttpsRedirection();
+
             app.UseAuthentication();
             app.UseAuthorization();
 

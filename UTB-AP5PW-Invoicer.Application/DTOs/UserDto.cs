@@ -1,34 +1,17 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using UTB_AP5PW_Invoicer.Domain.Entities;
 
-namespace UTB_AP5PW_Invoicer.Domain.Entities
+namespace UTB_AP5PW_Invoicer.Application.DTOs
 {
-    public class User
+    public record UserDto
     {
-        [Key]
         public int UserId { get; set; }
-
-        [Required, EmailAddress]
         public string Email { get; set; }
-
-        [Required]
         public string PasswordHash { get; set; }
-
-        [Required]
         public string FullName { get; set; }
-
-        [Required]
-        [DefaultValue(UserRole.User)]
         public UserRole Role { get; set; }
-
         public DateTime CreatedAt { get; set; }
-
         public DateTime UpdatedAt { get; set; }
-
         public string? PasswordResetToken { get; set; }
-
         public DateTime? PasswordResetExpiry { get; set; }
-
-        public ICollection<Company> Companies { get; set; }
     }
 }

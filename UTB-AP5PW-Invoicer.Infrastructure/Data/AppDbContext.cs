@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UTB_AP5PW_Invoicer.Domain.Entities;
 
-namespace UTB_AP5PW_Invoicer.Infrastructure
+namespace UTB_AP5PW_Invoicer.Infrastructure.Data
 {
     public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
     {

@@ -10,17 +10,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
+    <PackageReference Include="Scrutor" Version="6.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="9.0.6" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="9.0.6" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="9.0.6" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\UTB-AP5PW-Invoicer.Infrastructure\UTB-AP5PW-Invoicer.Infrastructure.csproj" />
-    <ProjectReference Include="..\utb-ap5pw-invoicer.client\UTB-AP5PW-Invoicer.Client.esproj">
+    <ProjectReference Include="..\UTB-AP5PW-Invoicer.Application\UTB-AP5PW-Invoicer.Application.csproj" />
+    <ProjectReference Include="..\UTB-AP5PW-Invoicer.Client\UTB-AP5PW-Invoicer.Client.esproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="..\UTB-AP5PW-Invoicer.ServiceDefaults\UTB-AP5PW-Invoicer.ServiceDefaults.csproj" />

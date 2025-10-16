@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\UTB-AP5PW-Invoicer.Application\UTB-AP5PW-Invoicer.Application.csproj" />
+    <ProjectReference Include="..\UTB-AP5PW-Invoicer.Domain\UTB-AP5PW-Invoicer.Domain.csproj" />
   </ItemGroup>
 
 </Project>
