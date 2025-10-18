@@ -1,14 +1,11 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using AutoMapper;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using UTB_AP5PW_Invoicer.Application.DTOs;
-using UTB_AP5PW_Invoicer.Application.Features.Users.Commands.Create;
-using UTB_AP5PW_Invoicer.Application.Features.Users.Queries.Get;
+using UTB_AP5PW_Invoicer.Application.Services;
 using UTB_AP5PW_Invoicer.Server.Configuration;
 using UTB_AP5PW_Invoicer.Server.Models;
 
@@ -19,23 +16,21 @@ namespace UTB_AP5PW_Invoicer.Server.Controllers
     public class AuthController : ControllerBase
     {
         private readonly JwtOptions _jwtOptions;
-        private readonly IMediator _mediator;
-        private readonly IMapper _mapper;
+        private readonly IUserService _userService;
 
-        public AuthController(IOptions<JwtOptions> jwtOptions, IMediator mediator, IMapper mapper)
+        public AuthController(IOptions<JwtOptions> jwtOptions, IUserService userService)
         {
             _jwtOptions = jwtOptions.Value;
-            _mediator = mediator;
-            _mapper = mapper;
+            _userService = userService;
         }
 
         [HttpPost]
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel request)
         {
-            var user = await _mediator.Send(new GetUserByEmailQuery(request.Email));
+            var user = await _userService.GetUserByEmailAsync(request.Email);
 
-            if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            if (user == null || !await _userService.VerifyPasswordAsync(user, request.Password))
                 return Unauthorized();
 
             var claims = GetUserClaims(user);
@@ -48,18 +43,11 @@ namespace UTB_AP5PW_Invoicer.Server.Controllers
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel request)
         {
-            var existingUser = await _mediator.Send(new GetUserByEmailQuery(request.Email));
+            var existingUser = await _userService.GetUserByEmailAsync(request.Email);
             if (existingUser != null) return Conflict();
 
-            var newUser = new UserDto
-            {
-                FullName = request.FullName,
-                Email = request.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
-            };
-
-            var userId = await _mediator.Send(_mapper.Map<CreateUserCommand>(newUser));
-            var user = await _mediator.Send(new GetUserQuery(userId));
+            var userId = await _userService.CreateUserAsync(request.Email, request.FullName, request.Password);
+            var user = await _userService.GetUserAsync(userId);
             if (user == null) return StatusCode(500, "User creation failed");
 
             var claims = GetUserClaims(user);

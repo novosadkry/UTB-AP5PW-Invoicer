@@ -22,7 +22,7 @@ namespace UTB_AP5PW_Invoicer.Server.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IEnumerable<InvoiceDto>> GetInvoices()
         {
-            return await _invoiceService.GetAllInvoicesAsync();
+            return await _invoiceService.ListInvoicesAsync();
         }
     }
 }
