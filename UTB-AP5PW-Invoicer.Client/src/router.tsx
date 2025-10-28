@@ -3,6 +3,7 @@ import Index from "@pages/index/page";
 import Login from "@pages/auth/login/page";
 import Signup from "@pages/auth/signup/page";
 import Dashboard from "@pages/dashboard/page";
+import Invoices from "@pages/dashboard/invoices/page";
 import ProtectedRoute from "@components/protected-route";
 
 export default function AppRouter() {
@@ -15,6 +16,11 @@ export default function AppRouter() {
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/dashboard/invoices" element={
+          <ProtectedRoute>
+            <Invoices />
           </ProtectedRoute>
         } />
       </Routes>
