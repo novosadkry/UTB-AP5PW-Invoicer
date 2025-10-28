@@ -16,7 +16,9 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { ThemeToggle } from "@components/theme-toggle.tsx";
+import { ThemeToggle } from "@components/theme-toggle";
+import { useAuth } from "@/hooks/use-auth";
+import { useAxiosPublic } from "@/hooks/use-axios.ts";
 
 export function LoginForm({
   className,
@@ -28,6 +30,9 @@ export function LoginForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const api = useAxiosPublic();
+  const { setAccessToken, setUser } = useAuth();
+
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (loading) return;
@@ -35,15 +40,9 @@ export function LoginForm({
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await api.post("/auth/login", { email, password });
 
-      if (!res.ok) {
+      if (res.status !== 200) {
         if (res.status === 401) {
           setError("Neplatná e-mailová adresa nebo heslo.");
         } else {
@@ -52,10 +51,9 @@ export function LoginForm({
         return;
       }
 
-      const data: { accessToken: string; refreshToken: string } = await res.json();
-
-      localStorage.setItem("accessToken", data.accessToken);
-      localStorage.setItem("refreshToken", data.refreshToken);
+      const { accessToken, user } = res.data;
+      setAccessToken(accessToken);
+      setUser(user);
 
       navigate("/dashboard", { replace: true });
     } catch (err) {

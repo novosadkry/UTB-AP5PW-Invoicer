@@ -29,12 +29,37 @@ namespace UTB_AP5PW_Invoicer.Server.Controllers
             var accessToken = await _authService.GetAccessTokenAsync(user);
             var refreshToken = await _authService.GetRefreshTokenAsync(user);
 
-            return Ok(new { accessToken, refreshToken });
+            Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddDays(7)
+            });
+
+            return Ok(new
+            {
+                accessToken,
+                user = new { user.UserId, user.Email, user.FullName }
+            });
         }
 
         [HttpPost]
-        [Route("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterModel request)
+        [Route("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var token = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(token)) return Ok();
+
+            await _authService.RevokeRefreshTokenAsync(token);
+            Response.Cookies.Delete("refreshToken");
+
+            return Ok();
+        }
+
+        [HttpPost]
+        [Route("signup")]
+        public async Task<IActionResult> Signup([FromBody] SignupModel request)
         {
             var existingUser = await _userService.GetUserByEmailAsync(request.Email);
             if (existingUser != null) return Conflict();
@@ -46,22 +71,49 @@ namespace UTB_AP5PW_Invoicer.Server.Controllers
             var accessToken = await _authService.GetAccessTokenAsync(user);
             var refreshToken = await _authService.GetRefreshTokenAsync(user);
 
-            return Ok(new { accessToken, refreshToken });
+            Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddDays(7)
+            });
+
+            return Ok(new
+            {
+                accessToken,
+                user = new { user.UserId, user.Email, user.FullName }
+            });
         }
 
         [HttpPost]
         [Route("refresh")]
-        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenModel request)
+        public async Task<IActionResult> RefreshToken()
         {
-            var user = await _authService.ValidateRefreshTokenAsync(request.Token);
+            var token = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(token)) return Unauthorized();
+
+            var user = await _authService.ValidateRefreshTokenAsync(token);
             if (user == null) return Unauthorized();
 
-            await _authService.RevokeRefreshTokenAsync(request.Token);
+            await _authService.RevokeRefreshTokenAsync(token);
 
             var accessToken = await _authService.GetAccessTokenAsync(user);
             var refreshToken = await _authService.GetRefreshTokenAsync(user);
 
-            return Ok(new { accessToken, refreshToken });
+            Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddDays(7)
+            });
+
+            return Ok(new
+            {
+                accessToken,
+                user = new { user.UserId, user.Email, user.FullName }
+            });
         }
     }
 }

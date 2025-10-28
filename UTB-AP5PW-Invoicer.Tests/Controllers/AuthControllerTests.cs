@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using UTB_AP5PW_Invoicer.Application.DTOs;
@@ -32,8 +33,14 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
             mockUserService.Setup(x => x.GetUserByEmailAsync(user.Email)).ReturnsAsync(user);
             mockAuthService.Setup(x => x.VerifyPasswordAsync(user, "password")).ReturnsAsync(true);
             mockAuthService.Setup(x => x.GetAccessTokenAsync(user)).ReturnsAsync("valid_token");
+            mockAuthService.Setup(x => x.GetRefreshTokenAsync(user)).ReturnsAsync("valid_refresh");
 
-            var controller = new AuthController(mockUserService.Object, mockAuthService.Object);
+            var httpContext = new DefaultHttpContext();
+            var controller = new AuthController(mockUserService.Object, mockAuthService.Object)
+            {
+                ControllerContext = new ControllerContext { HttpContext = httpContext }
+            };
+
             var result = await controller.Login(new LoginModel
             {
                 Email = user.Email,
@@ -46,6 +53,10 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
             Assert.True(doc.RootElement.TryGetProperty("accessToken", out var tokenElement));
             Assert.False(string.IsNullOrWhiteSpace(tokenElement.GetString()));
             Assert.Equal("valid_token", tokenElement.GetString());
+
+            var setCookie = httpContext.Response.Headers.SetCookie.ToString();
+            Assert.False(string.IsNullOrEmpty(setCookie));
+            Assert.Contains("refreshToken=valid_refresh", setCookie);
         }
 
         [Fact]
@@ -97,7 +108,7 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
             mockUserService.Setup(x => x.GetUserByEmailAsync(user.Email)).ReturnsAsync(user);
 
             var controller = new AuthController(mockUserService.Object, mockAuthService.Object);
-            var result = await controller.Register(new RegisterModel
+            var result = await controller.Signup(new SignupModel
             {
                 Email = user.Email,
                 FullName = user.FullName,
@@ -118,9 +129,15 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
             mockUserService.Setup(x => x.CreateUserAsync(user.Email, user.FullName, "password")).ReturnsAsync(1);
             mockUserService.Setup(x => x.GetUserAsync(1)).ReturnsAsync(user);
             mockAuthService.Setup(x => x.GetAccessTokenAsync(user)).ReturnsAsync("valid_token");
+            mockAuthService.Setup(x => x.GetRefreshTokenAsync(user)).ReturnsAsync("new_refresh");
 
-            var controller = new AuthController(mockUserService.Object, mockAuthService.Object);
-            var result = await controller.Register(new RegisterModel
+            var httpContext = new DefaultHttpContext();
+            var controller = new AuthController(mockUserService.Object, mockAuthService.Object)
+            {
+                ControllerContext = new ControllerContext { HttpContext = httpContext }
+            };
+
+            var result = await controller.Signup(new SignupModel
             {
                 Email = user.Email,
                 FullName = user.FullName,
@@ -133,6 +150,10 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
             Assert.True(doc.RootElement.TryGetProperty("accessToken", out var tokenElement));
             Assert.False(string.IsNullOrWhiteSpace(tokenElement.GetString()));
             Assert.Equal("valid_token", tokenElement.GetString());
+
+            var setCookie = httpContext.Response.Headers.SetCookie.ToString();
+            Assert.False(string.IsNullOrEmpty(setCookie));
+            Assert.Contains("refreshToken=new_refresh", setCookie);
         }
 
         [Fact]
@@ -140,11 +161,18 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
         {
             var mockUserService = new Mock<IUserService>();
             var mockAuthService = new Mock<IAuthService>();
+            var mockRequestCookies = new Mock<IRequestCookieCollection>();
 
             mockAuthService.Setup(x => x.ValidateRefreshTokenAsync("invalid_token")).ReturnsAsync((UserDto?)null);
+            mockRequestCookies.Setup(x => x["refreshToken"]).Returns("invalid_token");
 
-            var controller = new AuthController(mockUserService.Object, mockAuthService.Object);
-            var result = await controller.RefreshToken(new RefreshTokenModel { Token = "invalid_token" });
+            var controller = new AuthController(mockUserService.Object, mockAuthService.Object)
+            {
+                ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() },
+                Request = { Cookies = mockRequestCookies.Object }
+            };
+
+            var result = await controller.RefreshToken();
 
             Assert.IsType<UnauthorizedResult>(result);
         }
@@ -155,14 +183,22 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
             var user = GetTestUser();
             var mockUserService = new Mock<IUserService>();
             var mockAuthService = new Mock<IAuthService>();
+            var mockRequestCookies = new Mock<IRequestCookieCollection>();
 
             mockAuthService.Setup(x => x.ValidateRefreshTokenAsync("valid_refresh")).ReturnsAsync(user);
             mockAuthService.Setup(x => x.RevokeRefreshTokenAsync("valid_refresh")).Returns(Task.CompletedTask);
             mockAuthService.Setup(x => x.GetAccessTokenAsync(user)).ReturnsAsync("new_access");
             mockAuthService.Setup(x => x.GetRefreshTokenAsync(user)).ReturnsAsync("new_refresh");
+            mockRequestCookies.Setup(x => x["refreshToken"]).Returns("valid_refresh");
 
-            var controller = new AuthController(mockUserService.Object, mockAuthService.Object);
-            var result = await controller.RefreshToken(new RefreshTokenModel { Token = "valid_refresh" });
+            var httpContext = new DefaultHttpContext();
+            var controller = new AuthController(mockUserService.Object, mockAuthService.Object)
+            {
+                ControllerContext = new ControllerContext { HttpContext = httpContext },
+                Request = { Cookies = mockRequestCookies.Object }
+            };
+
+            var result = await controller.RefreshToken();
 
             var ok = Assert.IsType<OkObjectResult>(result);
             var json = JsonSerializer.Serialize(ok.Value);
@@ -170,8 +206,10 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
 
             Assert.True(doc.RootElement.TryGetProperty("accessToken", out var accessElement));
             Assert.Equal("new_access", accessElement.GetString());
-            Assert.True(doc.RootElement.TryGetProperty("refreshToken", out var refreshElement));
-            Assert.Equal("new_refresh", refreshElement.GetString());
+
+            var setCookie = httpContext.Response.Headers.SetCookie.ToString();
+            Assert.False(string.IsNullOrEmpty(setCookie));
+            Assert.Contains("refreshToken=new_refresh", setCookie);
 
             mockAuthService.Verify(x => x.RevokeRefreshTokenAsync("valid_refresh"), Times.Once);
         }
