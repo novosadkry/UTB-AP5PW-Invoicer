@@ -1,12 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using UTB_AP5PW_Invoicer.Application.DTOs;
+﻿using Microsoft.AspNetCore.Mvc;
 using UTB_AP5PW_Invoicer.Application.Services;
-using UTB_AP5PW_Invoicer.Server.Configuration;
 using UTB_AP5PW_Invoicer.Server.Models;
 
 namespace UTB_AP5PW_Invoicer.Server.Controllers
@@ -15,13 +8,13 @@ namespace UTB_AP5PW_Invoicer.Server.Controllers
     [Route("[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly JwtOptions _jwtOptions;
         private readonly IUserService _userService;
+        private readonly IAuthService _authService;
 
-        public AuthController(IOptions<JwtOptions> jwtOptions, IUserService userService)
+        public AuthController(IUserService userService, IAuthService authService)
         {
-            _jwtOptions = jwtOptions.Value;
             _userService = userService;
+            _authService = authService;
         }
 
         [HttpPost]
@@ -30,13 +23,13 @@ namespace UTB_AP5PW_Invoicer.Server.Controllers
         {
             var user = await _userService.GetUserByEmailAsync(request.Email);
 
-            if (user == null || !await _userService.VerifyPasswordAsync(user, request.Password))
+            if (user == null || !await _authService.VerifyPasswordAsync(user, request.Password))
                 return Unauthorized();
 
-            var claims = GetUserClaims(user);
-            var accessToken = GenerateJwtToken(claims, DateTime.Now.AddMinutes(15));
+            var accessToken = await _authService.GetAccessTokenAsync(user);
+            var refreshToken = await _authService.GetRefreshTokenAsync(user);
 
-            return Ok(new { accessToken });
+            return Ok(new { accessToken, refreshToken });
         }
 
         [HttpPost]
@@ -50,35 +43,25 @@ namespace UTB_AP5PW_Invoicer.Server.Controllers
             var user = await _userService.GetUserAsync(userId);
             if (user == null) return StatusCode(500, "User creation failed");
 
-            var claims = GetUserClaims(user);
-            var accessToken = GenerateJwtToken(claims, DateTime.Now.AddMinutes(15));
+            var accessToken = await _authService.GetAccessTokenAsync(user);
+            var refreshToken = await _authService.GetRefreshTokenAsync(user);
 
-            return Ok(new { accessToken });
+            return Ok(new { accessToken, refreshToken });
         }
 
-        private static List<Claim> GetUserClaims(UserDto user)
+        [HttpPost]
+        [Route("refresh")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenModel request)
         {
-            return
-            [
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.FullName),
-                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                new Claim(ClaimTypes.Role, user.Role.ToString())
-            ];
-        }
+            var user = await _authService.ValidateRefreshTokenAsync(request.Token);
+            if (user == null) return Unauthorized();
 
-        private string GenerateJwtToken(IEnumerable<Claim> claims, DateTime expires)
-        {
-            var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtOptions.SecretKey));
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            await _authService.RevokeRefreshTokenAsync(request.Token);
 
-            var token = new JwtSecurityToken(
-                claims: claims,
-                expires: expires,
-                signingCredentials: credentials
-            );
+            var accessToken = await _authService.GetAccessTokenAsync(user);
+            var refreshToken = await _authService.GetRefreshTokenAsync(user);
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return Ok(new { accessToken, refreshToken });
         }
     }
 }

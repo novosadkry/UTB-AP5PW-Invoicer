@@ -1,4 +1,4 @@
-﻿namespace UTB_AP5PW_Invoicer.Server.Configuration
+﻿namespace UTB_AP5PW_Invoicer.Infrastructure.Configuration
 {
     public class JwtOptions
     {

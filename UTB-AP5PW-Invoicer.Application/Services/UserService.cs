@@ -10,7 +10,6 @@ namespace UTB_AP5PW_Invoicer.Application.Services
     {
         public Task<UserDto?> GetUserAsync(int userId);
         public Task<UserDto?> GetUserByEmailAsync(string email);
-        public Task<bool> VerifyPasswordAsync(UserDto? userDto, string password);
         public Task<int> CreateUserAsync(string email, string fullName, string password);
     }
 
@@ -33,13 +32,6 @@ namespace UTB_AP5PW_Invoicer.Application.Services
         public Task<UserDto?> GetUserByEmailAsync(string email)
         {
             return _mediator.Send(new GetUserByEmailQuery(email));
-        }
-
-        public Task<bool> VerifyPasswordAsync(UserDto? user, string password)
-        {
-            return Task.FromResult(
-                user?.PasswordHash != null &&
-                BCrypt.Net.BCrypt.Verify(password, user.PasswordHash));
         }
 
         public Task<int> CreateUserAsync(string email, string fullName, string password)

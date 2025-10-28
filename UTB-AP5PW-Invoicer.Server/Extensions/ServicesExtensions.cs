@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using UTB_AP5PW_Invoicer.Application.Services;
+using UTB_AP5PW_Invoicer.Infrastructure.Configuration;
 using UTB_AP5PW_Invoicer.Infrastructure.Data;
-using UTB_AP5PW_Invoicer.Server.Configuration;
 
 namespace UTB_AP5PW_Invoicer.Server.Extensions
 {

@@ -1,11 +1,9 @@
 ﻿using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Moq;
 using UTB_AP5PW_Invoicer.Application.DTOs;
 using UTB_AP5PW_Invoicer.Application.Services;
 using UTB_AP5PW_Invoicer.Domain.Entities;
-using UTB_AP5PW_Invoicer.Server.Configuration;
 using UTB_AP5PW_Invoicer.Server.Controllers;
 using UTB_AP5PW_Invoicer.Server.Models;
 
@@ -13,11 +11,6 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
 {
     public class AuthControllerTests
     {
-        private static IOptions<JwtOptions> GetJwtOptions()
-        {
-            return Options.Create(new JwtOptions { SecretKey = "UzTetmpB3sftq8QCW66uPnJOCSkNW792" });
-        }
-
         private static UserDto GetTestUser()
         {
             return new UserDto
@@ -34,10 +27,13 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
         {
             var user = GetTestUser();
             var mockUserService = new Mock<IUserService>();
-            mockUserService.Setup(x => x.GetUserByEmailAsync(user.Email)).ReturnsAsync(user);
-            mockUserService.Setup(x => x.VerifyPasswordAsync(user, "password")).ReturnsAsync(true);
+            var mockAuthService = new Mock<IAuthService>();
 
-            var controller = new AuthController(GetJwtOptions(), mockUserService.Object);
+            mockUserService.Setup(x => x.GetUserByEmailAsync(user.Email)).ReturnsAsync(user);
+            mockAuthService.Setup(x => x.VerifyPasswordAsync(user, "password")).ReturnsAsync(true);
+            mockAuthService.Setup(x => x.GetAccessTokenAsync(user)).ReturnsAsync("valid_token");
+
+            var controller = new AuthController(mockUserService.Object, mockAuthService.Object);
             var result = await controller.Login(new LoginModel
             {
                 Email = user.Email,
@@ -49,6 +45,7 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
             using var doc = JsonDocument.Parse(json);
             Assert.True(doc.RootElement.TryGetProperty("accessToken", out var tokenElement));
             Assert.False(string.IsNullOrWhiteSpace(tokenElement.GetString()));
+            Assert.Equal("valid_token", tokenElement.GetString());
         }
 
         [Fact]
@@ -56,9 +53,11 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
         {
             var user = GetTestUser();
             var mockUserService = new Mock<IUserService>();
+            var mockAuthService = new Mock<IAuthService>();
+
             mockUserService.Setup(x => x.GetUserByEmailAsync(user.Email)).ReturnsAsync((UserDto?)null);
 
-            var controller = new AuthController(GetJwtOptions(), mockUserService.Object);
+            var controller = new AuthController(mockUserService.Object, mockAuthService.Object);
             var result = await controller.Login(new LoginModel
             {
                 Email = user.Email,
@@ -73,10 +72,12 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
         {
             var user = GetTestUser();
             var mockUserService = new Mock<IUserService>();
-            mockUserService.Setup(x => x.GetUserByEmailAsync(user.Email)).ReturnsAsync(user);
-            mockUserService.Setup(x => x.VerifyPasswordAsync(user, "password")).ReturnsAsync(false);
+            var mockAuthService = new Mock<IAuthService>();
 
-            var controller = new AuthController(GetJwtOptions(), mockUserService.Object);
+            mockUserService.Setup(x => x.GetUserByEmailAsync(user.Email)).ReturnsAsync(user);
+            mockAuthService.Setup(x => x.VerifyPasswordAsync(user, "password")).ReturnsAsync(false);
+
+            var controller = new AuthController(mockUserService.Object, mockAuthService.Object);
             var result = await controller.Login(new LoginModel
             {
                 Email = user.Email,
@@ -91,9 +92,11 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
         {
             var user = GetTestUser();
             var mockUserService = new Mock<IUserService>();
+            var mockAuthService = new Mock<IAuthService>();
+
             mockUserService.Setup(x => x.GetUserByEmailAsync(user.Email)).ReturnsAsync(user);
 
-            var controller = new AuthController(GetJwtOptions(), mockUserService.Object);
+            var controller = new AuthController(mockUserService.Object, mockAuthService.Object);
             var result = await controller.Register(new RegisterModel
             {
                 Email = user.Email,
@@ -109,11 +112,14 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
         {
             var user = GetTestUser();
             var mockUserService = new Mock<IUserService>();
+            var mockAuthService = new Mock<IAuthService>();
+
             mockUserService.Setup(x => x.GetUserByEmailAsync(user.Email)).ReturnsAsync((UserDto?)null);
             mockUserService.Setup(x => x.CreateUserAsync(user.Email, user.FullName, "password")).ReturnsAsync(1);
             mockUserService.Setup(x => x.GetUserAsync(1)).ReturnsAsync(user);
+            mockAuthService.Setup(x => x.GetAccessTokenAsync(user)).ReturnsAsync("valid_token");
 
-            var controller = new AuthController(GetJwtOptions(), mockUserService.Object);
+            var controller = new AuthController(mockUserService.Object, mockAuthService.Object);
             var result = await controller.Register(new RegisterModel
             {
                 Email = user.Email,
@@ -126,6 +132,48 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
             using var doc = JsonDocument.Parse(json);
             Assert.True(doc.RootElement.TryGetProperty("accessToken", out var tokenElement));
             Assert.False(string.IsNullOrWhiteSpace(tokenElement.GetString()));
+            Assert.Equal("valid_token", tokenElement.GetString());
+        }
+
+        [Fact]
+        public async Task Refresh_ReturnsUnauthorized_WhenTokenInvalid()
+        {
+            var mockUserService = new Mock<IUserService>();
+            var mockAuthService = new Mock<IAuthService>();
+
+            mockAuthService.Setup(x => x.ValidateRefreshTokenAsync("invalid_token")).ReturnsAsync((UserDto?)null);
+
+            var controller = new AuthController(mockUserService.Object, mockAuthService.Object);
+            var result = await controller.RefreshToken(new RefreshTokenModel { Token = "invalid_token" });
+
+            Assert.IsType<UnauthorizedResult>(result);
+        }
+
+        [Fact]
+        public async Task Refresh_ReturnsOk_WithNewTokens_AndRevokesOldToken_WhenValid()
+        {
+            var user = GetTestUser();
+            var mockUserService = new Mock<IUserService>();
+            var mockAuthService = new Mock<IAuthService>();
+
+            mockAuthService.Setup(x => x.ValidateRefreshTokenAsync("valid_refresh")).ReturnsAsync(user);
+            mockAuthService.Setup(x => x.RevokeRefreshTokenAsync("valid_refresh")).Returns(Task.CompletedTask);
+            mockAuthService.Setup(x => x.GetAccessTokenAsync(user)).ReturnsAsync("new_access");
+            mockAuthService.Setup(x => x.GetRefreshTokenAsync(user)).ReturnsAsync("new_refresh");
+
+            var controller = new AuthController(mockUserService.Object, mockAuthService.Object);
+            var result = await controller.RefreshToken(new RefreshTokenModel { Token = "valid_refresh" });
+
+            var ok = Assert.IsType<OkObjectResult>(result);
+            var json = JsonSerializer.Serialize(ok.Value);
+            using var doc = JsonDocument.Parse(json);
+
+            Assert.True(doc.RootElement.TryGetProperty("accessToken", out var accessElement));
+            Assert.Equal("new_access", accessElement.GetString());
+            Assert.True(doc.RootElement.TryGetProperty("refreshToken", out var refreshElement));
+            Assert.Equal("new_refresh", refreshElement.GetString());
+
+            mockAuthService.Verify(x => x.RevokeRefreshTokenAsync("valid_refresh"), Times.Once);
         }
     }
 }

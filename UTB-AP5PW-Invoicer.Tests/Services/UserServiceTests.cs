@@ -29,20 +29,6 @@ namespace UTB_AP5PW_Invoicer.Tests.Services
         }
 
         [Fact]
-        public async Task VerifyPasswordAsync_ReturnsTrue_ForMatchingPassword()
-        {
-            var mockMapper = new Mock<IMapper>();
-            var mockMediator = new Mock<IMediator>();
-            var hashed = BCrypt.Net.BCrypt.HashPassword("secret");
-            var user = new UserDto { PasswordHash = hashed };
-
-            var service = new UserService(mockMediator.Object, mockMapper.Object);
-            var ok = await service.VerifyPasswordAsync(user, "secret");
-
-            Assert.True(ok);
-        }
-
-        [Fact]
         public async Task CreateUserAsync_SendsCreateCommand_AndReturnsId()
         {
             var mockMapper = new Mock<IMapper>();

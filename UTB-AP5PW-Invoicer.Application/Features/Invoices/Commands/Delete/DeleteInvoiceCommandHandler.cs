@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using UTB_AP5PW_Invoicer.Infrastructure.Data;
 
 namespace UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.Delete
@@ -8,11 +9,9 @@ namespace UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.Delete
     {
         public async Task Handle(DeleteInvoiceCommand request, CancellationToken cancellationToken)
         {
-            var invoice = await dbContext.Invoices.FindAsync([request.Id], cancellationToken);
-            if (invoice == null) return;
-
-            dbContext.Invoices.Remove(invoice);
-            await dbContext.SaveChangesAsync(cancellationToken);
+            await dbContext.Invoices
+                .Where(x => x.InvoiceId == request.Id)
+                .ExecuteDeleteAsync(cancellationToken);
         }
     }
 }
