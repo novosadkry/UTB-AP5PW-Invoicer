@@ -40,7 +40,10 @@ export function LoginForm({
     setLoading(true);
 
     try {
-      const res = await api.post("/auth/login", { email, password });
+      const res = await api.post(
+        "/auth/login",
+        { email, password }
+      );
 
       if (res.status !== 200) {
         if (res.status === 401) {

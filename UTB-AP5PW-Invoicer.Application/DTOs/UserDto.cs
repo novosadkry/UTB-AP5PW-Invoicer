@@ -4,7 +4,7 @@ namespace UTB_AP5PW_Invoicer.Application.DTOs
 {
     public record UserDto
     {
-        public int UserId { get; set; }
+        public int Id { get; set; }
         public string Email { get; set; }
         public string PasswordHash { get; set; }
         public string FullName { get; set; }

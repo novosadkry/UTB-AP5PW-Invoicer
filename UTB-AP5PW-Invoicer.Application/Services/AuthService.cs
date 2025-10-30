@@ -42,7 +42,7 @@ namespace UTB_AP5PW_Invoicer.Application.Services
         {
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Name, user.FullName)
             };
@@ -60,7 +60,7 @@ namespace UTB_AP5PW_Invoicer.Application.Services
             var id = await _mediator.Send(new CreateRefreshTokenCommand
             {
                 Token = token,
-                UserId = user.UserId,
+                UserId = user.Id,
                 ExpiresAt = DateTime.UtcNow.AddDays(7)
             });
 
@@ -88,14 +88,14 @@ namespace UTB_AP5PW_Invoicer.Application.Services
         {
             var refreshToken = await _mediator.Send(new GetRefreshTokenByValueQuery(token));
             if (refreshToken != null)
-                await _mediator.Send(new DeleteRefreshTokenCommand(refreshToken.RefreshTokenId));
+                await _mediator.Send(new DeleteRefreshTokenCommand(refreshToken.Id));
         }
 
         public async Task RevokeRefreshTokenAsync(string token)
         {
             var refreshToken = await _mediator.Send(new GetRefreshTokenByValueQuery(token));
             if (refreshToken is { Revoked: false })
-                await _mediator.Send(new RevokeRefreshTokenCommand(refreshToken.RefreshTokenId));
+                await _mediator.Send(new RevokeRefreshTokenCommand(refreshToken.Id));
         }
 
         private string GenerateJwtToken(IEnumerable<Claim> claims, DateTime expires)

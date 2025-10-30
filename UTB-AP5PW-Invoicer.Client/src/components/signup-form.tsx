@@ -47,7 +47,10 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 
     setLoading(true);
     try {
-      const res = await api.post("/auth/signup", { fullName, email, password });
+      const res = await api.post(
+        "/auth/signup",
+        { fullName, email, password }
+      );
 
       if (res.status !== 200) {
         if (res.status === 409) {

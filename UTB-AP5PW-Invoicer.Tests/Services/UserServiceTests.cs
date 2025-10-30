@@ -17,7 +17,7 @@ namespace UTB_AP5PW_Invoicer.Tests.Services
             var mockMediator = new Mock<IMediator>();
             mockMediator.Setup(m =>
                 m.Send(It.IsAny<GetUserQuery>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new UserDto { UserId = 1 });
+                .ReturnsAsync(new UserDto { Id = 1 });
 
             var service = new UserService(mockMediator.Object, mockMapper.Object);
             var result = await service.GetUserAsync(1);

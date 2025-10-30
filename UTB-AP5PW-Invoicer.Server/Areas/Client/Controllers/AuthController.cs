@@ -43,7 +43,7 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
             return Ok(new
             {
                 accessToken,
-                user = new { user.UserId, user.Email, user.FullName }
+                user = new { user.Id, user.Email, user.FullName }
             });
         }
 
@@ -88,7 +88,7 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
             return Ok(new
             {
                 accessToken,
-                user = new { user.UserId, user.Email, user.FullName }
+                user = new { user.Id, user.Email, user.FullName }
             });
         }
 
@@ -120,7 +120,7 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
             return Ok(new
             {
                 accessToken,
-                user = new { user.UserId, user.Email, user.FullName }
+                user = new { user.Id, user.Email, user.FullName }
             });
         }
     }

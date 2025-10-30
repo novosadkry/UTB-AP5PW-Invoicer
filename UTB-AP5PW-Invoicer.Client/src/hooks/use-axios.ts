@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/use-auth';
 
 export function useAxiosPublic() {
   return axios.create({
-    baseURL: '/api',
+    baseURL: '/api/client',
     headers: { 'Content-Type': 'application/json' }
   });
 }
@@ -12,7 +12,7 @@ export function useAxiosPrivate() {
   const { accessToken, setAccessToken } = useAuth();
 
   const axiosPrivate = axios.create({
-    baseURL: '/api',
+    baseURL: '/api/client',
     headers: { 'Content-Type': 'application/json' }
   });
 

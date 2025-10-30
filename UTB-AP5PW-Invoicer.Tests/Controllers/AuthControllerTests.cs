@@ -16,7 +16,7 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
         {
             return new UserDto
             {
-                UserId = 1,
+                Id = 1,
                 Email = "test@example.com",
                 FullName = "Test User",
                 Role = UserRole.User

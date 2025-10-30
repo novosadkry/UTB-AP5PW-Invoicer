@@ -3,11 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UTB_AP5PW_Invoicer.Domain.Entities
 {
-    public class Payment
+    public class Payment : Entity<int>
     {
-        [Key]
-        public int PaymentId { get; set; }
-
         [ForeignKey(nameof(Invoice))]
         public int InvoiceId { get; set; }
 
@@ -19,8 +16,6 @@ namespace UTB_AP5PW_Invoicer.Domain.Entities
 
         [Required]
         public string PaymentMethod { get; set; }
-
-        public DateTime CreatedAt { get; set; }
 
         public Invoice Invoice { get; set; }
     }

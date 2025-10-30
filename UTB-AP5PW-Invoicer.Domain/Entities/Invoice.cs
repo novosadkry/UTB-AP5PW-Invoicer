@@ -3,16 +3,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UTB_AP5PW_Invoicer.Domain.Entities
 {
-    public class Invoice
+    public class Invoice : Entity<int>
     {
-        [Key]
-        public int InvoiceId { get; set; }
-
-        [ForeignKey(nameof(Company))]
-        public int CompanyId { get; set; }
-
         [ForeignKey(nameof(Customer))]
-        public int CustomerId { get; set; }
+        public int? CustomerId { get; set; }
 
         [Required]
         public string InvoiceNumber { get; set; }
@@ -32,13 +26,8 @@ namespace UTB_AP5PW_Invoicer.Domain.Entities
         [Required]
         public decimal TotalVat { get; set; }
 
-        public DateTime CreatedAt { get; set; }
-
-        public DateTime UpdatedAt { get; set; }
-
-        public Company Company { get; set; }
-        public Customer Customer { get; set; }
-        public ICollection<InvoiceItem> InvoiceItems { get; set; }
+        public Customer? Customer { get; set; }
         public ICollection<Payment> Payments { get; set; }
+        public ICollection<InvoiceItem> InvoiceItems { get; set; }
     }
 }

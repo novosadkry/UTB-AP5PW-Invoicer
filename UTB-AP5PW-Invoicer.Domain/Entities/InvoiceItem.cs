@@ -3,11 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UTB_AP5PW_Invoicer.Domain.Entities
 {
-    public class InvoiceItem
+    public class InvoiceItem : Entity<int>
     {
-        [Key]
-        public int InvoiceItemId { get; set; }
-
         [ForeignKey(nameof(Invoice))]
         public int InvoiceId { get; set; }
 
@@ -28,10 +25,6 @@ namespace UTB_AP5PW_Invoicer.Domain.Entities
 
         [Required]
         public decimal TotalVat { get; set; }
-
-        public DateTime CreatedAt { get; set; }
-
-        public DateTime UpdatedAt { get; set; }
 
         public Invoice Invoice { get; set; }
     }

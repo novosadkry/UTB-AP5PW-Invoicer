@@ -10,7 +10,7 @@ namespace UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.Delete
         public async Task Handle(DeleteInvoiceCommand request, CancellationToken cancellationToken)
         {
             await dbContext.Invoices
-                .Where(x => x.InvoiceId == request.Id)
+                .Where(x => x.Id == request.Id)
                 .ExecuteDeleteAsync(cancellationToken);
         }
     }

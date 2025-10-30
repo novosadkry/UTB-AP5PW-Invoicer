@@ -12,7 +12,7 @@ using UTB_AP5PW_Invoicer.Infrastructure.Data;
 namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251016160423_Initial")]
+    [Migration("20251030142603_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -25,13 +25,13 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("UTB_AP5PW_Invoicer.Domain.Entities.Company", b =>
+            modelBuilder.Entity("UTB_AP5PW_Invoicer.Domain.Entities.Customer", b =>
                 {
-                    b.Property<int>("CompanyId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CompanyId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Address")
                         .IsRequired()
@@ -49,11 +49,9 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Dic")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Ico")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
@@ -66,98 +64,25 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
-                    b.HasKey("CompanyId");
+                    b.HasKey("Id");
 
                     b.HasIndex("UserId");
-
-                    b.ToTable("Companies");
-                });
-
-            modelBuilder.Entity("UTB_AP5PW_Invoicer.Domain.Entities.CompanySettings", b =>
-                {
-                    b.Property<int>("CompanyId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("InvoiceNumberFormat")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("InvoiceTemplate")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("CompanyId");
-
-                    b.ToTable("CompanySettings");
-                });
-
-            modelBuilder.Entity("UTB_AP5PW_Invoicer.Domain.Entities.Customer", b =>
-                {
-                    b.Property<int>("CustomerId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CustomerId"));
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("CompanyId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ContactEmail")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ContactPhone")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Dic")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Ico")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("CustomerId");
-
-                    b.HasIndex("CompanyId");
 
                     b.ToTable("Customers");
                 });
 
             modelBuilder.Entity("UTB_AP5PW_Invoicer.Domain.Entities.Invoice", b =>
                 {
-                    b.Property<int>("InvoiceId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("InvoiceId"));
-
-                    b.Property<int>("CompanyId")
-                        .HasColumnType("integer");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("CustomerId")
+                    b.Property<int?>("CustomerId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("DueDate")
@@ -183,9 +108,7 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("InvoiceId");
-
-                    b.HasIndex("CompanyId");
+                    b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
 
@@ -194,11 +117,11 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("UTB_AP5PW_Invoicer.Domain.Entities.InvoiceItem", b =>
                 {
-                    b.Property<int>("InvoiceItemId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("InvoiceItemId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -228,7 +151,7 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                     b.Property<decimal>("VatRate")
                         .HasColumnType("numeric");
 
-                    b.HasKey("InvoiceItemId");
+                    b.HasKey("Id");
 
                     b.HasIndex("InvoiceId");
 
@@ -237,11 +160,11 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("UTB_AP5PW_Invoicer.Domain.Entities.Payment", b =>
                 {
-                    b.Property<int>("PaymentId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PaymentId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric");
@@ -259,7 +182,10 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("PaymentId");
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("InvoiceId");
 
@@ -268,11 +194,11 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("UTB_AP5PW_Invoicer.Domain.Entities.User", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -301,15 +227,44 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("UserId");
+                    b.HasKey("Id");
 
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("UTB_AP5PW_Invoicer.Domain.Entities.Company", b =>
+            modelBuilder.Entity("UTB_AP5PW_Invoicer.Infrastructure.Authentication.RefreshToken", b =>
+                {
+                    b.Property<Guid>("RefreshTokenId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("Revoked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("RefreshTokenId");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
+            modelBuilder.Entity("UTB_AP5PW_Invoicer.Domain.Entities.Customer", b =>
                 {
                     b.HasOne("UTB_AP5PW_Invoicer.Domain.Entities.User", "User")
-                        .WithMany("Companies")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -317,43 +272,11 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("UTB_AP5PW_Invoicer.Domain.Entities.CompanySettings", b =>
-                {
-                    b.HasOne("UTB_AP5PW_Invoicer.Domain.Entities.Company", "Company")
-                        .WithOne("CompanySettings")
-                        .HasForeignKey("UTB_AP5PW_Invoicer.Domain.Entities.CompanySettings", "CompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Company");
-                });
-
-            modelBuilder.Entity("UTB_AP5PW_Invoicer.Domain.Entities.Customer", b =>
-                {
-                    b.HasOne("UTB_AP5PW_Invoicer.Domain.Entities.Company", "Company")
-                        .WithMany("Customers")
-                        .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Company");
-                });
-
             modelBuilder.Entity("UTB_AP5PW_Invoicer.Domain.Entities.Invoice", b =>
                 {
-                    b.HasOne("UTB_AP5PW_Invoicer.Domain.Entities.Company", "Company")
-                        .WithMany("Invoices")
-                        .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("UTB_AP5PW_Invoicer.Domain.Entities.Customer", "Customer")
                         .WithMany("Invoices")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Company");
+                        .HasForeignKey("CustomerId");
 
                     b.Navigation("Customer");
                 });
@@ -380,14 +303,15 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                     b.Navigation("Invoice");
                 });
 
-            modelBuilder.Entity("UTB_AP5PW_Invoicer.Domain.Entities.Company", b =>
+            modelBuilder.Entity("UTB_AP5PW_Invoicer.Infrastructure.Authentication.RefreshToken", b =>
                 {
-                    b.Navigation("CompanySettings")
+                    b.HasOne("UTB_AP5PW_Invoicer.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Customers");
-
-                    b.Navigation("Invoices");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("UTB_AP5PW_Invoicer.Domain.Entities.Customer", b =>
@@ -400,11 +324,6 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                     b.Navigation("InvoiceItems");
 
                     b.Navigation("Payments");
-                });
-
-            modelBuilder.Entity("UTB_AP5PW_Invoicer.Domain.Entities.User", b =>
-                {
-                    b.Navigation("Companies");
                 });
 #pragma warning restore 612, 618
         }

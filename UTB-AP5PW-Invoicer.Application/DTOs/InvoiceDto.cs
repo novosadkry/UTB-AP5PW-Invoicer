@@ -2,9 +2,8 @@
 {
     public record InvoiceDto
     {
-        public int InvoiceId { get; set; }
-        public int CompanyId { get; set; }
-        public int CustomerId { get; set; }
+        public int Id { get; set; }
+        public int? CustomerId { get; set; }
         public string InvoiceNumber { get; set; }
         public DateTime IssueDate { get; set; }
         public DateTime DueDate { get; set; }

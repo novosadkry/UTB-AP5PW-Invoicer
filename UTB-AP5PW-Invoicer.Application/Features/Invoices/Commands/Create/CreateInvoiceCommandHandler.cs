@@ -15,7 +15,7 @@ namespace UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.Create
             dbContext.Invoices.Add(invoice);
             await dbContext.SaveChangesAsync(cancellationToken);
 
-            return invoice.InvoiceId;
+            return invoice.Id;
         }
     }
 }

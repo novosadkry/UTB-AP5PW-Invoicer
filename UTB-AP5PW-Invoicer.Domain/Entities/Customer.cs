@@ -3,13 +3,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UTB_AP5PW_Invoicer.Domain.Entities
 {
-    public class Customer
+    public class Customer : Entity<int>
     {
-        [Key]
-        public int CustomerId { get; set; }
-
-        [ForeignKey(nameof(Company))]
-        public int CompanyId { get; set; }
+        [ForeignKey(nameof(User))]
+        public int UserId { get; set; }
 
         [Required]
         public string Name { get; set; }
@@ -27,11 +24,7 @@ namespace UTB_AP5PW_Invoicer.Domain.Entities
         [Required]
         public string ContactPhone { get; set; }
 
-        public DateTime CreatedAt { get; set; }
-
-        public DateTime UpdatedAt { get; set; }
-
-        public Company Company { get; set; }
+        public User User { get; set; }
         public ICollection<Invoice> Invoices { get; set; }
     }
 }
