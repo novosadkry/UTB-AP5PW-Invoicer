@@ -34,8 +34,16 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
   });
 
   useEffect(() => {
-    localStorage.setItem("accessToken", accessToken ?? "");
-    localStorage.setItem("user", JSON.stringify(user));
+    if (accessToken) {
+      localStorage.setItem("accessToken", accessToken);
+    } else {
+      localStorage.removeItem("accessToken");
+    }
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+    }
   }, [accessToken, user]);
 
   const value: AuthContextType = {

@@ -55,13 +55,7 @@ namespace UTB_AP5PW_Invoicer.Application.Services
 
         public async Task<string> GetRefreshTokenAsync(UserDto user)
         {
-            var claims = new List<Claim>
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString())
-            };
-
-            var expiresAt = DateTime.UtcNow.AddDays(7);
-            var token = GenerateJwtToken(claims, expiresAt);
+            var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
 
             var id = await _mediator.Send(new CreateRefreshTokenCommand
             {
