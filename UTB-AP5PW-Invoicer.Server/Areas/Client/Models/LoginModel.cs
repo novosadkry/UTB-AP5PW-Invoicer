@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace UTB_AP5PW_Invoicer.Server.Models
+namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Models
 {
     public class LoginModel
     {

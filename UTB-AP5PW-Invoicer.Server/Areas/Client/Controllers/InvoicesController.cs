@@ -3,10 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using UTB_AP5PW_Invoicer.Application.DTOs;
 using UTB_AP5PW_Invoicer.Application.Services;
 
-namespace UTB_AP5PW_Invoicer.Server.Controllers
+namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Area("Client")]
+    [Route("[area]/[controller]")]
     public class InvoicesController : ControllerBase
     {
         private readonly IInvoiceService _invoiceService;

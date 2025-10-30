@@ -49,7 +49,14 @@ namespace UTB_AP5PW_Invoicer.Server
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapControllers();
+            app.MapControllerRoute(
+                name: "Admin",
+                pattern: "{area:exists}/{controller}/{action}");
+
+            app.MapControllerRoute(
+                name: "Client",
+                pattern: "{area:exists}/{controller}/{action}");
+
             app.MapFallbackToFile("/index.html");
 
             app.Run();

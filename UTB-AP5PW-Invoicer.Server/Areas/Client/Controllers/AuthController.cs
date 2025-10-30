@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using UTB_AP5PW_Invoicer.Application.Services;
-using UTB_AP5PW_Invoicer.Server.Models;
+using UTB_AP5PW_Invoicer.Server.Areas.Client.Models;
 
-namespace UTB_AP5PW_Invoicer.Server.Controllers
+namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Area("Client")]
+    [Route("[area]/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -19,6 +20,8 @@ namespace UTB_AP5PW_Invoicer.Server.Controllers
 
         [HttpPost]
         [Route("login")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login([FromBody] LoginModel request)
         {
             var user = await _userService.GetUserByEmailAsync(request.Email);
@@ -46,6 +49,7 @@ namespace UTB_AP5PW_Invoicer.Server.Controllers
 
         [HttpPost]
         [Route("logout")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Logout()
         {
             var token = Request.Cookies["refreshToken"];
@@ -59,6 +63,8 @@ namespace UTB_AP5PW_Invoicer.Server.Controllers
 
         [HttpPost]
         [Route("signup")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> Signup([FromBody] SignupModel request)
         {
             var existingUser = await _userService.GetUserByEmailAsync(request.Email);
@@ -88,6 +94,8 @@ namespace UTB_AP5PW_Invoicer.Server.Controllers
 
         [HttpPost]
         [Route("refresh")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> RefreshToken()
         {
             var token = Request.Cookies["refreshToken"];

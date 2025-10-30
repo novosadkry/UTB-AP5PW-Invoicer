@@ -5,8 +5,8 @@ using Moq;
 using UTB_AP5PW_Invoicer.Application.DTOs;
 using UTB_AP5PW_Invoicer.Application.Services;
 using UTB_AP5PW_Invoicer.Domain.Entities;
-using UTB_AP5PW_Invoicer.Server.Controllers;
-using UTB_AP5PW_Invoicer.Server.Models;
+using UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers;
+using UTB_AP5PW_Invoicer.Server.Areas.Client.Models;
 
 namespace UTB_AP5PW_Invoicer.Tests.Controllers
 {
