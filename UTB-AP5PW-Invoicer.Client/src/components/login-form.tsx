@@ -87,7 +87,7 @@ export function LoginForm({
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="vase-jmeno@vesela-domena.cz"
+                  placeholder="petr.novak@domena.cz"
                   required
                   autoComplete="email"
                   value={email}

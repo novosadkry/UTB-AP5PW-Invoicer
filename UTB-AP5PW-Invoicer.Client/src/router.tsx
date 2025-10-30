@@ -5,6 +5,7 @@ import Signup from "@pages/auth/signup/page";
 import Dashboard from "@pages/dashboard/page";
 import Invoices from "@pages/dashboard/invoices/page";
 import ProtectedRoute from "@components/protected-route";
+import NotFound from "@pages/errors/404";
 
 export default function AppRouter() {
   return (
@@ -23,6 +24,7 @@ export default function AppRouter() {
             <Invoices />
           </ProtectedRoute>
         } />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   )

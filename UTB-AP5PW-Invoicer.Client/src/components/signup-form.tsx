@@ -89,14 +89,14 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="name">Vaše jméno</FieldLabel>
-              <Input id="name" type="text" placeholder="John Doe" required value={fullName} onChange={(e) => setFullName(e.target.value)} disabled={loading} />
+              <Input id="name" type="text" placeholder="Petr Novák" required value={fullName} onChange={(e) => setFullName(e.target.value)} disabled={loading} />
             </Field>
             <Field>
               <FieldLabel htmlFor="email">E-mailová adresa</FieldLabel>
               <Input
                 id="email"
                 type="email"
-                placeholder="vase-jmeno@vesela-domena.cz"
+                placeholder="petr.novak@domena.cz"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
