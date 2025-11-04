@@ -14,6 +14,7 @@ builder.AddNpmApp("utb-ap5pw-invoicer-client", "../UTB-AP5PW-Invoicer.Client")
     .WithReference(server)
     .WaitFor(server)
     .WithEnvironment("BROWSER", "none")
+    .WithEnvironment("VITE_API_URL", server.GetEndpoint("https"))
     .WithHttpEndpoint(env: "VITE_PORT")
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile();
