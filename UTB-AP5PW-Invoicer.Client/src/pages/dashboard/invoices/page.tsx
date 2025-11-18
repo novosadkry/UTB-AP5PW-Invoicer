@@ -45,18 +45,18 @@ export default function Page() {
   const loadInvoices = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await invoiceService.getAll();
-      setInvoices(data);
+      return invoiceService.getAll();
     } catch (error) {
       console.error("Failed to load invoices:", error);
       toast.error("Nepodařilo se načíst faktury");
     } finally {
       setLoading(false);
     }
+    return null;
   }, [invoiceService]);
 
   useEffect(() => {
-    loadInvoices();
+    loadInvoices().then((invoices) => setInvoices(invoices));
   }, []);
 
   async function handleCreateInvoice(invoice: CreateInvoiceDto) {
@@ -65,7 +65,7 @@ export default function Page() {
       await invoiceService.create(invoice);
       toast.success("Faktura byla úspěšně vytvořena");
       setIsDrawerOpen(false);
-      loadInvoices();
+      setInvoices(await loadInvoices());
     } catch (error) {
       console.error("Failed to create invoice:", error);
       toast.error("Nepodařilo se vytvořit fakturu");
@@ -77,11 +77,11 @@ export default function Page() {
   async function handleUpdateInvoice(invoice: UpdateInvoiceDto) {
     setFormLoading(true);
     try {
-      await invoiceService.update(invoice.invoiceId, invoice);
+      await invoiceService.update(invoice);
       toast.success("Faktura byla úspěšně aktualizována");
       setIsDrawerOpen(false);
       setEditingInvoice(null);
-      loadInvoices();
+      setInvoices(await loadInvoices());
     } catch (error) {
       console.error("Failed to update invoice:", error);
       toast.error("Nepodařilo se aktualizovat fakturu");
@@ -98,7 +98,7 @@ export default function Page() {
     try {
       await invoiceService.delete(id);
       toast.success("Faktura byla úspěšně smazána");
-      loadInvoices();
+      setInvoices(await loadInvoices());
     } catch (error) {
       console.error("Failed to delete invoice:", error);
       toast.error("Nepodařilo se smazat fakturu");
@@ -189,7 +189,7 @@ export default function Page() {
                 <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
                   {invoices.map((invoice) => (
                     <Card
-                      key={invoice.invoiceId}
+                      key={invoice.id}
                       className="transition-all hover:shadow-md hover:border-primary/30"
                     >
                       <CardContent className="p-4 flex flex-wrap justify-between items-start gap-4">
@@ -221,7 +221,7 @@ export default function Page() {
                             size="sm"
                             className="gap-1"
                           >
-                            <Link to={`/dashboard/invoices/${invoice.invoiceId}`}>
+                            <Link to={`/dashboard/invoices/${invoice.id}`}>
                               Zobrazit
                               <ArrowRight className="w-4 h-4" />
                             </Link>
@@ -229,7 +229,7 @@ export default function Page() {
                           <Button
                             variant="destructive"
                             size="sm"
-                            onClick={() => handleDelete(invoice.invoiceId)}
+                            onClick={() => handleDelete(invoice.id)}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>

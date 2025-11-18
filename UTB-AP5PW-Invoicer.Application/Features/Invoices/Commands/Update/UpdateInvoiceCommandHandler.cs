@@ -9,7 +9,7 @@ namespace UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.Update
     {
         public async Task Handle(UpdateInvoiceCommand request, CancellationToken cancellationToken)
         {
-            var invoice = await dbContext.Invoices.FindAsync([request.InvoiceId], cancellationToken);
+            var invoice = await dbContext.Invoices.FindAsync([request.Id], cancellationToken);
             if (invoice == null) return;
 
             mapper.Map(request, invoice);

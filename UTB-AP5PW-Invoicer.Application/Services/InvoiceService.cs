@@ -12,7 +12,7 @@ namespace UTB_AP5PW_Invoicer.Application.Services
     public interface IInvoiceService : IService
     {
         public Task<IEnumerable<InvoiceDto>> ListInvoicesAsync();
-        public Task<InvoiceDto?> GetInvoiceByIdAsync(int invoiceId);
+        public Task<InvoiceDto?> GetInvoiceByIdAsync(int id);
         public Task CreateInvoiceAsync(InvoiceDto invoice);
         public Task UpdateInvoiceAsync(InvoiceDto invoice);
         public Task DeleteInvoiceAsync(InvoiceDto invoice);
@@ -29,9 +29,9 @@ namespace UTB_AP5PW_Invoicer.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<InvoiceDto?> GetInvoiceByIdAsync(int invoiceId)
+        public async Task<InvoiceDto?> GetInvoiceByIdAsync(int id)
         {
-            return await _mediator.Send(new GetInvoiceQuery(invoiceId));
+            return await _mediator.Send(new GetInvoiceQuery(id));
         }
 
         public async Task CreateInvoiceAsync(InvoiceDto invoice)

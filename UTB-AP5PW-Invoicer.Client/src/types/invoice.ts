@@ -1,5 +1,5 @@
 export interface Invoice {
-  invoiceId: number;
+  id: number;
   customerId: number | null;
   invoiceNumber: string;
   issueDate: string;
@@ -22,5 +22,5 @@ export interface CreateInvoiceDto {
 }
 
 export interface UpdateInvoiceDto extends CreateInvoiceDto {
-  invoiceId: number;
+  id: number;
 }

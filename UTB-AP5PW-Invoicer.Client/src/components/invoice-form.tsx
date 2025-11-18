@@ -44,7 +44,7 @@ export function InvoiceForm({ invoice, onSubmit, onCancel, isLoading = false }: 
         ...formData,
         issueDate: new Date(formData.issueDate).toISOString(),
         dueDate: new Date(formData.dueDate).toISOString(),
-        ...(invoice && { invoiceId: invoice.invoiceId })
+        ...(invoice && { id: invoice.id })
       };
       await onSubmit(invoiceData as CreateInvoiceDto | UpdateInvoiceDto);
     } catch (err) {

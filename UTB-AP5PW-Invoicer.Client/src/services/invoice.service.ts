@@ -23,8 +23,8 @@ export class InvoiceService {
     return response.data;
   }
 
-  async update(id: number, invoice: UpdateInvoiceDto): Promise<void> {
-    await this.api.put(`/invoices/${id}`, invoice);
+  async update(invoice: UpdateInvoiceDto): Promise<void> {
+    await this.api.put(`/invoices/${invoice.id}`, invoice);
   }
 
   async delete(id: number): Promise<void> {
