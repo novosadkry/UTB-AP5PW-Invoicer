@@ -87,7 +87,7 @@ export default function Page() {
         setCustomer(null);
       }
     });
-  }, [loadInvoice, customerService]);
+  }, []);
 
   async function handleUpdateInvoice(updated: UpdateInvoiceDto) {
     if (!invoice) return;

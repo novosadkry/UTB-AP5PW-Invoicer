@@ -59,7 +59,7 @@ export default function Page() {
 
   useEffect(() => {
     loadCustomers().then((data) => setCustomers(data));
-  }, [loadCustomers]);
+  }, []);
 
   async function handleCreateCustomer(customer: CreateCustomerDto) {
     setFormLoading(true);

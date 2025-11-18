@@ -70,7 +70,7 @@ export default function Page() {
 
   useEffect(() => {
     loadCustomer().then(customer => setCustomer(customer));
-  }, [loadCustomer]);
+  }, []);
 
   async function handleUpdateCustomer(updated: UpdateCustomerDto) {
     if (!customer) return;
