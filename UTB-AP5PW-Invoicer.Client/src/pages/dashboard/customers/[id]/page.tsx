@@ -21,6 +21,16 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@components/ui/drawer.tsx";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@components/ui/alert-dialog";
 import { useAxiosPrivate } from "@/hooks/use-axios";
 import { CustomerService } from "@/services/customer.service";
 import type { Customer, UpdateCustomerDto } from "@/types/customer";
@@ -37,6 +47,7 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const loadCustomer = useCallback(async () => {
     setLoading(true);
@@ -90,9 +101,6 @@ export default function Page() {
 
   async function handleDelete() {
     if (!customer) return;
-    if (!confirm("Opravdu chcete smazat tohoto zákazníka?")) {
-      return;
-    }
 
     try {
       await customerService.delete(customer.id);
@@ -101,6 +109,8 @@ export default function Page() {
     } catch (error) {
       console.error("Failed to delete customer:", error);
       toast.error("Nepodařilo se smazat zákazníka");
+    } finally {
+      setIsDeleteDialogOpen(false);
     }
   }
 
@@ -162,7 +172,7 @@ export default function Page() {
             <Button
               variant="destructive"
               size="icon"
-              onClick={handleDelete}
+              onClick={() => setIsDeleteDialogOpen(true)}
             >
               <Trash2 className="w-4 h-4" />
             </Button>
@@ -271,6 +281,23 @@ export default function Page() {
           </div>
         </DrawerContent>
       </Drawer>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Opravdu chcete smazat tohoto zákazníka?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tuto akci nelze vrátit zpět. Zákazník bude trvale odstraněn.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Zrušit</AlertDialogCancel>
+            <AlertDialogAction onClick={() => void handleDelete()}>
+              Smazat
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SidebarProvider>
   );
 }

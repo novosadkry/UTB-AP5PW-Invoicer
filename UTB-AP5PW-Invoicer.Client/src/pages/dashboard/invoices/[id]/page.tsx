@@ -22,6 +22,16 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@components/ui/drawer.tsx";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@components/ui/alert-dialog";
 import { useAxiosPrivate } from "@/hooks/use-axios";
 import { InvoiceService } from "@/services/invoice.service";
 import { CustomerService } from "@/services/customer.service";
@@ -42,6 +52,7 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const loadInvoice = useCallback(async () => {
     setLoading(true);
@@ -117,9 +128,6 @@ export default function Page() {
 
   async function handleDelete() {
     if (!invoice) return;
-    if (!confirm("Opravdu chcete smazat tuto fakturu?")) {
-      return;
-    }
 
     try {
       await invoiceService.delete(invoice.id);
@@ -128,6 +136,8 @@ export default function Page() {
     } catch (error) {
       console.error("Failed to delete invoice:", error);
       toast.error("Nepodařilo se smazat fakturu");
+    } finally {
+      setIsDeleteDialogOpen(false);
     }
   }
 
@@ -206,7 +216,7 @@ export default function Page() {
             <Button
               variant="destructive"
               size="icon"
-              onClick={handleDelete}
+              onClick={() => setIsDeleteDialogOpen(true)}
             >
               <Trash2 className="w-4 h-4" />
             </Button>
@@ -342,6 +352,23 @@ export default function Page() {
           </div>
         </DrawerContent>
       </Drawer>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Opravdu chcete smazat tuto fakturu?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tuto akci nelze vrátit zpět. Faktura bude trvale odstraněna.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Zrušit</AlertDialogCancel>
+            <AlertDialogAction onClick={() => void handleDelete()}>
+              Smazat
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SidebarProvider>
   );
 }

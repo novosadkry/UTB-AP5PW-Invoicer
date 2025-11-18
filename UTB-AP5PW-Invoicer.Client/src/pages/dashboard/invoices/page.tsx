@@ -32,6 +32,16 @@ import { InvoiceService } from "@/services/invoice.service";
 import type { Invoice, CreateInvoiceDto, UpdateInvoiceDto } from "@/types/invoice";
 import { InvoiceForm } from "@/components/invoice-form";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@components/ui/alert-dialog";
 
 export default function Page() {
   const [invoices, setInvoices] = useState<Invoice[] | null>(null);
@@ -39,6 +49,7 @@ export default function Page() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [formLoading, setFormLoading] = useState(false);
+  const [deletingInvoiceId, setDeletingInvoiceId] = useState<number | null>(null);
   const api = useAxiosPrivate();
   const invoiceService = useMemo(() => new InvoiceService(api), [api]);
 
@@ -91,10 +102,6 @@ export default function Page() {
   }
 
   async function handleDelete(id: number) {
-    if (!confirm("Opravdu chcete smazat tuto fakturu?")) {
-      return;
-    }
-
     try {
       await invoiceService.delete(id);
       toast.success("Faktura byla úspěšně smazána");
@@ -102,6 +109,8 @@ export default function Page() {
     } catch (error) {
       console.error("Failed to delete invoice:", error);
       toast.error("Nepodařilo se smazat fakturu");
+    } finally {
+      setDeletingInvoiceId(null);
     }
   }
 
@@ -229,7 +238,7 @@ export default function Page() {
                           <Button
                             variant="destructive"
                             size="sm"
-                            onClick={() => handleDelete(invoice.id)}
+                            onClick={() => setDeletingInvoiceId(invoice.id)}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -290,6 +299,34 @@ export default function Page() {
           </div>
         </DrawerContent>
       </Drawer>
+
+      <AlertDialog
+        open={deletingInvoiceId !== null}
+        onOpenChange={(open: boolean) => {
+          if (!open) setDeletingInvoiceId(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Opravdu chcete smazat tuto fakturu?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tuto akci nelze vrátit zpět. Faktura bude trvale odstraněna.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Zrušit</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (deletingInvoiceId !== null) {
+                  void handleDelete(deletingInvoiceId);
+                }
+              }}
+            >
+              Smazat
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SidebarProvider>
   );
 }

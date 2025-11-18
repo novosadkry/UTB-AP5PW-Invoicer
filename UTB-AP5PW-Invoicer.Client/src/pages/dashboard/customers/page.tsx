@@ -34,6 +34,16 @@ import { CustomerService } from "@/services/customer.service";
 import type { Customer, CreateCustomerDto, UpdateCustomerDto } from "@/types/customer";
 import { CustomerForm } from "@/components/customer-form";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@components/ui/alert-dialog";
 
 export default function Page() {
   const [customers, setCustomers] = useState<Customer[] | null>(null);
@@ -41,6 +51,7 @@ export default function Page() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [formLoading, setFormLoading] = useState(false);
+  const [deletingCustomerId, setDeletingCustomerId] = useState<number | null>(null);
   const api = useAxiosPrivate();
   const customerService = useMemo(() => new CustomerService(api), [api]);
 
@@ -93,10 +104,6 @@ export default function Page() {
   }
 
   async function handleDelete(id: number) {
-    if (!confirm("Opravdu chcete smazat tohoto zákazníka?")) {
-      return;
-    }
-
     try {
       await customerService.delete(id);
       toast.success("Zákazník byl úspěšně smazán");
@@ -104,6 +111,8 @@ export default function Page() {
     } catch (error) {
       console.error("Failed to delete customer:", error);
       toast.error("Nepodařilo se smazat zákazníka");
+    } finally {
+      setDeletingCustomerId(null);
     }
   }
 
@@ -209,7 +218,7 @@ export default function Page() {
                           <Button
                             variant="destructive"
                             size="sm"
-                            onClick={() => handleDelete(customer.id)}
+                            onClick={() => setDeletingCustomerId(customer.id)}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -269,6 +278,34 @@ export default function Page() {
           </div>
         </DrawerContent>
       </Drawer>
+
+      <AlertDialog
+        open={deletingCustomerId !== null}
+        onOpenChange={(open: boolean) => {
+          if (!open) setDeletingCustomerId(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Opravdu chcete smazat tohoto zákazníka?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tuto akci nelze vrátit zpět. Zákazník bude trvale odstraněn.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Zrušit</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (deletingCustomerId !== null) {
+                  void handleDelete(deletingCustomerId);
+                }
+              }}
+            >
+              Smazat
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SidebarProvider>
   );
 }
