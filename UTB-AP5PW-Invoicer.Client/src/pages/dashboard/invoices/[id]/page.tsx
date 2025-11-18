@@ -24,7 +24,9 @@ import {
 } from "@components/ui/drawer.tsx";
 import { useAxiosPrivate } from "@/hooks/use-axios";
 import { InvoiceService } from "@/services/invoice.service";
+import { CustomerService } from "@/services/customer.service";
 import type { Invoice, UpdateInvoiceDto } from "@/types/invoice";
+import type { Customer } from "@/types/customer";
 import { InvoiceForm } from "@/components/invoice-form";
 import { toast } from "sonner";
 
@@ -33,8 +35,10 @@ export default function Page() {
   const navigate = useNavigate();
   const api = useAxiosPrivate();
   const invoiceService = useMemo(() => new InvoiceService(api), [api]);
+  const customerService = useMemo(() => new CustomerService(api), [api]);
 
   const [invoice, setInvoice] = useState<Invoice | null>(null);
+  const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
@@ -70,8 +74,20 @@ export default function Page() {
   }, [id, invoiceService, navigate]);
 
   useEffect(() => {
-    loadInvoice().then((invoice) => setInvoice(invoice));
-  }, []);
+    loadInvoice().then(async (invoice) => {
+      setInvoice(invoice);
+      if (invoice && invoice.customerId) {
+        try {
+          setCustomer(await customerService.getById(invoice.customerId));
+        } catch (error) {
+          console.error("Failed to load customer for invoice:", error);
+          setCustomer(null);
+        }
+      } else {
+        setCustomer(null);
+      }
+    });
+  }, [loadInvoice, customerService]);
 
   async function handleUpdateInvoice(updated: UpdateInvoiceDto) {
     if (!invoice) return;
@@ -81,6 +97,16 @@ export default function Page() {
       toast.success("Faktura byla úspěšně aktualizována");
       setIsDrawerOpen(false);
       setInvoice(await loadInvoice());
+      if (invoice && invoice.customerId) {
+        try {
+          setCustomer(await customerService.getById(invoice.customerId));
+        } catch (error) {
+          console.error("Failed to reload customer for invoice:", error);
+          setCustomer(null);
+        }
+      } else {
+        setCustomer(null);
+      }
     } catch (error) {
       console.error("Failed to update invoice:", error);
       toast.error("Nepodařilo se aktualizovat fakturu");
@@ -211,16 +237,28 @@ export default function Page() {
             </div>
             <div>
               <h3 className="font-semibold mb-1">Zákazník</h3>
-              {invoice.customer ? (
+              {customer ? (
                 <dl className="space-y-1 text-sm">
                   <div className="flex justify-between">
                     <dt className="text-muted-foreground">Název</dt>
-                    <dd>{invoice.customer.name}</dd>
+                    <dd>{customer.name}</dd>
                   </div>
-                  {invoice.customer.email && (
+                  {customer.contactEmail && (
                     <div className="flex justify-between">
                       <dt className="text-muted-foreground">E-mail</dt>
-                      <dd>{invoice.customer.email}</dd>
+                      <dd>{customer.contactEmail}</dd>
+                    </div>
+                  )}
+                  {customer.contactPhone && (
+                    <div className="flex justify-between">
+                      <dt className="text-muted-foreground">Telefon</dt>
+                      <dd>{customer.contactPhone}</dd>
+                    </div>
+                  )}
+                  {customer.address && (
+                    <div className="flex justify-between">
+                      <dt className="text-muted-foreground">Adresa</dt>
+                      <dd>{customer.address}</dd>
                     </div>
                   )}
                 </dl>
