@@ -22,6 +22,17 @@ import { useAxiosPublic } from "@/hooks/use-axios.ts";
 import { getValidationErrors } from "@/types/api.ts";
 import { Alert, AlertDescription, AlertTitle } from "@components/ui/alert.tsx";
 import { AlertCircleIcon } from "lucide-react";
+import { z } from "zod";
+import { getZodFieldErrors } from "@/types/zod.ts";
+
+const loginSchema = z.object({
+  email: z
+    .email("Zadejte platnou e-mailovou adresu.")
+    .min(1, "E-mail je povinný."),
+  password: z
+    .string()
+    .min(1, "Heslo je povinné."),
+});
 
 export function LoginForm({
   className,
@@ -43,12 +54,27 @@ export function LoginForm({
 
     setError(null);
     setFieldErrors({});
+
+    const parseResult = loginSchema.safeParse({
+      email,
+      password,
+    });
+
+    if (!parseResult.success) {
+      setFieldErrors(getZodFieldErrors(parseResult.error));
+      setError("Formulář obsahuje chyby. Zkontrolujte zvýrazněná pole.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const res = await api.post(
         "/auth/login",
-        { email, password }
+        {
+          email: parseResult.data.email,
+          password: parseResult.data.password,
+        }
       );
 
       const { accessToken, user } = await res.data;
@@ -98,7 +124,7 @@ export function LoginForm({
                   disabled={loading}
                 />
                 {fieldErrors.Email && (
-                  <FieldError errors={fieldErrors.Email.map(message => ({message}))} />
+                  <FieldError errors={fieldErrors.Email.map(message => ({ message }))} />
                 )}
               </Field>
               <Field data-invalid={!!fieldErrors.Password}>
@@ -123,13 +149,13 @@ export function LoginForm({
                   aria-invalid={!!fieldErrors.Password}
                 />
                 {fieldErrors.Password && (
-                  <FieldError errors={fieldErrors.Password.map(message => ({message}))} />
+                  <FieldError errors={fieldErrors.Password.map(message => ({ message }))} />
                 )}
               </Field>
               {error && (
                 <Alert variant="destructive">
                   <AlertCircleIcon />
-                  <AlertTitle>Registrace selhala</AlertTitle>
+                  <AlertTitle>Přihlášení selhalo</AlertTitle>
                   <AlertDescription>
                     <p>{error}</p>
                   </AlertDescription>

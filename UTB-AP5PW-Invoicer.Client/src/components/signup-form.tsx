@@ -26,6 +26,27 @@ import { useAuth } from "@/hooks/use-auth";
 import { getValidationErrors } from "@/types/api.ts";
 import { AlertCircleIcon } from "lucide-react";
 import type { AxiosError } from "axios";
+import { z } from "zod";
+import { getZodFieldErrors } from "@/types/zod.ts";
+
+const signupSchema = z.object({
+  fullName: z
+    .string()
+    .min(1, "Jméno je povinné.")
+    .max(100, "Jméno je příliš dlouhé."),
+  email: z
+    .email("Zadejte platnou e-mailovou adresu.")
+    .min(1, "E-mail je povinný."),
+  password: z
+    .string()
+    .min(5, "Heslo musí být alespoň 5 znaků dlouhé."),
+  confirmPassword: z
+    .string()
+    .min(5, "Heslo musí být alespoň 5 znaků dlouhé."),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Hesla se neshodují.",
+  path: ["ConfirmPassword"],
+});
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const navigate = useNavigate();
@@ -47,21 +68,26 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
     setError(null);
     setFieldErrors({});
 
-    if (password.length < 5) {
-      setError("Heslo musí být alespoň 5 znaků dlouhé.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError("Hesla se neshodují.");
+    const parseResult = signupSchema.safeParse({
+      fullName,
+      email,
+      password,
+      confirmPassword,
+    });
+
+    if (!parseResult.success) {
+      setFieldErrors(getZodFieldErrors(parseResult.error));
+      setError("Formulář obsahuje chyby. Zkontrolujte zvýrazněná pole.");
       return;
     }
 
     setLoading(true);
     try {
-      const res = await api.post(
-        "/auth/signup",
-        { fullName, email, password }
-      );
+      const res = await api.post("/auth/signup", {
+        fullName: parseResult.data.fullName,
+        email: parseResult.data.email,
+        password: parseResult.data.password,
+      });
 
       const { accessToken, user } = await res.data;
       setAccessToken(accessToken);
@@ -111,7 +137,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                 disabled={loading}
               />
               {fieldErrors.FullName && (
-                <FieldError errors={fieldErrors.FullName.map(message => ({message}))} />
+                <FieldError errors={fieldErrors.FullName.map(message => ({ message }))} />
               )}
             </Field>
             <Field>
@@ -126,7 +152,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                 disabled={loading}
               />
               {fieldErrors.Email && (
-                <FieldError errors={fieldErrors.Email.map(message => ({message}))} />
+                <FieldError errors={fieldErrors.Email.map(message => ({ message }))} />
               )}
             </Field>
             <Field>
@@ -144,7 +170,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                 Musí být minimálně 5 znaků dlouhé.
               </FieldDescription>
               {fieldErrors.Password && (
-                <FieldError errors={fieldErrors.Password.map(message => ({message}))} />
+                <FieldError errors={fieldErrors.Password.map(message => ({ message }))} />
               )}
             </Field>
             <Field>
@@ -159,6 +185,9 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={loading}
               />
+              {fieldErrors.ConfirmPassword && (
+                <FieldError errors={fieldErrors.ConfirmPassword.map(message => ({ message }))} />
+              )}
             </Field>
             {error && (
               <Alert variant="destructive">
