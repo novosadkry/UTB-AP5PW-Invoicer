@@ -8,16 +8,24 @@ import {
 } from "@/components/ui/card"
 import {
   Field,
-  FieldDescription,
+  FieldDescription, FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle
+} from "@components/ui/alert.tsx";
 import { Input } from "@/components/ui/input"
 import { ThemeToggle } from "@components/theme-toggle";
 import { Link, useNavigate } from "react-router";
 import { useState } from "react";
 import { useAxiosPublic } from "@/hooks/use-axios";
 import { useAuth } from "@/hooks/use-auth";
+import { getValidationErrors } from "@/types/api.ts";
+import { AlertCircleIcon } from "lucide-react";
+import type { AxiosError } from "axios";
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const navigate = useNavigate();
@@ -27,6 +35,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   const api = useAxiosPublic();
   const { setAccessToken, setUser } = useAuth();
@@ -34,7 +43,9 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (loading) return;
+
     setError(null);
+    setFieldErrors({});
 
     if (password.length < 5) {
       setError("Heslo musí být alespoň 5 znaků dlouhé.");
@@ -52,22 +63,23 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
         { fullName, email, password }
       );
 
-      if (res.status !== 200) {
-        if (res.status === 409) {
-          setError("Uživatel s tímto e-mailem již existuje.");
-        } else {
-          setError("Registrace se nezdařila. Zkuste to prosím znovu.");
-        }
-        return;
-      }
-
       const { accessToken, user } = await res.data;
       setAccessToken(accessToken);
       setUser(user);
 
       navigate("/dashboard", { replace: true });
-    } catch {
-      setError("Došlo k chybě při připojení k serveru.");
+    } catch (err) {
+      const validation = getValidationErrors(err);
+      if (validation?.errors) {
+        setFieldErrors(validation.errors);
+        setError("Formulář obsahuje chyby. Zkontrolujte zvýrazněná pole.");
+      } else {
+        if ((err as AxiosError)?.response?.status === 409) {
+          setError("Účet s touto e-mailovou adresou již existuje.");
+        } else {
+          setError("Došlo k neznámé chybě. Zkuste to prosím znovu.");
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -89,7 +101,18 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="name">Vaše jméno</FieldLabel>
-              <Input id="name" type="text" placeholder="Petr Novák" required value={fullName} onChange={(e) => setFullName(e.target.value)} disabled={loading} />
+              <Input
+                id="name"
+                type="text"
+                placeholder="Petr Novák"
+                required
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                disabled={loading}
+              />
+              {fieldErrors.FullName && (
+                <FieldError errors={fieldErrors.FullName.map(message => ({message}))} />
+              )}
             </Field>
             <Field>
               <FieldLabel htmlFor="email">E-mailová adresa</FieldLabel>
@@ -102,26 +125,49 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
               />
+              {fieldErrors.Email && (
+                <FieldError errors={fieldErrors.Email.map(message => ({message}))} />
+              )}
             </Field>
             <Field>
               <FieldLabel htmlFor="password">Heslo</FieldLabel>
-              <Input id="password" type="password" required minLength={5} value={password} onChange={(e) => setPassword(e.target.value)} disabled={loading} />
+              <Input
+                id="password"
+                type="password"
+                required
+                minLength={5}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+              />
               <FieldDescription>
                 Musí být minimálně 5 znaků dlouhé.
               </FieldDescription>
+              {fieldErrors.Password && (
+                <FieldError errors={fieldErrors.Password.map(message => ({message}))} />
+              )}
             </Field>
             <Field>
               <FieldLabel htmlFor="confirm-password">
                 Heslo znovu
               </FieldLabel>
-              <Input id="confirm-password" type="password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} disabled={loading} />
+              <Input
+                id="confirm-password"
+                type="password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                disabled={loading}
+              />
             </Field>
             {error && (
-              <Field>
-                <FieldDescription className="text-red-600">
-                  {error}
-                </FieldDescription>
-              </Field>
+              <Alert variant="destructive">
+                <AlertCircleIcon />
+                <AlertTitle>Registrace selhala</AlertTitle>
+                <AlertDescription>
+                  <p>{error}</p>
+                </AlertDescription>
+              </Alert>
             )}
             <FieldGroup>
               <Field>

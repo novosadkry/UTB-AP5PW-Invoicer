@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card"
 import {
   Field,
-  FieldDescription,
+  FieldDescription, FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
@@ -19,6 +19,9 @@ import { Input } from "@/components/ui/input"
 import { ThemeToggle } from "@components/theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
 import { useAxiosPublic } from "@/hooks/use-axios.ts";
+import { getValidationErrors } from "@/types/api.ts";
+import { Alert, AlertDescription, AlertTitle } from "@components/ui/alert.tsx";
+import { AlertCircleIcon } from "lucide-react";
 
 export function LoginForm({
   className,
@@ -29,6 +32,7 @@ export function LoginForm({
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   const api = useAxiosPublic();
   const { setAccessToken, setUser } = useAuth();
@@ -36,7 +40,9 @@ export function LoginForm({
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (loading) return;
+
     setError(null);
+    setFieldErrors({});
     setLoading(true);
 
     try {
@@ -45,22 +51,19 @@ export function LoginForm({
         { email, password }
       );
 
-      if (res.status !== 200) {
-        if (res.status === 401) {
-          setError("Neplatná e-mailová adresa nebo heslo.");
-        } else {
-          setError("Přihlášení se nezdařilo. Zkuste to prosím znovu.");
-        }
-        return;
-      }
-
-      const { accessToken, user } = res.data;
+      const { accessToken, user } = await res.data;
       setAccessToken(accessToken);
       setUser(user);
 
       navigate("/dashboard", { replace: true });
     } catch (err) {
-      setError("Došlo k chybě při připojení k serveru.");
+      const validation = getValidationErrors(err);
+      if (validation?.errors) {
+        setFieldErrors(validation.errors);
+        setError("Formulář obsahuje chyby. Zkontrolujte zvýrazněná pole.");
+      } else {
+        setError("Došlo k neznámé chybě. Zkuste to prosím znovu.");
+      }
     } finally {
       setLoading(false);
     }
@@ -94,8 +97,11 @@ export function LoginForm({
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
                 />
+                {fieldErrors.Email && (
+                  <FieldError errors={fieldErrors.Email.map(message => ({message}))} />
+                )}
               </Field>
-              <Field>
+              <Field data-invalid={!!fieldErrors.Password}>
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Heslo</FieldLabel>
                   <a
@@ -105,14 +111,29 @@ export function LoginForm({
                     Zapomněli jste heslo?
                   </a>
                 </div>
-                <Input id="password" name="password" type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} disabled={loading} />
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                  aria-invalid={!!fieldErrors.Password}
+                />
+                {fieldErrors.Password && (
+                  <FieldError errors={fieldErrors.Password.map(message => ({message}))} />
+                )}
               </Field>
               {error && (
-                <Field>
-                  <FieldDescription className="text-red-600">
-                    {error}
-                  </FieldDescription>
-                </Field>
+                <Alert variant="destructive">
+                  <AlertCircleIcon />
+                  <AlertTitle>Registrace selhala</AlertTitle>
+                  <AlertDescription>
+                    <p>{error}</p>
+                  </AlertDescription>
+                </Alert>
               )}
               <Field>
                 <Button type="submit" disabled={loading}>
