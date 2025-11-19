@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using UTB_AP5PW_Invoicer.Application.DTOs;
-using UTB_AP5PW_Invoicer.Application.Services;
+using UTB_AP5PW_Invoicer.Application.Services.Interfaces;
 using UTB_AP5PW_Invoicer.Domain.Entities;
 using UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers;
 using UTB_AP5PW_Invoicer.Server.Areas.Client.Models;

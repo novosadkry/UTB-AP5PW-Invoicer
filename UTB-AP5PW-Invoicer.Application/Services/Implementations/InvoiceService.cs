@@ -6,18 +6,10 @@ using UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.Delete;
 using UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.Update;
 using UTB_AP5PW_Invoicer.Application.Features.Invoices.Queries.Get;
 using UTB_AP5PW_Invoicer.Application.Features.Invoices.Queries.List;
+using UTB_AP5PW_Invoicer.Application.Services.Interfaces;
 
-namespace UTB_AP5PW_Invoicer.Application.Services
+namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
 {
-    public interface IInvoiceService : IService
-    {
-        public Task<IEnumerable<InvoiceDto>> ListInvoicesAsync();
-        public Task<InvoiceDto?> GetInvoiceByIdAsync(int id);
-        public Task CreateInvoiceAsync(InvoiceDto invoice);
-        public Task UpdateInvoiceAsync(InvoiceDto invoice);
-        public Task DeleteInvoiceAsync(InvoiceDto invoice);
-    }
-
     public class InvoiceService : IInvoiceService
     {
         private readonly IMediator _mediator;

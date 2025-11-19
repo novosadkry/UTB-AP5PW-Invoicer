@@ -3,16 +3,10 @@ using MediatR;
 using UTB_AP5PW_Invoicer.Application.DTOs;
 using UTB_AP5PW_Invoicer.Application.Features.Users.Commands.Create;
 using UTB_AP5PW_Invoicer.Application.Features.Users.Queries.Get;
+using UTB_AP5PW_Invoicer.Application.Services.Interfaces;
 
-namespace UTB_AP5PW_Invoicer.Application.Services
+namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
 {
-    public interface IUserService : IService
-    {
-        public Task<UserDto?> GetUserAsync(int userId);
-        public Task<UserDto?> GetUserByEmailAsync(string email);
-        public Task<int> CreateUserAsync(string email, string fullName, string password);
-    }
-
     public class UserService : IUserService
     {
         private readonly IMediator _mediator;

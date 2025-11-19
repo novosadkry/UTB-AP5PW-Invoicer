@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using UTB_AP5PW_Invoicer.Application.Services;
+using UTB_AP5PW_Invoicer.Application.Services.Interfaces;
 using UTB_AP5PW_Invoicer.Server.Areas.Client.Models;
 
 namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers

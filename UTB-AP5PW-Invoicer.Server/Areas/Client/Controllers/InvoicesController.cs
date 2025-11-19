@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UTB_AP5PW_Invoicer.Application.DTOs;
-using UTB_AP5PW_Invoicer.Application.Services;
+using UTB_AP5PW_Invoicer.Application.Services.Interfaces;
 
 namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
 {

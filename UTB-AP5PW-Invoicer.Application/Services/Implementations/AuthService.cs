@@ -11,20 +11,11 @@ using UTB_AP5PW_Invoicer.Application.Features.RefreshTokens.Commands.Delete;
 using UTB_AP5PW_Invoicer.Application.Features.RefreshTokens.Commands.Revoke;
 using UTB_AP5PW_Invoicer.Application.Features.RefreshTokens.Queries.Get;
 using UTB_AP5PW_Invoicer.Application.Features.Users.Queries.Get;
+using UTB_AP5PW_Invoicer.Application.Services.Interfaces;
 using UTB_AP5PW_Invoicer.Infrastructure.Configuration;
 
-namespace UTB_AP5PW_Invoicer.Application.Services
+namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
 {
-    public interface IAuthService : IService
-    {
-        public Task<string> GetAccessTokenAsync(UserDto user);
-        public Task<string> GetRefreshTokenAsync(UserDto user);
-        public Task<bool> VerifyPasswordAsync(UserDto? userDto, string password);
-        public Task<UserDto?> ValidateRefreshTokenAsync(string token);
-        public Task DeleteRefreshTokenAsync(string token);
-        public Task RevokeRefreshTokenAsync(string token);
-    }
-
     public class AuthService : IAuthService
     {
         private readonly JwtOptions _jwtOptions;

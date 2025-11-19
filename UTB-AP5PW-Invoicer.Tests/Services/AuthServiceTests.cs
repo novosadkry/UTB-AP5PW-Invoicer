@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.Extensions.Options;
 using Moq;
 using UTB_AP5PW_Invoicer.Application.DTOs;
-using UTB_AP5PW_Invoicer.Application.Services;
+using UTB_AP5PW_Invoicer.Application.Services.Implementations;
 using UTB_AP5PW_Invoicer.Infrastructure.Configuration;
 
 namespace UTB_AP5PW_Invoicer.Tests.Services

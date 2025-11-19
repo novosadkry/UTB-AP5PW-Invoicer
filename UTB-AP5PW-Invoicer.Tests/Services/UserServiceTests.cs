@@ -4,7 +4,7 @@ using Moq;
 using UTB_AP5PW_Invoicer.Application.DTOs;
 using UTB_AP5PW_Invoicer.Application.Features.Users.Commands.Create;
 using UTB_AP5PW_Invoicer.Application.Features.Users.Queries.Get;
-using UTB_AP5PW_Invoicer.Application.Services;
+using UTB_AP5PW_Invoicer.Application.Services.Implementations;
 
 namespace UTB_AP5PW_Invoicer.Tests.Services
 {
