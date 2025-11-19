@@ -1,5 +1,6 @@
 using AutoMapper;
 using MediatR;
+using FluentValidation;
 using UTB_AP5PW_Invoicer.Application.DTOs;
 using UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.Create;
 using UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.Delete;
@@ -14,11 +15,13 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
     {
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
+        private readonly IValidator<InvoiceDto> _invoiceValidator;
 
-        public InvoiceService(IMediator mediator, IMapper mapper)
+        public InvoiceService(IMediator mediator, IMapper mapper, IValidator<InvoiceDto> invoiceValidator)
         {
             _mediator = mediator;
             _mapper = mapper;
+            _invoiceValidator = invoiceValidator;
         }
 
         public async Task<InvoiceDto?> GetInvoiceByIdAsync(int id)
@@ -28,6 +31,7 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
 
         public async Task CreateInvoiceAsync(InvoiceDto invoice)
         {
+            await _invoiceValidator.ValidateAndThrowAsync(invoice);
             await _mediator.Send(_mapper.Map<CreateInvoiceCommand>(invoice));
         }
 
@@ -43,6 +47,7 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
 
         public async Task UpdateInvoiceAsync(InvoiceDto invoice)
         {
+            await _invoiceValidator.ValidateAndThrowAsync(invoice);
             await _mediator.Send(_mapper.Map<UpdateInvoiceCommand>(invoice));
         }
     }

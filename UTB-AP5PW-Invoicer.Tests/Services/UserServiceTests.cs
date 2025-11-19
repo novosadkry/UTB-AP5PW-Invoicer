@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MediatR;
 using Moq;
+using FluentValidation;
 using UTB_AP5PW_Invoicer.Application.DTOs;
 using UTB_AP5PW_Invoicer.Application.Features.Users.Commands.Create;
 using UTB_AP5PW_Invoicer.Application.Features.Users.Queries.Get;
@@ -15,11 +16,12 @@ namespace UTB_AP5PW_Invoicer.Tests.Services
         {
             var mockMapper = new Mock<IMapper>();
             var mockMediator = new Mock<IMediator>();
+            var mockValidator = new Mock<IValidator<UserDto>>();
             mockMediator.Setup(m =>
                 m.Send(It.IsAny<GetUserQuery>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new UserDto { Id = 1 });
 
-            var service = new UserService(mockMediator.Object, mockMapper.Object);
+            var service = new UserService(mockMediator.Object, mockMapper.Object, mockValidator.Object);
             var result = await service.GetUserAsync(1);
 
             Assert.NotNull(result);
@@ -33,11 +35,12 @@ namespace UTB_AP5PW_Invoicer.Tests.Services
         {
             var mockMapper = new Mock<IMapper>();
             var mockMediator = new Mock<IMediator>();
+            var mockValidator = new Mock<IValidator<UserDto>>();
             mockMediator.Setup(m =>
                 m.Send(It.IsAny<CreateUserCommand>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(1);
 
-            var service = new UserService(mockMediator.Object, mockMapper.Object);
+            var service = new UserService(mockMediator.Object, mockMapper.Object, mockValidator.Object);
             var id = await service.CreateUserAsync("a@b.com", "Name", "pw");
 
             Assert.Equal(1, id);

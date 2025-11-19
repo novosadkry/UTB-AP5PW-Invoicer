@@ -1,4 +1,7 @@
-﻿using System.Text;
+﻿using System.Reflection;
+using System.Text;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -17,7 +20,10 @@ namespace UTB_AP5PW_Invoicer.Server.Extensions
         {
             return services
                 .AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<IService>())
-                .AddAutoMapper(cfg => cfg.AddMaps(typeof(IService).Assembly));
+                .AddAutoMapper(cfg => cfg.AddMaps(typeof(IService).Assembly))
+                .AddFluentValidationAutoValidation()
+                .AddValidatorsFromAssemblyContaining<IService>()
+                .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         }
 
         public static IServiceCollection AddServicesFromAssembly(
