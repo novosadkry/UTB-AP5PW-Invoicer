@@ -3,6 +3,7 @@
     public record CustomerDto
     {
         public int Id { get; set; }
+        public int UserId { get; set; }
         public string Name { get; set; }
         public string? Ico { get; set; }
         public string? Dic { get; set; }
