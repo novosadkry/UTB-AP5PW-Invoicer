@@ -5,20 +5,36 @@ import { Field, FieldGroup, FieldLabel, FieldDescription } from "@/components/ui
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { CreateInvoiceDto, UpdateInvoiceDto, Invoice } from "@/types/invoice";
+import type { Customer } from "@/types/customer";
 
 interface InvoiceFormProps {
   invoice?: Invoice;
   onSubmit: (invoice: CreateInvoiceDto | UpdateInvoiceDto) => Promise<void>;
   onCancel: () => void;
   isLoading?: boolean;
+  customers: Customer[];
+  customersLoading?: boolean;
+  customersError?: string | null;
 }
 
-export function InvoiceForm({ invoice, onSubmit, onCancel, isLoading = false }: InvoiceFormProps) {
+export function InvoiceForm({
+  invoice,
+  onSubmit,
+  onCancel,
+  isLoading = false,
+  customers,
+  customersLoading = false,
+  customersError = null
+}: InvoiceFormProps) {
   const [formData, setFormData] = useState({
     customerId: invoice?.customerId || null,
     invoiceNumber: invoice?.invoiceNumber || "",
-    issueDate: invoice?.issueDate ? invoice.issueDate.split('T')[0] : new Date().toISOString().split('T')[0],
-    dueDate: invoice?.dueDate ? invoice.dueDate.split('T')[0] : "",
+    issueDate: invoice?.issueDate
+      ? invoice.issueDate.split('T')[0]
+      : new Date().toISOString().split('T')[0],
+    dueDate: invoice?.dueDate
+      ? invoice.dueDate.split('T')[0]
+      : "",
     status: invoice?.status || "draft",
     totalAmount: invoice?.totalAmount || 0,
     totalVat: invoice?.totalVat || 0,
@@ -53,7 +69,7 @@ export function InvoiceForm({ invoice, onSubmit, onCancel, isLoading = false }: 
     }
   };
 
-  const handleChange = (field: string, value: string | number) => {
+  const handleChange = (field: string, value: string | number | null) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -68,6 +84,40 @@ export function InvoiceForm({ invoice, onSubmit, onCancel, isLoading = false }: 
       <CardContent>
         <form onSubmit={handleSubmit}>
           <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="customerId">Zákazník</FieldLabel>
+              <Select
+                value={formData.customerId !== null ? String(formData.customerId) : ""}
+                onValueChange={(value) => {
+                  const parsed = value ? Number(value) : null;
+                  handleChange("customerId", Number.isNaN(parsed) ? null : parsed);
+                }}
+                disabled={isLoading || customersLoading}
+              >
+                <SelectTrigger id="customerId">
+                  <SelectValue placeholder={
+                    customersLoading
+                      ? "Načítání zákazníků..."
+                      : customersError
+                        ? "Chyba načítání zákazníků"
+                        : "Vyberte zákazníka"
+                  } />
+                </SelectTrigger>
+                <SelectContent>
+                  {customers.map((customer) => (
+                    <SelectItem key={customer.id} value={String(customer.id)}>
+                      {customer.name} (IČO: {customer.ico})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {customersError && !customersLoading && (
+                <FieldDescription className="text-red-600 mt-1">
+                  {customersError}
+                </FieldDescription>
+              )}
+            </Field>
+
             <Field>
               <FieldLabel htmlFor="invoiceNumber">Číslo faktury</FieldLabel>
               <Input

@@ -49,10 +49,27 @@ export default function Page() {
 
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [customer, setCustomer] = useState<Customer | null>(null);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [customersLoading, setCustomersLoading] = useState(false);
+  const [customersError, setCustomersError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const loadCustomers = useCallback(async () => {
+    setCustomersLoading(true);
+    setCustomersError(null);
+    try {
+      const data = await customerService.getAll();
+      setCustomers(data);
+    } catch (error) {
+      console.error("Failed to load customers:", error);
+      setCustomersError("Nepodařilo se načíst zákazníky");
+    } finally {
+      setCustomersLoading(false);
+    }
+  }, [customerService]);
 
   const loadInvoice = useCallback(async () => {
     setLoading(true);
@@ -335,7 +352,12 @@ export default function Page() {
         </div>
       </SidebarInset>
 
-      <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+      <Drawer open={isDrawerOpen} onOpenChange={(open) => {
+        setIsDrawerOpen(open);
+        if (open && !customersLoading && customers.length === 0) {
+          void loadCustomers();
+        }
+      }}>
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>Upravit fakturu</DrawerTitle>
@@ -347,6 +369,9 @@ export default function Page() {
                 onSubmit={(data) => handleUpdateInvoice(data as UpdateInvoiceDto)}
                 onCancel={() => setIsDrawerOpen(false)}
                 isLoading={formLoading}
+                customers={customers}
+                customersLoading={customersLoading}
+                customersError={customersError}
               />
             )}
           </div>

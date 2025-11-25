@@ -29,7 +29,9 @@ import {
 } from "@components/ui/breadcrumb.tsx";
 import { useAxiosPrivate } from "@/hooks/use-axios";
 import { InvoiceService } from "@/services/invoice.service";
+import { CustomerService } from "@/services/customer.service";
 import type { Invoice, CreateInvoiceDto, UpdateInvoiceDto } from "@/types/invoice";
+import type { Customer } from "@/types/customer";
 import { InvoiceForm } from "@/components/invoice-form";
 import { toast } from "sonner";
 import {
@@ -50,8 +52,12 @@ export default function Page() {
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [formLoading, setFormLoading] = useState(false);
   const [deletingInvoiceId, setDeletingInvoiceId] = useState<number | null>(null);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [customersLoading, setCustomersLoading] = useState(false);
+  const [customersError, setCustomersError] = useState<string | null>(null);
   const api = useAxiosPrivate();
   const invoiceService = useMemo(() => new InvoiceService(api), [api]);
+  const customerService = useMemo(() => new CustomerService(api), [api]);
 
   const loadInvoices = useCallback(async () => {
     setLoading(true);
@@ -65,6 +71,20 @@ export default function Page() {
     }
     return null;
   }, [invoiceService]);
+
+  const loadCustomers = useCallback(async () => {
+    setCustomersLoading(true);
+    setCustomersError(null);
+    try {
+      const data = await customerService.getAll();
+      setCustomers(data);
+    } catch (error) {
+      console.error("Failed to load customers:", error);
+      setCustomersError("Nepodařilo se načíst zákazníky");
+    } finally {
+      setCustomersLoading(false);
+    }
+  }, [customerService]);
 
   useEffect(() => {
     loadInvoices().then((invoices) => setInvoices(invoices));
@@ -116,11 +136,17 @@ export default function Page() {
 
   function openCreateDrawer() {
     setEditingInvoice(null);
+    if (!customersLoading && customers.length === 0) {
+      void loadCustomers();
+    }
     setIsDrawerOpen(true);
   }
 
   function openEditDrawer(invoice: Invoice) {
     setEditingInvoice(invoice);
+    if (!customersLoading && customers.length === 0) {
+      void loadCustomers();
+    }
     setIsDrawerOpen(true);
   }
 
@@ -295,6 +321,9 @@ export default function Page() {
               }}
               onCancel={closeDrawer}
               isLoading={formLoading}
+              customers={customers}
+              customersLoading={customersLoading}
+              customersError={customersError}
             />
           </div>
         </DrawerContent>
