@@ -22,7 +22,7 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IEnumerable<CustomerDto>> GetCustomers()
+        public async Task<ICollection<CustomerDto>> GetCustomers()
         {
             return await _customerService.ListCustomersAsync();
         }

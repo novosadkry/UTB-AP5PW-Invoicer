@@ -30,9 +30,6 @@ namespace UTB_AP5PW_Invoicer.Server
             app.UseDatabase();
             app.MapDefaultEndpoints();
 
-            app.UseDefaultFiles();
-            app.MapStaticAssets();
-
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -50,7 +47,6 @@ namespace UTB_AP5PW_Invoicer.Server
             app.UseAuthorization();
 
             app.MapControllers();
-            app.MapFallbackToFile("/index.html");
 
             app.Run();
         }

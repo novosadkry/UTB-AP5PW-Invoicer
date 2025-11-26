@@ -35,7 +35,7 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
             await _mediator.Send(_mapper.Map<CreateCustomerCommand>(customer));
         }
 
-        public async Task<IEnumerable<CustomerDto>> ListCustomersAsync()
+        public async Task<ICollection<CustomerDto>> ListCustomersAsync()
         {
             return await _mediator.Send(new ListCustomersQuery());
         }

@@ -8,9 +8,9 @@ using UTB_AP5PW_Invoicer.Infrastructure.Data;
 namespace UTB_AP5PW_Invoicer.Application.Features.Invoices.Queries.List
 {
     public class ListInvoicesQueryHandler(AppDbContext dbContext, IMapper mapper)
-        : IRequestHandler<ListInvoicesQuery, List<InvoiceDto>>
+        : IRequestHandler<ListInvoicesQuery, ICollection<InvoiceDto>>
     {
-        public async Task<List<InvoiceDto>> Handle(ListInvoicesQuery request, CancellationToken cancellationToken)
+        public async Task<ICollection<InvoiceDto>> Handle(ListInvoicesQuery request, CancellationToken cancellationToken)
         {
             return await dbContext.Invoices
                 .AsNoTracking()
