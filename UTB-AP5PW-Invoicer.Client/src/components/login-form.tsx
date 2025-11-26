@@ -29,6 +29,7 @@ import { Alert, AlertDescription, AlertTitle } from "@components/ui/alert.tsx";
 import { AlertCircleIcon } from "lucide-react";
 import { z } from "zod";
 import { getZodFieldErrors } from "@/types/zod.ts";
+import type { AxiosError } from "axios";
 
 const loginSchema = z.object({
   email: z
@@ -36,7 +37,7 @@ const loginSchema = z.object({
     .min(1, "E-mail je povinný."),
   password: z
     .string()
-    .min(1, "Heslo je povinné."),
+    .min(5, "Heslo musí být alespoň 5 znaků dlouhé."),
 });
 
 export function LoginForm({
@@ -111,6 +112,8 @@ export function LoginForm({
       if (validation?.errors) {
         setFieldErrors(validation.errors);
         setError("Formulář obsahuje chyby. Zkontrolujte zvýrazněná pole.");
+      } else if ((err as AxiosError)?.response?.status === 401) {
+        setError("Neplatné přihlašovací údaje.");
       } else {
         setError("Došlo k neznámé chybě. Zkuste to prosím znovu.");
       }
@@ -134,7 +137,7 @@ export function LoginForm({
         <CardContent>
           <form onSubmit={onSubmit}>
             <FieldGroup>
-              <Field>
+              <Field data-invalid={!!fieldErrors.email}>
                 <FieldLabel htmlFor="email">E-mailová adresa</FieldLabel>
                 <Input
                   id="email"
@@ -146,12 +149,13 @@ export function LoginForm({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
+                  aria-invalid={!!fieldErrors.email}
                 />
-                {fieldErrors.Email && (
-                  <FieldError errors={fieldErrors.Email.map(message => ({ message }))} />
+                {fieldErrors.email && (
+                  <FieldError errors={fieldErrors.email.map(message => ({ message }))} />
                 )}
               </Field>
-              <Field data-invalid={!!fieldErrors.Password}>
+              <Field data-invalid={!!fieldErrors.password}>
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Heslo</FieldLabel>
                   <a
@@ -170,10 +174,10 @@ export function LoginForm({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
-                  aria-invalid={!!fieldErrors.Password}
+                  aria-invalid={!!fieldErrors.password}
                 />
-                {fieldErrors.Password && (
-                  <FieldError errors={fieldErrors.Password.map(message => ({ message }))} />
+                {fieldErrors.password && (
+                  <FieldError errors={fieldErrors.password.map(message => ({ message }))} />
                 )}
               </Field>
               {error && (

@@ -50,7 +50,7 @@ const signupSchema = z.object({
     .min(5, "Heslo musí být alespoň 5 znaků dlouhé."),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Hesla se neshodují.",
-  path: ["ConfirmPassword"],
+  path: ["confirmPassword"],
 });
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
@@ -149,7 +149,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
       <CardContent>
         <form onSubmit={onSubmit}>
           <FieldGroup>
-            <Field>
+            <Field data-invalid={!!fieldErrors.fullName}>
               <FieldLabel htmlFor="name">Vaše jméno</FieldLabel>
               <Input
                 id="name"
@@ -159,12 +159,13 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 disabled={loading}
+                aria-invalid={!!fieldErrors.fullName}
               />
-              {fieldErrors.FullName && (
-                <FieldError errors={fieldErrors.FullName.map(message => ({ message }))} />
+              {fieldErrors.fullName && (
+                <FieldError errors={fieldErrors.fullName.map(message => ({ message }))} />
               )}
             </Field>
-            <Field>
+            <Field data-invalid={!!fieldErrors.email}>
               <FieldLabel htmlFor="email">E-mailová adresa</FieldLabel>
               <Input
                 id="email"
@@ -174,12 +175,13 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
+                aria-invalid={!!fieldErrors.email}
               />
-              {fieldErrors.Email && (
-                <FieldError errors={fieldErrors.Email.map(message => ({ message }))} />
+              {fieldErrors.email && (
+                <FieldError errors={fieldErrors.email.map(message => ({ message }))} />
               )}
             </Field>
-            <Field>
+            <Field data-invalid={!!fieldErrors.password}>
               <FieldLabel htmlFor="password">Heslo</FieldLabel>
               <Input
                 id="password"
@@ -189,15 +191,16 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
+                aria-invalid={!!fieldErrors.password}
               />
               <FieldDescription>
                 Musí být minimálně 5 znaků dlouhé.
               </FieldDescription>
-              {fieldErrors.Password && (
-                <FieldError errors={fieldErrors.Password.map(message => ({ message }))} />
+              {fieldErrors.password && (
+                <FieldError errors={fieldErrors.password.map(message => ({ message }))} />
               )}
             </Field>
-            <Field>
+            <Field data-invalid={!!fieldErrors.confirmPassword}>
               <FieldLabel htmlFor="confirm-password">
                 Heslo znovu
               </FieldLabel>
@@ -208,9 +211,10 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={loading}
+                aria-invalid={!!fieldErrors.confirmPassword}
               />
-              {fieldErrors.ConfirmPassword && (
-                <FieldError errors={fieldErrors.ConfirmPassword.map(message => ({ message }))} />
+              {fieldErrors.confirmPassword && (
+                <FieldError errors={fieldErrors.confirmPassword.map(message => ({ message }))} />
               )}
             </Field>
             {error && (
