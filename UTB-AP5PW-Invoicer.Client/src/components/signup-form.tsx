@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button"
 import {
   Card, CardAction,
@@ -19,8 +20,12 @@ import {
 } from "@components/ui/alert.tsx";
 import { Input } from "@/components/ui/input"
 import { ThemeToggle } from "@components/theme-toggle";
-import { Link, useNavigate } from "react-router";
-import { useState } from "react";
+import {
+  Link,
+  useNavigate,
+  useLocation,
+  useSearchParams,
+} from "react-router";
 import { useAxiosPublic } from "@/hooks/use-axios";
 import { useAuth } from "@/hooks/use-auth";
 import { getValidationErrors } from "@/types/api.ts";
@@ -59,7 +64,23 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   const api = useAxiosPublic();
-  const { setAccessToken, setUser } = useAuth();
+  const { search } = useLocation();
+  const [searchParams] = useSearchParams();
+  const { setAccessToken, user, setUser } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      navigate(
+        searchParams.get("redirect") ?? "/dashboard",
+        { replace: true }
+      );
+    }
+  }, []);
+
+  // If user is already logged in, do not show the signup form
+  if (user) {
+    return null;
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -93,7 +114,10 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
       setAccessToken(accessToken);
       setUser(user);
 
-      navigate("/dashboard", { replace: true });
+      navigate(
+        searchParams.get("redirect") ?? "/dashboard",
+        { replace: true }
+      );
     } catch (err) {
       const validation = getValidationErrors(err);
       if (validation?.errors) {
@@ -202,7 +226,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
               <Field>
                 <Button type="submit" disabled={loading}>{loading ? "Registruji…" : "Registrovat se"}</Button>
                 <FieldDescription className="px-6 text-center">
-                  Už máte účet? <Link to="/login">Přihlásit se</Link>
+                  Už máte účet? <Link to={{ pathname: "/login", search }}>Přihlásit se</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

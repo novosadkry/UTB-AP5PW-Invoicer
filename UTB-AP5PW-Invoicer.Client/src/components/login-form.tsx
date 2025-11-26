@@ -1,6 +1,11 @@
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils"
-import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import {
+  Link,
+  useNavigate,
+  useLocation,
+  useSearchParams,
+} from "react-router";
 import { Button } from "@/components/ui/button"
 import {
   Card, CardAction,
@@ -46,7 +51,23 @@ export function LoginForm({
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   const api = useAxiosPublic();
-  const { setAccessToken, setUser } = useAuth();
+  const { search } = useLocation();
+  const [searchParams] = useSearchParams();
+  const { setAccessToken, user, setUser } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      navigate(
+        searchParams.get("redirect") ?? "/dashboard",
+        { replace: true }
+      );
+    }
+  }, []);
+
+  // If user is already logged in, do not show the login form
+  if (user) {
+    return null;
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -81,7 +102,10 @@ export function LoginForm({
       setAccessToken(accessToken);
       setUser(user);
 
-      navigate("/dashboard", { replace: true });
+      navigate(
+        searchParams.get("redirect") ?? "/dashboard",
+        { replace: true }
+      );
     } catch (err) {
       const validation = getValidationErrors(err);
       if (validation?.errors) {
@@ -166,7 +190,7 @@ export function LoginForm({
                   {loading ? "Přihlašuji…" : "Přihlásit se"}
                 </Button>
                 <FieldDescription className="text-center">
-                  Ještě nemáte účet? <Link to="/signup">Registrovat se</Link>
+                  Ještě nemáte účet? <Link to={{ pathname: "/signup", search }}>Registrovat se</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>
