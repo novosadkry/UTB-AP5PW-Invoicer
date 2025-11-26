@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using UTB_AP5PW_Invoicer.Application.DTOs;
 using UTB_AP5PW_Invoicer.Application.Services.Interfaces;
@@ -27,6 +28,7 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
         public async Task Login_ReturnsOk_WithAccessToken_WhenCredentialsValid()
         {
             var user = GetTestUser();
+            var mockLogger = new Mock<ILogger<AuthController>>();
             var mockUserService = new Mock<IUserService>();
             var mockAuthService = new Mock<IAuthService>();
 
@@ -36,7 +38,10 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
             mockAuthService.Setup(x => x.GetRefreshTokenAsync(user)).ReturnsAsync("valid_refresh");
 
             var httpContext = new DefaultHttpContext();
-            var controller = new AuthController(mockUserService.Object, mockAuthService.Object)
+            var controller = new AuthController(
+                mockLogger.Object,
+                mockUserService.Object,
+                mockAuthService.Object)
             {
                 ControllerContext = new ControllerContext { HttpContext = httpContext }
             };
@@ -63,12 +68,17 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
         public async Task Login_ReturnsUnauthorized_WhenUserNotFound()
         {
             var user = GetTestUser();
+            var mockLogger = new Mock<ILogger<AuthController>>();
             var mockUserService = new Mock<IUserService>();
             var mockAuthService = new Mock<IAuthService>();
 
             mockUserService.Setup(x => x.GetUserByEmailAsync(user.Email)).ReturnsAsync((UserDto?)null);
 
-            var controller = new AuthController(mockUserService.Object, mockAuthService.Object);
+            var controller = new AuthController(
+                mockLogger.Object,
+                mockUserService.Object,
+                mockAuthService.Object);
+
             var result = await controller.Login(new LoginModel
             {
                 Email = user.Email,
@@ -82,13 +92,18 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
         public async Task Login_ReturnsUnauthorized_WhenInvalidPassword()
         {
             var user = GetTestUser();
+            var mockLogger = new Mock<ILogger<AuthController>>();
             var mockUserService = new Mock<IUserService>();
             var mockAuthService = new Mock<IAuthService>();
 
             mockUserService.Setup(x => x.GetUserByEmailAsync(user.Email)).ReturnsAsync(user);
             mockAuthService.Setup(x => x.VerifyPasswordAsync(user, "password")).ReturnsAsync(false);
 
-            var controller = new AuthController(mockUserService.Object, mockAuthService.Object);
+            var controller = new AuthController(
+                mockLogger.Object,
+                mockUserService.Object,
+                mockAuthService.Object);
+
             var result = await controller.Login(new LoginModel
             {
                 Email = user.Email,
@@ -102,12 +117,17 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
         public async Task Register_ReturnsConflict_WhenUserAlreadyExists()
         {
             var user = GetTestUser();
+            var mockLogger = new Mock<ILogger<AuthController>>();
             var mockUserService = new Mock<IUserService>();
             var mockAuthService = new Mock<IAuthService>();
 
             mockUserService.Setup(x => x.GetUserByEmailAsync(user.Email)).ReturnsAsync(user);
 
-            var controller = new AuthController(mockUserService.Object, mockAuthService.Object);
+            var controller = new AuthController(
+                mockLogger.Object,
+                mockUserService.Object,
+                mockAuthService.Object);
+
             var result = await controller.Signup(new SignupModel
             {
                 Email = user.Email,
@@ -122,6 +142,7 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
         public async Task Register_ReturnsOk_WithAccessToken_WhenCreationSucceeds()
         {
             var user = GetTestUser();
+            var mockLogger = new Mock<ILogger<AuthController>>();
             var mockUserService = new Mock<IUserService>();
             var mockAuthService = new Mock<IAuthService>();
 
@@ -132,7 +153,10 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
             mockAuthService.Setup(x => x.GetRefreshTokenAsync(user)).ReturnsAsync("new_refresh");
 
             var httpContext = new DefaultHttpContext();
-            var controller = new AuthController(mockUserService.Object, mockAuthService.Object)
+            var controller = new AuthController(
+                mockLogger.Object,
+                mockUserService.Object,
+                mockAuthService.Object)
             {
                 ControllerContext = new ControllerContext { HttpContext = httpContext }
             };
@@ -159,6 +183,7 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
         [Fact]
         public async Task Refresh_ReturnsUnauthorized_WhenTokenInvalid()
         {
+            var mockLogger = new Mock<ILogger<AuthController>>();
             var mockUserService = new Mock<IUserService>();
             var mockAuthService = new Mock<IAuthService>();
             var mockRequestCookies = new Mock<IRequestCookieCollection>();
@@ -166,7 +191,10 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
             mockAuthService.Setup(x => x.ValidateRefreshTokenAsync("invalid_token")).ReturnsAsync((UserDto?)null);
             mockRequestCookies.Setup(x => x["refreshToken"]).Returns("invalid_token");
 
-            var controller = new AuthController(mockUserService.Object, mockAuthService.Object)
+            var controller = new AuthController(
+                mockLogger.Object,
+                mockUserService.Object,
+                mockAuthService.Object)
             {
                 ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() },
                 Request = { Cookies = mockRequestCookies.Object }
@@ -181,6 +209,7 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
         public async Task Refresh_ReturnsOk_WithNewTokens_AndRevokesOldToken_WhenValid()
         {
             var user = GetTestUser();
+            var mockLogger = new Mock<ILogger<AuthController>>();
             var mockUserService = new Mock<IUserService>();
             var mockAuthService = new Mock<IAuthService>();
             var mockRequestCookies = new Mock<IRequestCookieCollection>();
@@ -192,7 +221,10 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
             mockRequestCookies.Setup(x => x["refreshToken"]).Returns("valid_refresh");
 
             var httpContext = new DefaultHttpContext();
-            var controller = new AuthController(mockUserService.Object, mockAuthService.Object)
+            var controller = new AuthController(
+                mockLogger.Object,
+                mockUserService.Object,
+                mockAuthService.Object)
             {
                 ControllerContext = new ControllerContext { HttpContext = httpContext },
                 Request = { Cookies = mockRequestCookies.Object }
