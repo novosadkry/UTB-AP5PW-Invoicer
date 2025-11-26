@@ -182,30 +182,29 @@ export default function Page() {
       <AppSidebar variant="inset" />
       <SidebarInset>
         <SiteHeader>
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/dashboard">Přehled</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Faktury</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
+          <div className="flex w-full items-center justify-between gap-4">
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/dashboard">Přehled</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Faktury</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+            <Button size="sm" onClick={openCreateDrawer}>
+              <Plus className="w-4 h-4 mr-2" />
+              Nová faktura
+            </Button>
+          </div>
         </SiteHeader>
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <div className="flex justify-between items-center px-4 lg:px-6">
-                <h1 className="text-2xl font-bold">Faktury</h1>
-                <Button onClick={openCreateDrawer}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nová faktura
-                </Button>
-              </div>
               {loading ? (
                 <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
                   {Array.from({ length: 9 }).map((_, i) => (
@@ -244,15 +243,8 @@ export default function Page() {
                         </div>
                         <div className="flex gap-2">
                           <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openEditDrawer(invoice)}
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </Button>
-                          <Button
                             asChild
-                            variant="secondary"
+                            variant="outline"
                             size="sm"
                             className="gap-1"
                           >
@@ -262,8 +254,15 @@ export default function Page() {
                             </Link>
                           </Button>
                           <Button
+                            variant="outline"
+                            size="icon-sm"
+                            onClick={() => openEditDrawer(invoice)}
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button
                             variant="destructive"
-                            size="sm"
+                            size="icon-sm"
                             onClick={() => setDeletingInvoiceId(invoice.id)}
                           >
                             <Trash2 className="w-4 h-4" />
