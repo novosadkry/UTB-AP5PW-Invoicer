@@ -22,6 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useAxiosPrivate } from "@/hooks/use-axios"
 import { SummaryService } from "@/services/summary.service.ts";
 import type { DashboardSummary } from "@/types/summary.ts";
+import { toast } from "sonner";
 
 export default function Page() {
   const api = useAxiosPrivate()
@@ -29,17 +30,15 @@ export default function Page() {
 
   const [summary, setSummary] = useState<DashboardSummary | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
 
   async function loadSummary() {
     setLoading(true)
-    setError(null)
     try {
       const data = await summaryService.getDashboardSummary()
       setSummary(data)
     } catch (e) {
       console.error("Failed to load dashboard summary", e)
-      setError("Nepodařilo se načíst data pro přehled.")
+      toast.error("Nepodařilo se načíst data pro přehled.")
     } finally {
       setLoading(false)
     }
@@ -146,14 +145,6 @@ export default function Page() {
               </CardContent>
             </Card>
           </div>
-
-          {error && (
-            <Card>
-              <CardContent className="py-4 text-sm text-red-600 dark:text-red-400">
-                {error}
-              </CardContent>
-            </Card>
-          )}
 
           <div className="grid gap-4 lg:grid-cols-3">
             <Card className="lg:col-span-2">
