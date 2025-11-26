@@ -58,7 +58,7 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult> UpdateCustomer(int id, [FromBody] CustomerDto customer)
         {
-            if (id != customer.Id) return BadRequest();
+            customer.Id = id;
             await _customerService.UpdateCustomerAsync(customer);
             return Ok();
         }

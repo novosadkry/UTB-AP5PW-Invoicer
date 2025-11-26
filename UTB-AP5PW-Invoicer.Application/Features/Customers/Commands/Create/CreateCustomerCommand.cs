@@ -10,5 +10,5 @@ namespace UTB_AP5PW_Invoicer.Application.Features.Customers.Commands.Create
         string Address,
         string ContactEmail,
         string ContactPhone
-    ) : IRequest;
+    ) : IRequest<int>;
 }

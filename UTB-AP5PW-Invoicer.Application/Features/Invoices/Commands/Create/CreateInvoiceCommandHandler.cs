@@ -12,7 +12,7 @@ namespace UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.Create
         {
             var invoice = mapper.Map<Invoice>(request);
 
-            dbContext.Invoices.Add(invoice);
+            await dbContext.Invoices.AddAsync(invoice, cancellationToken);
             await dbContext.SaveChangesAsync(cancellationToken);
 
             return invoice.Id;

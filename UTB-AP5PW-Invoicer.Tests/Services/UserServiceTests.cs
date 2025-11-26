@@ -17,8 +17,9 @@ namespace UTB_AP5PW_Invoicer.Tests.Services
             var mockMapper = new Mock<IMapper>();
             var mockMediator = new Mock<IMediator>();
             var mockValidator = new Mock<IValidator<UserDto>>();
-            mockMediator.Setup(m =>
-                m.Send(It.IsAny<GetUserQuery>(), It.IsAny<CancellationToken>()))
+
+            mockMediator
+                .Setup(m => m.Send(It.IsAny<GetUserQuery>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new UserDto { Id = 1 });
 
             var service = new UserService(mockMediator.Object, mockMapper.Object, mockValidator.Object);
@@ -36,8 +37,9 @@ namespace UTB_AP5PW_Invoicer.Tests.Services
             var mockMapper = new Mock<IMapper>();
             var mockMediator = new Mock<IMediator>();
             var mockValidator = new Mock<IValidator<UserDto>>();
-            mockMediator.Setup(m =>
-                m.Send(It.IsAny<CreateUserCommand>(), It.IsAny<CancellationToken>()))
+
+            mockMediator
+                .Setup(m => m.Send(It.IsAny<CreateUserCommand>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(1);
 
             var service = new UserService(mockMediator.Object, mockMapper.Object, mockValidator.Object);
