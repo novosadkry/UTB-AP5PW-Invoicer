@@ -50,5 +50,10 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
             await _invoiceValidator.ValidateAndThrowAsync(invoice);
             await _mediator.Send(_mapper.Map<UpdateInvoiceCommand>(invoice));
         }
+
+        public async Task<InvoiceDashboardSummaryDto> GetDashboardSummaryAsync()
+        {
+            return await _mediator.Send(new GetInvoiceDashboardSummaryQuery());
+        }
     }
 }

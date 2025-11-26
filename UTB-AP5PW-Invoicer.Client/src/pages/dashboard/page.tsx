@@ -21,40 +21,39 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAxiosPrivate } from "@/hooks/use-axios"
 import { InvoiceService } from "@/services/invoice.service"
-import type { Invoice } from "@/types/invoice"
+import type { InvoiceDashboardSummary } from "@/types/invoice"
 
 export default function Page() {
   const api = useAxiosPrivate()
   const invoiceService = useMemo(() => new InvoiceService(api), [api])
 
-  const [invoices, setInvoices] = useState<Invoice[] | null>(null)
+  const [summary, setSummary] = useState<InvoiceDashboardSummary | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
 
-  async function loadInvoices() {
+  async function loadSummary() {
     setLoading(true)
     setError(null)
     try {
-      const data = await invoiceService.getAll()
-      setInvoices(data)
+      const data = await invoiceService.getDashboardSummary()
+      setSummary(data)
     } catch (e) {
-      console.error("Failed to load invoices for dashboard", e)
-      setError("Nepodařilo se načíst faktury pro přehled.")
+      console.error("Failed to load dashboard summary", e)
+      setError("Nepodařilo se načíst data pro přehled.")
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    void loadInvoices()
+    void loadSummary()
   }, [])
 
-  // TODO: Replace with direct calls to API once backend supports summary endpoints
-  const totalInvoices = invoices?.length ?? 0
-  const unpaidInvoices = invoices?.filter((i) => i.status.toLowerCase() !== "paid").length ?? 0
-  const totalAmount = invoices?.reduce((sum, i) => sum + i.totalAmount, 0) ?? 0
-  const overdueInvoices = invoices?.filter((i) => i.status.toLowerCase() === "overdue").length ?? 0
-  const latestInvoices = invoices?.slice(0, 5) ?? []
+  const totalInvoices = summary?.totalInvoices ?? 0
+  const unpaidInvoices = summary?.unpaidInvoices ?? 0
+  const totalAmount = summary?.totalAmount ?? 0
+  const overdueInvoices = summary?.overdueInvoices ?? 0
+  const latestInvoices = summary?.latestInvoices ?? []
 
   return (
     <SidebarProvider
@@ -95,7 +94,6 @@ export default function Page() {
               </CardContent>
             </Card>
 
-            {/* Neuhrazené faktury */}
             <Card>
               <CardHeader>
                 <CardTitle>Neuhrazené faktury</CardTitle>
@@ -112,7 +110,6 @@ export default function Page() {
               </CardContent>
             </Card>
 
-            {/* Celková částka */}
             <Card>
               <CardHeader>
                 <CardTitle>Celková částka</CardTitle>
@@ -133,7 +130,6 @@ export default function Page() {
               </CardContent>
             </Card>
 
-            {/* Po splatnosti */}
             <Card>
               <CardHeader>
                 <CardTitle>Po splatnosti</CardTitle>
@@ -195,7 +191,7 @@ export default function Page() {
                           <tr key={invoice.id} className="border-b last:border-0">
                             <td className="py-2 pr-4 font-medium">{invoice.invoiceNumber}</td>
                             <td className="py-2 pr-4">
-                              {invoice.customerId ?? "-"}
+                              {invoice.customerName ?? "-"}
                             </td>
                             <td className="py-2 pr-4">
                               {new Date(invoice.issueDate).toLocaleDateString("cs-CZ")}

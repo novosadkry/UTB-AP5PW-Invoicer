@@ -70,5 +70,15 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
             await _invoiceService.DeleteInvoiceAsync(new InvoiceDto { Id = id });
             return Ok();
         }
+
+        [HttpGet("dashboard-summary")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<InvoiceDashboardSummaryDto>> GetDashboardSummary()
+        {
+            var summary = await _invoiceService.GetDashboardSummaryAsync();
+            return Ok(summary);
+        }
     }
 }
