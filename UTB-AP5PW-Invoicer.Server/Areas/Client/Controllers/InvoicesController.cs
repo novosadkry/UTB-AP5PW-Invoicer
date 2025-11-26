@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using UTB_AP5PW_Invoicer.Application.DTOs;
 using UTB_AP5PW_Invoicer.Application.Services.Interfaces;
+using UTB_AP5PW_Invoicer.Server.Extensions;
 
 namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
 {
@@ -45,6 +46,7 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult> CreateInvoice([FromBody] InvoiceDto invoice)
         {
+            invoice.UserId = HttpContext.User.GetUserId();
             await _invoiceService.CreateInvoiceAsync(invoice);
             return CreatedAtAction(nameof(GetInvoice), new { id = invoice.Id }, invoice);
         }
@@ -69,16 +71,6 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
         {
             await _invoiceService.DeleteInvoiceAsync(new InvoiceDto { Id = id });
             return Ok();
-        }
-
-        [HttpGet("dashboard-summary")]
-        [Authorize]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<InvoiceDashboardSummaryDto>> GetDashboardSummary()
-        {
-            var summary = await _invoiceService.GetDashboardSummaryAsync();
-            return Ok(summary);
         }
     }
 }

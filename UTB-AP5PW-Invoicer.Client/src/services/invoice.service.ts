@@ -3,7 +3,6 @@ import type {
   Invoice,
   CreateInvoiceDto,
   UpdateInvoiceDto,
-  InvoiceDashboardSummary,
 } from '@/types/invoice';
 
 export class InvoiceService {
@@ -34,10 +33,5 @@ export class InvoiceService {
 
   async delete(id: number): Promise<void> {
     await this.api.delete(`/invoices/${id}`);
-  }
-
-  async getDashboardSummary(): Promise<InvoiceDashboardSummary> {
-    const response = await this.api.get<InvoiceDashboardSummary>('/invoices/dashboard-summary');
-    return response.data;
   }
 }

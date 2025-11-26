@@ -3,16 +3,17 @@ using Microsoft.EntityFrameworkCore;
 using UTB_AP5PW_Invoicer.Application.DTOs;
 using UTB_AP5PW_Invoicer.Infrastructure.Data;
 
-namespace UTB_AP5PW_Invoicer.Application.Features.Invoices.Queries.Get
+namespace UTB_AP5PW_Invoicer.Application.Features.Summary.Queries
 {
-    public class GetInvoiceDashboardSummaryQueryHandler(AppDbContext dbContext)
-        : IRequestHandler<GetInvoiceDashboardSummaryQuery, InvoiceDashboardSummaryDto>
+    public class GetDashboardSummaryQueryHandler(AppDbContext dbContext)
+        : IRequestHandler<GetDashboardSummaryQuery, DashboardSummaryDto>
     {
-        public async Task<InvoiceDashboardSummaryDto> Handle(GetInvoiceDashboardSummaryQuery request, CancellationToken cancellationToken)
+        public async Task<DashboardSummaryDto> Handle(GetDashboardSummaryQuery request, CancellationToken cancellationToken)
         {
             var invoicesQuery = dbContext.Invoices
-                .AsNoTracking()
-                .Include(i => i.Customer);
+                .Where(i => i.UserId == request.UserId)
+                .Include(i => i.Customer)
+                .AsNoTracking();
 
             var invoices = await invoicesQuery.ToListAsync(cancellationToken);
 
@@ -36,7 +37,7 @@ namespace UTB_AP5PW_Invoicer.Application.Features.Invoices.Queries.Get
                 })
                 .ToList();
 
-            return new InvoiceDashboardSummaryDto
+            return new DashboardSummaryDto
             {
                 TotalInvoices = totalInvoices,
                 UnpaidInvoices = unpaidInvoices,

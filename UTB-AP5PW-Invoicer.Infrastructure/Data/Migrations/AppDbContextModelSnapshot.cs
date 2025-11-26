@@ -105,9 +105,14 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Invoices");
                 });
@@ -275,7 +280,15 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                         .WithMany("Invoices")
                         .HasForeignKey("CustomerId");
 
+                    b.HasOne("UTB_AP5PW_Invoicer.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Customer");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("UTB_AP5PW_Invoicer.Domain.Entities.InvoiceItem", b =>

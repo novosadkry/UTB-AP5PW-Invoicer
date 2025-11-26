@@ -86,6 +86,7 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
                     CustomerId = table.Column<int>(type: "integer", nullable: true),
                     InvoiceNumber = table.Column<string>(type: "text", nullable: false),
                     IssueDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -104,6 +105,12 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                         column: x => x.CustomerId,
                         principalTable: "Customers",
                         principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Invoices_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -171,6 +178,11 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                 name: "IX_Invoices_CustomerId",
                 table: "Invoices",
                 column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Invoices_UserId",
+                table: "Invoices",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Payments_InvoiceId",

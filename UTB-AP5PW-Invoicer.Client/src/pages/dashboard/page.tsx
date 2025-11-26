@@ -20,14 +20,14 @@ import {
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAxiosPrivate } from "@/hooks/use-axios"
-import { InvoiceService } from "@/services/invoice.service"
-import type { InvoiceDashboardSummary } from "@/types/invoice"
+import { SummaryService } from "@/services/summary.service.ts";
+import type { DashboardSummary } from "@/types/summary.ts";
 
 export default function Page() {
   const api = useAxiosPrivate()
-  const invoiceService = useMemo(() => new InvoiceService(api), [api])
+  const summaryService = useMemo(() => new SummaryService(api), [api])
 
-  const [summary, setSummary] = useState<InvoiceDashboardSummary | null>(null)
+  const [summary, setSummary] = useState<DashboardSummary | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -35,7 +35,7 @@ export default function Page() {
     setLoading(true)
     setError(null)
     try {
-      const data = await invoiceService.getDashboardSummary()
+      const data = await summaryService.getDashboardSummary()
       setSummary(data)
     } catch (e) {
       console.error("Failed to load dashboard summary", e)

@@ -5,6 +5,9 @@ namespace UTB_AP5PW_Invoicer.Domain.Entities
 {
     public class Invoice : Entity<int>
     {
+        [ForeignKey(nameof(User))]
+        public int UserId { get; set; }
+
         [ForeignKey(nameof(Customer))]
         public int? CustomerId { get; set; }
 
@@ -26,6 +29,7 @@ namespace UTB_AP5PW_Invoicer.Domain.Entities
         [Required]
         public decimal TotalVat { get; set; }
 
+        public User User { get; set; }
         public Customer? Customer { get; set; }
         public ICollection<Payment> Payments { get; set; }
         public ICollection<InvoiceItem> InvoiceItems { get; set; }

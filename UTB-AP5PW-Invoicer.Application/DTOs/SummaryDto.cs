@@ -1,6 +1,6 @@
 ﻿namespace UTB_AP5PW_Invoicer.Application.DTOs
 {
-    public record InvoiceDashboardSummaryDto
+    public record DashboardSummaryDto
     {
         public decimal TotalAmount { get; set; }
         public int OverdueInvoices { get; set; }
