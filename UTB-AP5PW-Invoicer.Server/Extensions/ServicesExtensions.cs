@@ -55,6 +55,8 @@ namespace UTB_AP5PW_Invoicer.Server.Extensions
                 {
                     options.JsonSerializerOptions.Converters.Add(
                         new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, false));
+                    options.JsonSerializerOptions.Converters.Add(
+                        new UtcDateTimeOffsetConverter());
                 });
 
             return services;

@@ -14,9 +14,6 @@ namespace UTB_AP5PW_Invoicer.Application.Features.Reports.Queries
             var periodStart = request.PeriodStart ?? DateTimeOffset.UtcNow.AddYears(-1);
             var periodEnd = request.PeriodEnd ?? DateTimeOffset.UtcNow;
 
-            periodStart = periodStart.ToUniversalTime();
-            periodEnd = periodEnd.ToUniversalTime();
-
             var invoicesQuery = dbContext.Invoices
                 .Where(i => i.UserId == request.UserId)
                 .Where(i => i.IssueDate >= periodStart && i.IssueDate <= periodEnd)
