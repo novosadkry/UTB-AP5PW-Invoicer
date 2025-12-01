@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import type { Customer, CreateCustomerDto, UpdateCustomerDto } from "@/types/customer";
 import { z } from "zod";
 import { getZodFieldErrors } from "@/types/zod";
+import { getValidationErrors } from "@/types/api.ts";
 
 interface CustomerFormProps {
   customer?: Customer;
@@ -63,8 +64,13 @@ export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }
       };
       await onSubmit(customerData as CreateCustomerDto | UpdateCustomerDto);
     } catch (err) {
-      console.error(err);
-      setFormError("Nastala chyba při ukládání zákazníka");
+      const validation = getValidationErrors(err);
+      if (validation?.errors) {
+        setFieldErrors(validation.errors);
+        setFormError("Formulář obsahuje chyby. Zkontrolujte zvýrazněná pole.");
+      } else {
+        setFormError("Nastala chyba při ukládání zákazníka");
+      }
     }
   };
 

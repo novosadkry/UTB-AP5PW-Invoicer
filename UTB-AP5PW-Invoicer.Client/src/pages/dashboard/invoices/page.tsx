@@ -92,46 +92,69 @@ export default function Page() {
 
   async function handleCreateInvoice(invoice: CreateInvoiceDto) {
     setFormLoading(true);
-    try {
+
+    const promise = (async () => {
       await invoiceService.create(invoice);
-      toast.success("Faktura byla úspěšně vytvořena", { position: "top-center" });
       setIsDrawerOpen(false);
       setInvoices(await loadInvoices());
-    } catch (error) {
-      console.error("Failed to create invoice:", error);
-      toast.error("Nepodařilo se vytvořit fakturu", { position: "top-center" });
-    } finally {
-      setFormLoading(false);
-    }
+    })();
+
+    toast.promise(promise, {
+      position: "top-center",
+      loading: "Vytvářím fakturu...",
+      success: () => {
+        setFormLoading(false);
+        return "Faktura byla úspěšně vytvořena";
+      },
+      error: () => {
+        setFormLoading(false);
+        return "Nepodařilo se vytvořit fakturu";
+      },
+    });
+
+    return promise;
   }
 
   async function handleUpdateInvoice(invoice: UpdateInvoiceDto) {
     setFormLoading(true);
-    try {
+
+    const promise = (async () => {
       await invoiceService.update(invoice);
-      toast.success("Faktura byla úspěšně aktualizována", { position: "top-center" });
       setIsDrawerOpen(false);
       setEditingInvoice(null);
       setInvoices(await loadInvoices());
-    } catch (error) {
-      console.error("Failed to update invoice:", error);
-      toast.error("Nepodařilo se aktualizovat fakturu", { position: "top-center" });
-    } finally {
-      setFormLoading(false);
-    }
+    })();
+
+    toast.promise(promise, {
+      position: "top-center",
+      loading: "Aktualizuji fakturu...",
+      success: () => {
+        setFormLoading(false);
+        return "Faktura byla úspěšně aktualizována";
+      },
+      error: () => {
+        setFormLoading(false);
+        return "Nepodařilo se aktualizovat fakturu";
+      },
+    });
+
+    return promise;
   }
 
   async function handleDelete(id: number) {
-    try {
-      await invoiceService.delete(id);
-      toast.success("Faktura byla úspěšně smazána", { position: "top-center" });
-      setInvoices(await loadInvoices());
-    } catch (error) {
-      console.error("Failed to delete invoice:", error);
-      toast.error("Nepodařilo se smazat fakturu", { position: "top-center" });
-    } finally {
-      setDeletingInvoiceId(null);
-    }
+    toast.promise(
+      async () => {
+        await invoiceService.delete(id);
+        setInvoices(await loadInvoices());
+      },
+      {
+        position: "top-center",
+        loading: "Mažu fakturu...",
+        success: "Faktura byla úspěšně smazána",
+        error: "Nepodařilo se smazat fakturu",
+      }
+    );
+    setDeletingInvoiceId(null);
   }
 
   function openCreateDrawer() {

@@ -86,32 +86,44 @@ export default function Page() {
   async function handleUpdateCustomer(updated: UpdateCustomerDto) {
     if (!customer) return;
     setFormLoading(true);
-    try {
-      await customerService.update(updated);
-      toast.success("Zákazník byl úspěšně aktualizován", { position: "top-center" });
-      setIsDrawerOpen(false);
-      setCustomer(await loadCustomer());
-    } catch (error) {
-      console.error("Failed to update customer:", error);
-      toast.error("Nepodařilo se aktualizovat zákazníka", { position: "top-center" });
-    } finally {
-      setFormLoading(false);
-    }
+    toast.promise(
+      (async () => {
+        await customerService.update(updated);
+        setIsDrawerOpen(false);
+        setCustomer(await loadCustomer());
+      })(),
+      {
+        position: "top-center",
+        loading: "Aktualizuji zákazníka...",
+        success: () => {
+          setFormLoading(false);
+          return "Zákazník byl úspěšně aktualizován";
+        },
+        error: () => {
+          setFormLoading(false);
+          return "Nepodařilo se aktualizovat zákazníka";
+        },
+      }
+    );
   }
 
   async function handleDelete() {
     if (!customer) return;
 
-    try {
-      await customerService.delete(customer.id);
-      toast.success("Zákazník byl úspěšně smazán", { position: "top-center" });
-      navigate("/dashboard/customers");
-    } catch (error) {
-      console.error("Failed to delete customer:", error);
-      toast.error("Nepodařilo se smazat zákazníka", { position: "top-center" });
-    } finally {
-      setIsDeleteDialogOpen(false);
-    }
+    toast.promise(
+      async () => {
+        await customerService.delete(customer.id);
+        navigate("/dashboard/customers");
+      },
+      {
+        position: "top-center",
+        loading: "Mažu zákazníka...",
+        success: "Zákazník byl úspěšně smazán",
+        error: "Nepodařilo se smazat zákazníka",
+      }
+    );
+
+    setIsDeleteDialogOpen(false);
   }
 
   const renderContent = () => {

@@ -74,46 +74,69 @@ export default function Page() {
 
   async function handleCreateCustomer(customer: CreateCustomerDto) {
     setFormLoading(true);
-    try {
+
+    const promise = (async () => {
       await customerService.create(customer);
-      toast.success("Zákazník byl úspěšně vytvořen", { position: "top-center" });
       setIsDrawerOpen(false);
       setCustomers(await loadCustomers());
-    } catch (error) {
-      console.error("Failed to create customer:", error);
-      toast.error("Nepodařilo se vytvořit zákazníka", { position: "top-center" });
-    } finally {
-      setFormLoading(false);
-    }
+    })();
+
+    toast.promise(promise, {
+      position: "top-center",
+      loading: "Vytvářím zákazníka...",
+      success: () => {
+        setFormLoading(false);
+        return "Zákazník byl úspěšně vytvořen";
+      },
+      error: () => {
+        setFormLoading(false);
+        return "Nepodařilo se vytvořit zákazníka";
+      },
+    });
+
+    return promise;
   }
 
   async function handleUpdateCustomer(customer: UpdateCustomerDto) {
     setFormLoading(true);
-    try {
+
+    const promise = (async () => {
       await customerService.update(customer);
-      toast.success("Zákazník byl úspěšně aktualizován", { position: "top-center" });
       setIsDrawerOpen(false);
       setEditingCustomer(null);
       setCustomers(await loadCustomers());
-    } catch (error) {
-      console.error("Failed to update customer:", error);
-      toast.error("Nepodařilo se aktualizovat zákazníka", { position: "top-center" });
-    } finally {
-      setFormLoading(false);
-    }
+    })();
+
+    toast.promise(promise, {
+      position: "top-center",
+      loading: "Aktualizuji zákazníka...",
+      success: () => {
+        setFormLoading(false);
+        return "Zákazník byl úspěšně aktualizován";
+      },
+      error: () => {
+        setFormLoading(false);
+        return "Nepodařilo se aktualizovat zákazníka";
+      },
+    });
+
+    return promise;
   }
 
   async function handleDelete(id: number) {
-    try {
-      await customerService.delete(id);
-      toast.success("Zákazník byl úspěšně smazán", { position: "top-center" });
-      setCustomers(await loadCustomers());
-    } catch (error) {
-      console.error("Failed to delete customer:", error);
-      toast.error("Nepodařilo se smazat zákazníka", { position: "top-center" });
-    } finally {
-      setDeletingCustomerId(null);
-    }
+    toast.promise(
+      async () => {
+        await customerService.delete(id);
+        setCustomers(await loadCustomers());
+      },
+      {
+        position: "top-center",
+        loading: "Mažu zákazníka...",
+        success: "Zákazník byl úspěšně smazán",
+        error: "Nepodařilo se smazat zákazníka",
+      }
+    );
+    setDeletingCustomerId(null);
   }
 
   function openCreateDrawer() {

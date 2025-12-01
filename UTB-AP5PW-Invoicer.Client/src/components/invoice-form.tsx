@@ -8,6 +8,7 @@ import type { CreateInvoiceDto, UpdateInvoiceDto, Invoice } from "@/types/invoic
 import type { Customer } from "@/types/customer";
 import { z } from "zod";
 import { getZodFieldErrors } from "@/types/zod";
+import { getValidationErrors } from "@/types/api.ts";
 
 interface InvoiceFormProps {
   invoice?: Invoice;
@@ -78,8 +79,13 @@ export function InvoiceForm({
       };
       await onSubmit(invoiceData as CreateInvoiceDto | UpdateInvoiceDto);
     } catch (err) {
-      console.error(err);
-      setFormError("Nastala chyba při ukládání faktury");
+      const validation = getValidationErrors(err);
+      if (validation?.errors) {
+        setFieldErrors(validation.errors);
+        setFormError("Formulář obsahuje chyby. Zkontrolujte zvýrazněná pole.");
+      } else {
+        setFormError("Nastala chyba při ukládání faktury");
+      }
     }
   };
 

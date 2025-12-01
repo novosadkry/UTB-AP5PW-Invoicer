@@ -67,23 +67,31 @@ export default function Page() {
 
   async function handleExportCsv() {
     setExporting(true);
-    try {
-      const blob = await reportService.exportCsv(periodStart, periodEnd);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `report-${periodStart}-${periodEnd}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      toast.success("Report byl úspěšně exportován", { position: "top-center" });
-    } catch (error) {
-      console.error("Failed to export report:", error);
-      toast.error("Nepodařilo se exportovat report");
-    } finally {
-      setExporting(false);
-    }
+    toast.promise(
+      (async () => {
+        const blob = await reportService.exportCsv(periodStart, periodEnd);
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `report-${periodStart}-${periodEnd}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      })(),
+      {
+        position: "top-center",
+        loading: "Exportuji report do CSV...",
+        success: () => {
+          setExporting(false);
+          return "Report byl úspěšně exportován";
+        },
+        error: () => {
+          setExporting(false);
+          return "Nepodařilo se exportovat report";
+        },
+      }
+    );
   }
 
   function handleFilterSubmit(e: React.FormEvent) {

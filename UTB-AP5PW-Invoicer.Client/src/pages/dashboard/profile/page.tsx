@@ -72,25 +72,34 @@ export default function Page() {
   async function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    try {
-      const updateData: UpdateProfileDto = {
-        email,
-        fullName,
-        companyName: companyName || undefined,
-        ico: ico || undefined,
-        dic: dic || undefined,
-        companyAddress: companyAddress || undefined,
-        companyPhone: companyPhone || undefined,
-      };
-      await userService.updateProfile(updateData);
-      toast.success("Profil byl úspěšně aktualizován", { position: "top-center" });
-      await loadProfile();
-    } catch (error) {
-      console.error("Failed to update profile:", error);
-      toast.error("Nepodařilo se aktualizovat profil", { position: "top-center" });
-    } finally {
-      setSaving(false);
-    }
+    const updateData: UpdateProfileDto = {
+      email,
+      fullName,
+      companyName: companyName || undefined,
+      ico: ico || undefined,
+      dic: dic || undefined,
+      companyAddress: companyAddress || undefined,
+      companyPhone: companyPhone || undefined,
+    };
+
+    toast.promise(
+      (async () => {
+        await userService.updateProfile(updateData);
+        await loadProfile();
+      })(),
+      {
+        position: "top-center",
+        loading: "Aktualizuji profil...",
+        success: () => {
+          setSaving(false);
+          return "Profil byl úspěšně aktualizován";
+        },
+        error: () => {
+          setSaving(false);
+          return "Nepodařilo se aktualizovat profil";
+        },
+      }
+    );
   }
 
   async function handleChangePassword(e: React.FormEvent) {
@@ -104,22 +113,31 @@ export default function Page() {
       return;
     }
     setChangingPassword(true);
-    try {
-      const data: ChangePasswordDto = {
-        currentPassword,
-        newPassword,
-      };
-      await userService.changePassword(data);
-      toast.success("Heslo bylo úspěšně změněno", { position: "top-center" });
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-    } catch (error) {
-      console.error("Failed to change password:", error);
-      toast.error("Nepodařilo se změnit heslo. Zkontrolujte aktuální heslo.", { position: "top-center" });
-    } finally {
-      setChangingPassword(false);
-    }
+    const data: ChangePasswordDto = {
+      currentPassword,
+      newPassword,
+    };
+
+    toast.promise(
+      (async () => {
+        await userService.changePassword(data);
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      })(),
+      {
+        position: "top-center",
+        loading: "Měním heslo...",
+        success: () => {
+          setChangingPassword(false);
+          return "Heslo bylo úspěšně změněno";
+        },
+        error: () => {
+          setChangingPassword(false);
+          return "Nepodařilo se změnit heslo. Zkontrolujte aktuální heslo.";
+        },
+      }
+    );
   }
 
   const renderContent = () => {

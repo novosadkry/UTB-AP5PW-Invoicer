@@ -146,74 +146,88 @@ export default function Page() {
   async function handleUpdateInvoice(updated: UpdateInvoiceDto) {
     if (!invoice) return;
     setFormLoading(true);
-    try {
-      await invoiceService.update(updated);
-      toast.success("Faktura byla úspěšně aktualizována", { position: "top-center" });
-      setIsDrawerOpen(false);
-      setInvoice(await loadInvoice());
-      if (invoice && invoice.customerId) {
-        try {
-          setCustomer(await customerService.getById(invoice.customerId));
-        } catch (error) {
-          console.error("Failed to reload customer for invoice:", error);
+    toast.promise(
+      (async () => {
+        await invoiceService.update(updated);
+        setIsDrawerOpen(false);
+        setInvoice(await loadInvoice());
+        if (invoice && invoice.customerId) {
+          try {
+            setCustomer(await customerService.getById(invoice.customerId));
+          } catch (error) {
+            console.error("Failed to reload customer for invoice:", error);
+            setCustomer(null);
+          }
+        } else {
           setCustomer(null);
         }
-      } else {
-        setCustomer(null);
+      })(),
+      {
+        position: "top-center",
+        loading: "Aktualizuji fakturu...",
+        success: () => {
+          setFormLoading(false);
+          return "Faktura byla aktualizována";
+        },
+        error: () => {
+          setFormLoading(false);
+          return "Nepodařilo se aktualizovat fakturu";
+        },
       }
-    } catch (error) {
-      console.error("Failed to update invoice:", error);
-      toast.error("Nepodařilo se aktualizovat fakturu", { position: "top-center" });
-    } finally {
-      setFormLoading(false);
-    }
+    );
   }
 
   async function handleDelete() {
     if (!invoice) return;
 
-    try {
+    toast.promise(async () => {
       await invoiceService.delete(invoice.id);
-      toast.success("Faktura byla úspěšně smazána", { position: "top-center" });
       navigate("/dashboard/invoices");
-    } catch (error) {
-      console.error("Failed to delete invoice:", error);
-      toast.error("Nepodařilo se smazat fakturu", { position: "top-center" });
-    } finally {
-      setIsDeleteDialogOpen(false);
-    }
+    }, {
+      position: "top-center",
+      loading: "Mažu fakturu...",
+      success: "Faktura byla úspěšně smazána",
+      error: "Nepodařilo se smazat fakturu",
+    });
+
+    setIsDeleteDialogOpen(false);
   }
 
   async function handleDownloadPdf() {
     if (!invoice) return;
-    try {
+
+    toast.promise(async () => {
       const blob = await invoiceService.downloadPdf(invoice.id);
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = `faktura-${invoice.invoiceNumber}.pdf`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      toast.success("PDF bylo úspěšně staženo", { position: "top-center" });
-    } catch (error) {
-      console.error("Failed to download PDF:", error);
-      toast.error("Nepodařilo se stáhnout PDF", { position: "top-center" });
-    }
+    }, {
+      position: "top-center",
+      loading: "Stahuji PDF faktury...",
+      success: "PDF bylo úspěšně staženo",
+      error: "Nepodařilo se stáhnout PDF",
+    });
   }
 
   async function handleShare() {
     if (!invoice) return;
-    try {
+
+    toast.promise(async () => {
       const result = await invoiceService.generateShareLink(invoice.id);
       const baseUrl = window.location.origin;
       setShareLink(`${baseUrl}/shared/invoice/${result.shareToken}`);
       setIsShareDialogOpen(true);
-    } catch (error) {
-      console.error("Failed to generate share link:", error);
-      toast.error("Nepodařilo se vygenerovat odkaz pro sdílení", { position: "top-center" });
-    }
+    }, {
+      position: "top-center",
+      loading: "Generuji odkaz pro sdílení...",
+      success: "Odkaz byl vygenerován",
+      error: "Nepodařilo se vygenerovat odkaz pro sdílení",
+    });
   }
 
   function copyShareLink() {
@@ -225,12 +239,12 @@ export default function Page() {
 
   async function handleDeletePayment(paymentId: number) {
     if (!invoice) return;
-    toast.promise((async () => {
+    toast.promise(async () => {
       await paymentService.delete(paymentId);
       const paymentsData = await paymentService.getByInvoice(invoice.id);
       setPayments(paymentsData);
       setInvoice(await loadInvoice());
-    }), {
+    }, {
       position: "top-center",
       loading: "Mažu platbu...",
       success: "Platba byla smazána",
@@ -564,20 +578,30 @@ export default function Page() {
                 invoiceId={invoice.id}
                 onSubmit={async (payment) => {
                   setSavingPayment(true);
-                  toast.promise((async () => {
+
+                  const promise = (async () => {
                     await paymentService.create(payment);
                     setIsPaymentDrawerOpen(false);
-                    setSavingPayment(false);
-                    // Refresh payments from backend
+
                     const paymentsData = await paymentService.getByInvoice(invoice.id);
                     setPayments(paymentsData);
                     setInvoice(await loadInvoice());
-                  }), {
+                  })();
+
+                  toast.promise(promise, {
                     position: "top-center",
                     loading: "Ukládám platbu...",
-                    success: "Platba byla přidána",
-                    error: "Nepodařilo se přidat platbu",
+                    success: () => {
+                      setSavingPayment(false);
+                      return "Platba byla přidána";
+                    },
+                    error: () => {
+                      setSavingPayment(false);
+                      return "Nepodařilo se přidat platbu";
+                    },
                   });
+
+                  return promise;
                 }}
                 onCancel={() => setIsPaymentDrawerOpen(false)}
                 isLoading={savingPayment}

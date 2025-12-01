@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import type { CreatePaymentDto, UpdatePaymentDto, Payment } from "@/types/payment";
 import { z } from "zod";
 import { getZodFieldErrors } from "@/types/zod";
+import { getValidationErrors } from "@/types/api.ts";
 
 interface PaymentFormProps {
   invoiceId: number;
@@ -76,8 +77,13 @@ export function PaymentForm({
       const payload = payment ? { ...base, id: payment.id } : base;
       await onSubmit(payload);
     } catch (err) {
-      console.error(err);
-      setFormError("Nastala chyba při ukládání platby");
+      const validation = getValidationErrors(err);
+      if (validation?.errors) {
+        setFieldErrors(validation.errors);
+        setFormError("Formulář obsahuje chyby. Zkontrolujte zvýrazněná pole.");
+      } else {
+        setFormError("Nastala chyba při ukládání platby");
+      }
     }
   };
 
