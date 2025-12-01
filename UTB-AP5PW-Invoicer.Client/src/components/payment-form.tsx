@@ -1,9 +1,11 @@
 ﻿import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field, FieldGroup, FieldLabel, FieldDescription } from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel, FieldDescription, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import type { CreatePaymentDto, Payment } from "@/types/payment";
+import { z } from "zod";
+import { getZodFieldErrors } from "@/types/zod";
 
 interface PaymentFormProps {
   invoiceId: number;
@@ -12,6 +14,23 @@ interface PaymentFormProps {
   onCancel: () => void;
   isLoading?: boolean;
 }
+
+const paymentSchema = z.object({
+  amount: z
+    .string()
+    .min(1, "Částka je povinná")
+    .transform((val) => Number.parseFloat(val.replace(",", ".")))
+    .refine((val) => !Number.isNaN(val) && val > 0, {
+      message: "Částka musí být větší než 0",
+    }),
+  paymentMethod: z
+    .string()
+    .trim()
+    .min(1, "Způsob platby je povinný"),
+  paymentDate: z
+    .string()
+    .min(1, "Datum platby je povinné"),
+});
 
 export function PaymentForm({
   invoiceId,
@@ -27,40 +46,40 @@ export function PaymentForm({
       ? payment.paymentDate.split("T")[0]
       : new Date().toISOString().split("T")[0],
   });
-  const [error, setError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    if (isLoading) return;
 
-    const amountNumber = parseFloat(formData.amount);
-    if (Number.isNaN(amountNumber) || amountNumber <= 0) {
-      setError("Částka musí být větší než 0");
+    setFormError(null);
+    setFieldErrors({});
+
+    const parseResult = paymentSchema.safeParse(formData);
+
+    if (!parseResult.success) {
+      setFieldErrors(getZodFieldErrors(parseResult.error));
+      setFormError("Formulář obsahuje chyby. Zkontrolujte zvýrazněná pole.");
       return;
     }
-    if (!formData.paymentMethod.trim()) {
-      setError("Způsob platby je povinný");
-      return;
-    }
-    if (!formData.paymentDate) {
-      setError("Datum platby je povinné");
-      return;
-    }
+
+    const { amount, paymentMethod, paymentDate } = parseResult.data;
 
     try {
       const base: CreatePaymentDto = {
         invoiceId,
-        amount: amountNumber,
-        paymentMethod: formData.paymentMethod.trim(),
-        paymentDate: formData.paymentDate,
+        amount,
+        paymentMethod,
+        paymentDate,
       };
 
       const payload = payment ? { ...base, id: payment.id } : base;
 
       await onSubmit(payload);
     } catch (err) {
-      setError("Nastala chyba při ukládání platby");
       console.error(err);
+      setFormError("Nastala chyba při ukládání platby");
     }
   };
 
@@ -83,7 +102,7 @@ export function PaymentForm({
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <FieldGroup>
-            <Field>
+            <Field data-invalid={!!fieldErrors.amount}>
               <FieldLabel htmlFor="paymentAmount">Částka (Kč)</FieldLabel>
               <Input
                 id="paymentAmount"
@@ -94,9 +113,13 @@ export function PaymentForm({
                 disabled={isLoading}
                 required
                 placeholder="0.00"
+                aria-invalid={!!fieldErrors.amount}
               />
+              {fieldErrors.amount && (
+                <FieldError errors={fieldErrors.amount.map((message) => ({ message }))} />
+              )}
             </Field>
-            <Field>
+            <Field data-invalid={!!fieldErrors.paymentMethod}>
               <FieldLabel htmlFor="paymentMethod">Způsob platby</FieldLabel>
               <Input
                 id="paymentMethod"
@@ -105,9 +128,13 @@ export function PaymentForm({
                 disabled={isLoading}
                 required
                 placeholder="např. Bankovní převod"
+                aria-invalid={!!fieldErrors.paymentMethod}
               />
+              {fieldErrors.paymentMethod && (
+                <FieldError errors={fieldErrors.paymentMethod.map((message) => ({ message }))} />
+              )}
             </Field>
-            <Field>
+            <Field data-invalid={!!fieldErrors.paymentDate}>
               <FieldLabel htmlFor="paymentDate">Datum platby</FieldLabel>
               <Input
                 id="paymentDate"
@@ -116,13 +143,17 @@ export function PaymentForm({
                 onChange={(e) => handleChange("paymentDate", e.target.value)}
                 disabled={isLoading}
                 required
+                aria-invalid={!!fieldErrors.paymentDate}
               />
+              {fieldErrors.paymentDate && (
+                <FieldError errors={fieldErrors.paymentDate.map((message) => ({ message }))} />
+              )}
             </Field>
 
-            {error && (
+            {formError && (
               <Field>
                 <FieldDescription className="text-red-600">
-                  {error}
+                  {formError}
                 </FieldDescription>
               </Field>
             )}

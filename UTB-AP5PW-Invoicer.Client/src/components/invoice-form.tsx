@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field, FieldGroup, FieldLabel, FieldDescription } from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel, FieldDescription, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { CreateInvoiceDto, UpdateInvoiceDto, Invoice } from "@/types/invoice";
 import type { Customer } from "@/types/customer";
+import { z } from "zod";
+import { getZodFieldErrors } from "@/types/zod";
 
 interface InvoiceFormProps {
   invoice?: Invoice;
@@ -17,6 +19,15 @@ interface InvoiceFormProps {
   customersError?: string | null;
 }
 
+const invoiceSchema = z.object({
+  customerId: z.number().int().positive().nullable().optional(),
+  invoiceNumber: z.string().min(1, "Číslo faktury je povinné"),
+  issueDate: z.string().min(1, "Datum vystavení je povinné"),
+  dueDate: z.string().min(1, "Datum splatnosti je povinné"),
+  status: z.enum(["Draft", "Sent", "Paid", "Overdue"]),
+  totalAmount: z.number().gt(0, "Částka musí být větší než 0"),
+});
+
 export function InvoiceForm({
   invoice,
   onSubmit,
@@ -24,52 +35,56 @@ export function InvoiceForm({
   isLoading = false,
   customers,
   customersLoading = false,
-  customersError = null
+  customersError = null,
 }: InvoiceFormProps) {
   const [formData, setFormData] = useState({
     customerId: invoice?.customerId || null,
     invoiceNumber: invoice?.invoiceNumber || "",
     issueDate: invoice?.issueDate
-      ? invoice.issueDate.split('T')[0]
-      : new Date().toISOString().split('T')[0],
+      ? invoice.issueDate.split("T")[0]
+      : new Date().toISOString().split("T")[0],
     dueDate: invoice?.dueDate
-      ? invoice.dueDate.split('T')[0]
+      ? invoice.dueDate.split("T")[0]
       : "",
-    status: invoice?.status || "draft",
+    status: invoice?.status || "Draft",
     totalAmount: invoice?.totalAmount || 0,
   });
-  const [error, setError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    if (isLoading) return;
 
-    if (!formData.invoiceNumber) {
-      setError("Číslo faktury je povinné");
+    setFormError(null);
+    setFieldErrors({});
+
+    const parseResult = invoiceSchema.safeParse(formData);
+
+    if (!parseResult.success) {
+      setFieldErrors(getZodFieldErrors(parseResult.error));
+      setFormError("Formulář obsahuje chyby. Zkontrolujte zvýrazněná pole.");
       return;
     }
 
-    if (!formData.dueDate) {
-      setError("Datum splatnosti je povinné");
-      return;
-    }
+    const data = parseResult.data;
 
     try {
       const invoiceData = {
-        ...formData,
-        issueDate: new Date(formData.issueDate).toISOString(),
-        dueDate: new Date(formData.dueDate).toISOString(),
-        ...(invoice && { id: invoice.id })
+        ...data,
+        issueDate: new Date(data.issueDate).toISOString(),
+        dueDate: new Date(data.dueDate).toISOString(),
+        ...(invoice && { id: invoice.id }),
       };
       await onSubmit(invoiceData as CreateInvoiceDto | UpdateInvoiceDto);
     } catch (err) {
-      setError("Nastala chyba při ukládání faktury");
       console.error(err);
+      setFormError("Nastala chyba při ukládání faktury");
     }
   };
 
   const handleChange = (field: string, value: string | number | null) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -83,7 +98,7 @@ export function InvoiceForm({
       <CardContent>
         <form onSubmit={handleSubmit}>
           <FieldGroup>
-            <Field>
+            <Field data-invalid={!!fieldErrors.customerId}>
               <FieldLabel htmlFor="customerId">Zákazník</FieldLabel>
               <Select
                 value={formData.customerId !== null ? String(formData.customerId) : ""}
@@ -94,13 +109,15 @@ export function InvoiceForm({
                 disabled={isLoading || customersLoading}
               >
                 <SelectTrigger id="customerId">
-                  <SelectValue placeholder={
-                    customersLoading
-                      ? "Načítání zákazníků..."
-                      : customersError
-                        ? "Chyba načítání zákazníků"
-                        : "Vyberte zákazníka"
-                  } />
+                  <SelectValue
+                    placeholder={
+                      customersLoading
+                        ? "Načítání zákazníků..."
+                        : customersError
+                          ? "Chyba načítání zákazníků"
+                          : "Vyberte zákazníka"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {customers.map((customer) => (
@@ -115,9 +132,12 @@ export function InvoiceForm({
                   {customersError}
                 </FieldDescription>
               )}
+              {fieldErrors.customerId && (
+                <FieldError errors={fieldErrors.customerId.map((message) => ({ message }))} />
+              )}
             </Field>
 
-            <Field>
+            <Field data-invalid={!!fieldErrors.invoiceNumber}>
               <FieldLabel htmlFor="invoiceNumber">Číslo faktury</FieldLabel>
               <Input
                 id="invoiceNumber"
@@ -125,10 +145,16 @@ export function InvoiceForm({
                 onChange={(e) => handleChange("invoiceNumber", e.target.value)}
                 disabled={isLoading}
                 required
+                aria-invalid={!!fieldErrors.invoiceNumber}
               />
+              {fieldErrors.invoiceNumber && (
+                <FieldError
+                  errors={fieldErrors.invoiceNumber.map((message) => ({ message }))}
+                />
+              )}
             </Field>
 
-            <Field>
+            <Field data-invalid={!!fieldErrors.status}>
               <FieldLabel htmlFor="status">Stav</FieldLabel>
               <Select
                 value={formData.status}
@@ -145,10 +171,13 @@ export function InvoiceForm({
                   <SelectItem value="Overdue">Po splatnosti</SelectItem>
                 </SelectContent>
               </Select>
+              {fieldErrors.status && (
+                <FieldError errors={fieldErrors.status.map((message) => ({ message }))} />
+              )}
             </Field>
 
             <div className="grid grid-cols-2 gap-4">
-              <Field>
+              <Field data-invalid={!!fieldErrors.issueDate}>
                 <FieldLabel htmlFor="issueDate">Datum vystavení</FieldLabel>
                 <Input
                   id="issueDate"
@@ -157,10 +186,14 @@ export function InvoiceForm({
                   onChange={(e) => handleChange("issueDate", e.target.value)}
                   disabled={isLoading}
                   required
+                  aria-invalid={!!fieldErrors.issueDate}
                 />
+                {fieldErrors.issueDate && (
+                  <FieldError errors={fieldErrors.issueDate.map((message) => ({ message }))} />
+                )}
               </Field>
 
-              <Field>
+              <Field data-invalid={!!fieldErrors.dueDate}>
                 <FieldLabel htmlFor="dueDate">Datum splatnosti</FieldLabel>
                 <Input
                   id="dueDate"
@@ -169,29 +202,41 @@ export function InvoiceForm({
                   onChange={(e) => handleChange("dueDate", e.target.value)}
                   disabled={isLoading}
                   required
+                  aria-invalid={!!fieldErrors.dueDate}
                 />
+                {fieldErrors.dueDate && (
+                  <FieldError errors={fieldErrors.dueDate.map((message) => ({ message }))} />
+                )}
               </Field>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <Field>
+              <Field data-invalid={!!fieldErrors.totalAmount}>
                 <FieldLabel htmlFor="totalAmount">Celková částka (Kč)</FieldLabel>
                 <Input
                   id="totalAmount"
                   type="number"
                   step="0.01"
                   value={formData.totalAmount}
-                  onChange={(e) => handleChange("totalAmount", parseFloat(e.target.value) || 0)}
+                  onChange={(e) =>
+                    handleChange("totalAmount", parseFloat(e.target.value) || 0)
+                  }
                   disabled={isLoading}
                   required
+                  aria-invalid={!!fieldErrors.totalAmount}
                 />
+                {fieldErrors.totalAmount && (
+                  <FieldError
+                    errors={fieldErrors.totalAmount.map((message) => ({ message }))}
+                  />
+                )}
               </Field>
             </div>
 
-            {error && (
+            {formError && (
               <Field>
                 <FieldDescription className="text-red-600">
-                  {error}
+                  {formError}
                 </FieldDescription>
               </Field>
             )}

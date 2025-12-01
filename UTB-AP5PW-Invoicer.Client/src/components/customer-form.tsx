@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field, FieldGroup, FieldLabel, FieldDescription } from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel, FieldDescription, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import type { Customer, CreateCustomerDto, UpdateCustomerDto } from "@/types/customer";
+import { z } from "zod";
+import { getZodFieldErrors } from "@/types/zod";
 
 interface CustomerFormProps {
   customer?: Customer;
@@ -11,6 +13,17 @@ interface CustomerFormProps {
   onCancel: () => void;
   isLoading?: boolean;
 }
+
+const customerSchema = z.object({
+  name: z.string().min(1, "Název zákazníka je povinný"),
+  ico: z.string().optional(),
+  dic: z.string().optional(),
+  address: z.string().optional(),
+  contactEmail: z
+    .email("Zadejte platnou e-mailovou adresu.")
+    .min(1, "Kontaktní e-mail je povinný"),
+  contactPhone: z.string().optional(),
+});
 
 export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }: CustomerFormProps) {
   const [formData, setFormData] = useState({
@@ -21,38 +34,42 @@ export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }
     contactEmail: customer?.contactEmail || "",
     contactPhone: customer?.contactPhone || "",
   });
-  const [error, setError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    if (isLoading) return;
 
-    if (!formData.name) {
-      setError("Název zákazníka je povinný");
+    setFormError(null);
+    setFieldErrors({});
+
+    const parseResult = customerSchema.safeParse(formData);
+
+    if (!parseResult.success) {
+      setFieldErrors(getZodFieldErrors(parseResult.error));
+      setFormError("Formulář obsahuje chyby. Zkontrolujte zvýrazněná pole.");
       return;
     }
 
-    if (!formData.contactEmail) {
-      setError("Kontaktní e-mail je povinný");
-      return;
-    }
+    const data = parseResult.data;
 
     try {
       const customerData = {
-        ...formData,
-        ico: formData.ico || null,
-        dic: formData.dic || null,
-        ...(customer && { id: customer.id })
+        ...data,
+        ico: data.ico || null,
+        dic: data.dic || null,
+        ...(customer && { id: customer.id }),
       };
       await onSubmit(customerData as CreateCustomerDto | UpdateCustomerDto);
     } catch (err) {
-      setError("Nastala chyba při ukládání zákazníka");
       console.error(err);
+      setFormError("Nastala chyba při ukládání zákazníka");
     }
   };
 
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -66,7 +83,7 @@ export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }
       <CardContent>
         <form onSubmit={handleSubmit}>
           <FieldGroup>
-            <Field>
+            <Field data-invalid={!!fieldErrors.name}>
               <FieldLabel htmlFor="name">Název</FieldLabel>
               <Input
                 id="name"
@@ -74,11 +91,15 @@ export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }
                 onChange={(e) => handleChange("name", e.target.value)}
                 disabled={isLoading}
                 required
+                aria-invalid={!!fieldErrors.name}
               />
+              {fieldErrors.name && (
+                <FieldError errors={fieldErrors.name.map((message) => ({ message }))} />
+              )}
             </Field>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field>
+              <Field data-invalid={!!fieldErrors.ico}>
                 <FieldLabel htmlFor="ico">IČO</FieldLabel>
                 <Input
                   id="ico"
@@ -86,9 +107,12 @@ export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }
                   onChange={(e) => handleChange("ico", e.target.value)}
                   disabled={isLoading}
                 />
+                {fieldErrors.ico && (
+                  <FieldError errors={fieldErrors.ico.map((message) => ({ message }))} />
+                )}
               </Field>
 
-              <Field>
+              <Field data-invalid={!!fieldErrors.dic}>
                 <FieldLabel htmlFor="dic">DIČ</FieldLabel>
                 <Input
                   id="dic"
@@ -96,10 +120,13 @@ export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }
                   onChange={(e) => handleChange("dic", e.target.value)}
                   disabled={isLoading}
                 />
+                {fieldErrors.dic && (
+                  <FieldError errors={fieldErrors.dic.map((message) => ({ message }))} />
+                )}
               </Field>
             </div>
 
-            <Field>
+            <Field data-invalid={!!fieldErrors.address}>
               <FieldLabel htmlFor="address">Adresa</FieldLabel>
               <Input
                 id="address"
@@ -107,10 +134,13 @@ export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }
                 onChange={(e) => handleChange("address", e.target.value)}
                 disabled={isLoading}
               />
+              {fieldErrors.address && (
+                <FieldError errors={fieldErrors.address.map((message) => ({ message }))} />
+              )}
             </Field>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field>
+              <Field data-invalid={!!fieldErrors.contactEmail}>
                 <FieldLabel htmlFor="contactEmail">Kontaktní e-mail</FieldLabel>
                 <Input
                   id="contactEmail"
@@ -119,10 +149,16 @@ export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }
                   onChange={(e) => handleChange("contactEmail", e.target.value)}
                   disabled={isLoading}
                   required
+                  aria-invalid={!!fieldErrors.contactEmail}
                 />
+                {fieldErrors.contactEmail && (
+                  <FieldError
+                    errors={fieldErrors.contactEmail.map((message) => ({ message }))}
+                  />
+                )}
               </Field>
 
-              <Field>
+              <Field data-invalid={!!fieldErrors.contactPhone}>
                 <FieldLabel htmlFor="contactPhone">Telefon</FieldLabel>
                 <Input
                   id="contactPhone"
@@ -130,13 +166,18 @@ export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }
                   onChange={(e) => handleChange("contactPhone", e.target.value)}
                   disabled={isLoading}
                 />
+                {fieldErrors.contactPhone && (
+                  <FieldError
+                    errors={fieldErrors.contactPhone.map((message) => ({ message }))}
+                  />
+                )}
               </Field>
             </div>
 
-            {error && (
+            {formError && (
               <Field>
                 <FieldDescription className="text-red-600">
-                  {error}
+                  {formError}
                 </FieldDescription>
               </Field>
             )}
