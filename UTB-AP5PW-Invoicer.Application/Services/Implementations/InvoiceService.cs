@@ -36,10 +36,10 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
             return await _mediator.Send(new GetInvoiceByShareTokenQuery(token));
         }
 
-        public async Task CreateInvoiceAsync(InvoiceDto invoice)
+        public async Task<int> CreateInvoiceAsync(InvoiceDto invoice)
         {
             await _invoiceValidator.ValidateAndThrowAsync(invoice);
-            await _mediator.Send(_mapper.Map<CreateInvoiceCommand>(invoice));
+            return await _mediator.Send(_mapper.Map<CreateInvoiceCommand>(invoice));
         }
 
         public async Task<ICollection<InvoiceDto>> ListInvoicesAsync()
@@ -47,15 +47,15 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
             return await _mediator.Send(new ListInvoicesQuery());
         }
 
-        public async Task DeleteInvoiceAsync(InvoiceDto invoice)
+        public async Task<bool> DeleteInvoiceAsync(InvoiceDto invoice)
         {
-            await _mediator.Send(new DeleteInvoiceCommand(invoice.Id));
+            return await _mediator.Send(new DeleteInvoiceCommand(invoice.Id));
         }
 
-        public async Task UpdateInvoiceAsync(InvoiceDto invoice)
+        public async Task<bool> UpdateInvoiceAsync(InvoiceDto invoice)
         {
             await _invoiceValidator.ValidateAndThrowAsync(invoice);
-            await _mediator.Send(_mapper.Map<UpdateInvoiceCommand>(invoice));
+            return await _mediator.Send(_mapper.Map<UpdateInvoiceCommand>(invoice));
         }
 
         public async Task<string?> GenerateShareTokenAsync(int invoiceId)

@@ -215,7 +215,7 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
             var mockRequestCookies = new Mock<IRequestCookieCollection>();
 
             mockAuthService.Setup(x => x.ValidateRefreshTokenAsync("valid_refresh")).ReturnsAsync(user);
-            mockAuthService.Setup(x => x.RevokeRefreshTokenAsync("valid_refresh")).Returns(Task.CompletedTask);
+            mockAuthService.Setup(x => x.RevokeRefreshTokenAsync("valid_refresh")).ReturnsAsync(true);
             mockAuthService.Setup(x => x.GetAccessTokenAsync(user)).ReturnsAsync("new_access");
             mockAuthService.Setup(x => x.GetRefreshTokenAsync(user)).ReturnsAsync("new_refresh");
             mockRequestCookies.Setup(x => x["refreshToken"]).Returns("valid_refresh");

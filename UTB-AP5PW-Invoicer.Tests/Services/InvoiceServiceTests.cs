@@ -87,7 +87,7 @@ namespace UTB_AP5PW_Invoicer.Tests.Services
 
             mockMediator
                 .Setup(m => m.Send(It.IsAny<UpdateInvoiceCommand>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.CompletedTask);
+                .ReturnsAsync(true);
 
             var service = new InvoiceService(mockMediator.Object, mockMapper.Object, mockValidator.Object);
             var dto = new InvoiceDto { Id = 1, InvoiceNumber = "INV-1" };
@@ -111,7 +111,7 @@ namespace UTB_AP5PW_Invoicer.Tests.Services
 
             mockMediator
                 .Setup(m => m.Send(It.IsAny<DeleteInvoiceCommand>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.CompletedTask);
+                .ReturnsAsync(true);
 
             var service = new InvoiceService(mockMediator.Object, mockMapper.Object, mockValidator.Object);
             var dto = new InvoiceDto { Id = 1 };

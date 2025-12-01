@@ -87,7 +87,7 @@ namespace UTB_AP5PW_Invoicer.Tests.Services
 
             mockMediator
                 .Setup(m => m.Send(It.IsAny<UpdateCustomerCommand>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.CompletedTask);
+                .ReturnsAsync(true);
 
             var service = new CustomerService(mockMediator.Object, mockMapper.Object, mockValidator.Object);
             var dto = new CustomerDto { Id = 1, Name = "Customer" };
@@ -111,7 +111,7 @@ namespace UTB_AP5PW_Invoicer.Tests.Services
 
             mockMediator.Setup(m =>
                 m.Send(It.IsAny<DeleteCustomerCommand>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(Unit.Value));
+                .ReturnsAsync(true);
 
             var service = new CustomerService(mockMediator.Object, mockMapper.Object, mockValidator.Object);
             var dto = new CustomerDto { Id = 1 };

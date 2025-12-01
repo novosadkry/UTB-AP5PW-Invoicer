@@ -6,8 +6,8 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Interfaces
     {
         Task<ICollection<CustomerDto>> ListCustomersAsync();
         Task<CustomerDto?> GetCustomerByIdAsync(int id);
-        Task CreateCustomerAsync(CustomerDto customer);
-        Task UpdateCustomerAsync(CustomerDto customer);
-        Task DeleteCustomerAsync(CustomerDto customer);
+        Task<int> CreateCustomerAsync(CustomerDto customer);
+        Task<bool> UpdateCustomerAsync(CustomerDto customer);
+        Task<bool> DeleteCustomerAsync(CustomerDto customer);
     }
 }

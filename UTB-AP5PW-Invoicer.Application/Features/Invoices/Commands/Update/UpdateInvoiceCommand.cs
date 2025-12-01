@@ -2,7 +2,7 @@
 
 namespace UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.Update
 {
-    public record UpdateInvoiceCommand : IRequest
+    public record UpdateInvoiceCommand : IRequest<bool>
     {
         public int Id { get; set; }
         public int? CustomerId { get; set; }

@@ -75,18 +75,22 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
             return await _mediator.Send(new GetUserQuery(refreshToken.UserId));
         }
 
-        public async Task DeleteRefreshTokenAsync(string token)
+        public async Task<bool> DeleteRefreshTokenAsync(string token)
         {
             var refreshToken = await _mediator.Send(new GetRefreshTokenByValueQuery(token));
             if (refreshToken != null)
-                await _mediator.Send(new DeleteRefreshTokenCommand(refreshToken.Id));
+                return await _mediator.Send(new DeleteRefreshTokenCommand(refreshToken.Id));
+
+            return false;
         }
 
-        public async Task RevokeRefreshTokenAsync(string token)
+        public async Task<bool> RevokeRefreshTokenAsync(string token)
         {
             var refreshToken = await _mediator.Send(new GetRefreshTokenByValueQuery(token));
             if (refreshToken is { Revoked: false })
-                await _mediator.Send(new RevokeRefreshTokenCommand(refreshToken.Id));
+                return await _mediator.Send(new RevokeRefreshTokenCommand(refreshToken.Id));
+
+            return false;
         }
 
         private string GenerateJwtToken(IEnumerable<Claim> claims, DateTimeOffset expires)

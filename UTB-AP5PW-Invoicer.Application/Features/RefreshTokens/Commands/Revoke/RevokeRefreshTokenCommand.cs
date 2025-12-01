@@ -2,5 +2,5 @@
 
 namespace UTB_AP5PW_Invoicer.Application.Features.RefreshTokens.Commands.Revoke
 {
-    public record RevokeRefreshTokenCommand(Guid Id) : IRequest;
+    public record RevokeRefreshTokenCommand(Guid Id) : IRequest<bool>;
 }

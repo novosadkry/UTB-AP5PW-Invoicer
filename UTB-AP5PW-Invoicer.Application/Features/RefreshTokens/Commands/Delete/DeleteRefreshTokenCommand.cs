@@ -2,5 +2,5 @@
 
 namespace UTB_AP5PW_Invoicer.Application.Features.RefreshTokens.Commands.Delete
 {
-    public record DeleteRefreshTokenCommand(Guid Id) : IRequest;
+    public record DeleteRefreshTokenCommand(Guid Id) : IRequest<bool>;
 }

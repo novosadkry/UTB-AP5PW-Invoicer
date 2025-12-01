@@ -124,7 +124,6 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
         {
             var token = await _invoiceService.GenerateShareTokenAsync(id);
             if (token == null) return NotFound();
-
             return Ok(new { shareToken = token });
         }
 
@@ -135,7 +134,6 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
         {
             var invoice = await _invoiceService.GetInvoiceByShareTokenAsync(token);
             if (invoice == null) return NotFound();
-
             return Ok(invoice);
         }
 

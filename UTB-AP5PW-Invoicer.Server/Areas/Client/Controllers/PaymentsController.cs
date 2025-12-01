@@ -34,8 +34,7 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
         public async Task<ActionResult<PaymentDto>> GetPayment(int id)
         {
             var payment = await _paymentService.GetPaymentByIdAsync(id);
-            if (payment == null)
-                return NotFound();
+            if (payment == null) return NotFound();
             return Ok(payment);
         }
 
@@ -47,7 +46,7 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
         public async Task<ActionResult> CreatePayment([FromBody] PaymentDto payment)
         {
             var id = await _paymentService.CreatePaymentAsync(payment);
-            return CreatedAtAction(nameof(GetPayment), new { id }, new { id });
+            return CreatedAtAction(nameof(GetPayment), new { id }, payment);
         }
 
         [HttpDelete("{id:int}")]
@@ -57,10 +56,8 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult> DeletePayment(int id)
         {
-            var result = await _paymentService.DeletePaymentAsync(id);
-            if (!result)
-                return NotFound();
-            return NoContent();
+            await _paymentService.DeletePaymentAsync(id);
+            return Ok();
         }
     }
 }

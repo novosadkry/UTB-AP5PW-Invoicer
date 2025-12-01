@@ -29,10 +29,10 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
             return await _mediator.Send(new GetCustomerQuery(id));
         }
 
-        public async Task CreateCustomerAsync(CustomerDto customer)
+        public async Task<int> CreateCustomerAsync(CustomerDto customer)
         {
             await _customerValidator.ValidateAndThrowAsync(customer);
-            await _mediator.Send(_mapper.Map<CreateCustomerCommand>(customer));
+            return await _mediator.Send(_mapper.Map<CreateCustomerCommand>(customer));
         }
 
         public async Task<ICollection<CustomerDto>> ListCustomersAsync()
@@ -40,15 +40,15 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
             return await _mediator.Send(new ListCustomersQuery());
         }
 
-        public async Task DeleteCustomerAsync(CustomerDto customer)
+        public async Task<bool> DeleteCustomerAsync(CustomerDto customer)
         {
-            await _mediator.Send(new DeleteCustomerCommand(customer.Id));
+            return await _mediator.Send(new DeleteCustomerCommand(customer.Id));
         }
 
-        public async Task UpdateCustomerAsync(CustomerDto customer)
+        public async Task<bool> UpdateCustomerAsync(CustomerDto customer)
         {
             await _customerValidator.ValidateAndThrowAsync(customer);
-            await _mediator.Send(_mapper.Map<UpdateCustomerCommand>(customer));
+            return await _mediator.Send(_mapper.Map<UpdateCustomerCommand>(customer));
         }
     }
 }

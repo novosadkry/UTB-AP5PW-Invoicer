@@ -40,9 +40,9 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
             return await _mediator.Send(command);
         }
 
-        public Task<bool> DeletePaymentAsync(int id)
+        public async Task<bool> DeletePaymentAsync(int id)
         {
-            return _mediator.Send(new DeletePaymentCommand(id));
+            return await _mediator.Send(new DeletePaymentCommand(id));
         }
     }
 }

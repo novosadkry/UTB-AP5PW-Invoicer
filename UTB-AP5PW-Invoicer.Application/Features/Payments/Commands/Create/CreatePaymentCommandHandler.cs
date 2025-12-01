@@ -26,7 +26,6 @@ namespace UTB_AP5PW_Invoicer.Application.Features.Payments.Commands.Create
                 return payment.Id;
 
             var totalPaid = invoice.Payments.Sum(p => p.Amount);
-
             if (totalPaid >= invoice.TotalAmount)
                 invoice.Status = InvoiceStatus.Paid;
 
