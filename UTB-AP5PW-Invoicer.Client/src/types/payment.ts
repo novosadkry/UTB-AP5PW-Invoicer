@@ -12,3 +12,7 @@ export interface CreatePaymentDto {
   paymentDate: string;
   paymentMethod: string;
 }
+
+export interface UpdatePaymentDto extends CreatePaymentDto {
+  id: number;
+}

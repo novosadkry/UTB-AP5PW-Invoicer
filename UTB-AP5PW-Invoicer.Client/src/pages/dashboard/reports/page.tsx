@@ -59,7 +59,7 @@ export default function Page() {
       setReport(data);
     } catch (error) {
       console.error("Failed to load report:", error);
-      toast.error("Nepodařilo se načíst report");
+      toast.error("Nepodařilo se načíst report", { position: "top-center" });
     } finally {
       setLoading(false);
     }
@@ -77,7 +77,7 @@ export default function Page() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      toast.success("Report byl úspěšně exportován");
+      toast.success("Report byl úspěšně exportován", { position: "top-center" });
     } catch (error) {
       console.error("Failed to export report:", error);
       toast.error("Nepodařilo se exportovat report");

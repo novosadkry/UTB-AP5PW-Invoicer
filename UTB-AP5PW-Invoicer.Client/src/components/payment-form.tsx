@@ -3,14 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldGroup, FieldLabel, FieldDescription, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import type { CreatePaymentDto, Payment } from "@/types/payment";
+import type { CreatePaymentDto, UpdatePaymentDto, Payment } from "@/types/payment";
 import { z } from "zod";
 import { getZodFieldErrors } from "@/types/zod";
 
 interface PaymentFormProps {
   invoiceId: number;
   payment?: Payment;
-  onSubmit: (payment: CreatePaymentDto | (CreatePaymentDto & { id?: number })) => Promise<void>;
+  onSubmit: (payment: CreatePaymentDto | UpdatePaymentDto) => Promise<void>;
   onCancel: () => void;
   isLoading?: boolean;
 }
@@ -73,9 +73,7 @@ export function PaymentForm({
         paymentMethod,
         paymentDate,
       };
-
       const payload = payment ? { ...base, id: payment.id } : base;
-
       await onSubmit(payload);
     } catch (err) {
       console.error(err);
@@ -87,7 +85,7 @@ export function PaymentForm({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const isEdit = Boolean(payment);
+  const isEdit = !!payment;
 
   return (
     <Card>
@@ -152,7 +150,7 @@ export function PaymentForm({
 
             {formError && (
               <Field>
-                <FieldDescription className="text-red-600">
+                <FieldDescription className="text-destructive font-normal text-sm">
                   {formError}
                 </FieldDescription>
               </Field>

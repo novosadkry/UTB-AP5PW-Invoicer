@@ -65,7 +65,7 @@ export default function Page() {
       return invoiceService.getAll();
     } catch (error) {
       console.error("Failed to load invoices:", error);
-      toast.error("Nepodařilo se načíst faktury");
+      toast.error("Nepodařilo se načíst faktury", { position: "top-center" });
     } finally {
       setLoading(false);
     }
@@ -94,12 +94,12 @@ export default function Page() {
     setFormLoading(true);
     try {
       await invoiceService.create(invoice);
-      toast.success("Faktura byla úspěšně vytvořena");
+      toast.success("Faktura byla úspěšně vytvořena", { position: "top-center" });
       setIsDrawerOpen(false);
       setInvoices(await loadInvoices());
     } catch (error) {
       console.error("Failed to create invoice:", error);
-      toast.error("Nepodařilo se vytvořit fakturu");
+      toast.error("Nepodařilo se vytvořit fakturu", { position: "top-center" });
     } finally {
       setFormLoading(false);
     }
@@ -109,13 +109,13 @@ export default function Page() {
     setFormLoading(true);
     try {
       await invoiceService.update(invoice);
-      toast.success("Faktura byla úspěšně aktualizována");
+      toast.success("Faktura byla úspěšně aktualizována", { position: "top-center" });
       setIsDrawerOpen(false);
       setEditingInvoice(null);
       setInvoices(await loadInvoices());
     } catch (error) {
       console.error("Failed to update invoice:", error);
-      toast.error("Nepodařilo se aktualizovat fakturu");
+      toast.error("Nepodařilo se aktualizovat fakturu", { position: "top-center" });
     } finally {
       setFormLoading(false);
     }
@@ -124,11 +124,11 @@ export default function Page() {
   async function handleDelete(id: number) {
     try {
       await invoiceService.delete(id);
-      toast.success("Faktura byla úspěšně smazána");
+      toast.success("Faktura byla úspěšně smazána", { position: "top-center" });
       setInvoices(await loadInvoices());
     } catch (error) {
       console.error("Failed to delete invoice:", error);
-      toast.error("Nepodařilo se smazat fakturu");
+      toast.error("Nepodařilo se smazat fakturu", { position: "top-center" });
     } finally {
       setDeletingInvoiceId(null);
     }
@@ -157,13 +157,13 @@ export default function Page() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "Paid":
+      case "paid":
         return <Badge variant="default">Zaplaceno</Badge>;
-      case "Sent":
+      case "sent":
         return <Badge variant="outline">Odesláno</Badge>;
-      case "Overdue":
+      case "overdue":
         return <Badge variant="destructive">Po splatnosti</Badge>;
-      case "Draft":
+      case "draft":
         return <Badge variant="secondary">Koncept</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;

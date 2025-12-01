@@ -60,19 +60,19 @@ export default function Page() {
     try {
       const customerId = Number(id);
       if (Number.isNaN(customerId)) {
-        toast.error("Neplatné ID zákazníka");
+        toast.error("Neplatné ID zákazníka", { position: "top-center" });
         navigate("/dashboard/customers");
         return null;
       }
       const data = await customerService.getById(customerId);
       if (!data) {
-        toast.error("Zákazník nebyl nalezen");
+        toast.error("Zákazník nebyl nalezen", { position: "top-center" });
         return null;
       }
       return data;
     } catch (error) {
       console.error("Failed to load customer:", error);
-      toast.error("Nepodařilo se načíst zákazníka");
+      toast.error("Nepodařilo se načíst zákazníka", { position: "top-center" });
     } finally {
       setLoading(false);
     }
@@ -88,12 +88,12 @@ export default function Page() {
     setFormLoading(true);
     try {
       await customerService.update(updated);
-      toast.success("Zákazník byl úspěšně aktualizován");
+      toast.success("Zákazník byl úspěšně aktualizován", { position: "top-center" });
       setIsDrawerOpen(false);
       setCustomer(await loadCustomer());
     } catch (error) {
       console.error("Failed to update customer:", error);
-      toast.error("Nepodařilo se aktualizovat zákazníka");
+      toast.error("Nepodařilo se aktualizovat zákazníka", { position: "top-center" });
     } finally {
       setFormLoading(false);
     }
@@ -104,11 +104,11 @@ export default function Page() {
 
     try {
       await customerService.delete(customer.id);
-      toast.success("Zákazník byl úspěšně smazán");
+      toast.success("Zákazník byl úspěšně smazán", { position: "top-center" });
       navigate("/dashboard/customers");
     } catch (error) {
       console.error("Failed to delete customer:", error);
-      toast.error("Nepodařilo se smazat zákazníka");
+      toast.error("Nepodařilo se smazat zákazníka", { position: "top-center" });
     } finally {
       setIsDeleteDialogOpen(false);
     }

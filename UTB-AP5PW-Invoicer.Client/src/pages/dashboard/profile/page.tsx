@@ -63,7 +63,7 @@ export default function Page() {
       setCompanyPhone(data.companyPhone || "");
     } catch (error) {
       console.error("Failed to load profile:", error);
-      toast.error("Nepodařilo se načíst profil");
+      toast.error("Nepodařilo se načíst profil", { position: "top-center" });
     } finally {
       setLoading(false);
     }
@@ -83,11 +83,11 @@ export default function Page() {
         companyPhone: companyPhone || undefined,
       };
       await userService.updateProfile(updateData);
-      toast.success("Profil byl úspěšně aktualizován");
+      toast.success("Profil byl úspěšně aktualizován", { position: "top-center" });
       await loadProfile();
     } catch (error) {
       console.error("Failed to update profile:", error);
-      toast.error("Nepodařilo se aktualizovat profil");
+      toast.error("Nepodařilo se aktualizovat profil", { position: "top-center" });
     } finally {
       setSaving(false);
     }
@@ -96,11 +96,11 @@ export default function Page() {
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      toast.error("Nová hesla se neshodují");
+      toast.error("Nová hesla se neshodují", { position: "top-center" });
       return;
     }
     if (newPassword.length < 6) {
-      toast.error("Nové heslo musí mít alespoň 6 znaků");
+      toast.error("Nové heslo musí mít alespoň 6 znaků", { position: "top-center" });
       return;
     }
     setChangingPassword(true);
@@ -110,13 +110,13 @@ export default function Page() {
         newPassword,
       };
       await userService.changePassword(data);
-      toast.success("Heslo bylo úspěšně změněno");
+      toast.success("Heslo bylo úspěšně změněno", { position: "top-center" });
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (error) {
       console.error("Failed to change password:", error);
-      toast.error("Nepodařilo se změnit heslo. Zkontrolujte aktuální heslo.");
+      toast.error("Nepodařilo se změnit heslo. Zkontrolujte aktuální heslo.", { position: "top-center" });
     } finally {
       setChangingPassword(false);
     }

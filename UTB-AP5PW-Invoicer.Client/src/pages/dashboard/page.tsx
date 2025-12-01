@@ -191,18 +191,22 @@ export default function Page() {
                               {new Date(invoice.dueDate).toLocaleDateString("cs-CZ")}
                             </td>
                             <td className="py-2 pr-4">
-                              {invoice.status === "Paid" && (
+                              {invoice.status === "draft" && (
+                                <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800 dark:bg-gray-700/50 dark:text-gray-300">
+                                  Koncept
+                                </span>
+                              )}
+                              {invoice.status === "paid" && (
                                 <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
                                   Uhrazeno
                                 </span>
                               )}
-                              {invoice.status !== "Paid" &&
-                                invoice.status !== "Overdue" && (
-                                  <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
-                                    Neuhrazeno
-                                  </span>
-                                )}
-                              {invoice.status === "Overdue" && (
+                              {invoice.status === "sent" && (
+                                <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
+                                  Neuhrazeno
+                                </span>
+                              )}
+                              {invoice.status === "overdue" && (
                                 <span className="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 dark:bg-red-500/10 dark:text-red-300">
                                   Po splatnosti
                                 </span>

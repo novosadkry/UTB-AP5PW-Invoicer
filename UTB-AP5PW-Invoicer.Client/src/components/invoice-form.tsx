@@ -24,7 +24,7 @@ const invoiceSchema = z.object({
   invoiceNumber: z.string().min(1, "Číslo faktury je povinné"),
   issueDate: z.string().min(1, "Datum vystavení je povinné"),
   dueDate: z.string().min(1, "Datum splatnosti je povinné"),
-  status: z.enum(["Draft", "Sent", "Paid", "Overdue"]),
+  status: z.enum(["draft", "sent", "paid", "overdue"]),
   totalAmount: z.number().gt(0, "Částka musí být větší než 0"),
 });
 
@@ -46,7 +46,7 @@ export function InvoiceForm({
     dueDate: invoice?.dueDate
       ? invoice.dueDate.split("T")[0]
       : "",
-    status: invoice?.status || "Draft",
+    status: invoice?.status || "draft",
     totalAmount: invoice?.totalAmount || 0,
   });
   const [formError, setFormError] = useState<string | null>(null);
@@ -165,10 +165,10 @@ export function InvoiceForm({
                   <SelectValue placeholder="Vyberte stav" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Draft">Koncept</SelectItem>
-                  <SelectItem value="Sent">Odesláno</SelectItem>
-                  <SelectItem value="Paid">Zaplaceno</SelectItem>
-                  <SelectItem value="Overdue">Po splatnosti</SelectItem>
+                  <SelectItem value="draft">Koncept</SelectItem>
+                  <SelectItem value="sent">Odesláno</SelectItem>
+                  <SelectItem value="paid">Zaplaceno</SelectItem>
+                  <SelectItem value="overdue">Po splatnosti</SelectItem>
                 </SelectContent>
               </Select>
               {fieldErrors.status && (
@@ -235,7 +235,7 @@ export function InvoiceForm({
 
             {formError && (
               <Field>
-                <FieldDescription className="text-red-600">
+                <FieldDescription className="text-destructive font-normal text-sm">
                   {formError}
                 </FieldDescription>
               </Field>

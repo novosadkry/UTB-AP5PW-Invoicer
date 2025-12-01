@@ -99,19 +99,19 @@ export default function Page() {
     try {
       const invoiceId = Number(id);
       if (Number.isNaN(invoiceId)) {
-        toast.error("Neplatné ID faktury");
+        toast.error("Neplatné ID faktury", { position: "top-center" });
         navigate("/dashboard/invoices");
         return null;
       }
       const data = await invoiceService.getById(invoiceId);
       if (!data) {
-        toast.error("Faktura nebyla nalezena");
+        toast.error("Faktura nebyla nalezena", { position: "top-center" });
         return null;
       }
       return data;
     } catch (error) {
       console.error("Failed to load invoice:", error);
-      toast.error("Nepodařilo se načíst fakturu");
+      toast.error("Nepodařilo se načíst fakturu", { position: "top-center" });
     } finally {
       setLoading(false);
     }
@@ -148,7 +148,7 @@ export default function Page() {
     setFormLoading(true);
     try {
       await invoiceService.update(updated);
-      toast.success("Faktura byla úspěšně aktualizována");
+      toast.success("Faktura byla úspěšně aktualizována", { position: "top-center" });
       setIsDrawerOpen(false);
       setInvoice(await loadInvoice());
       if (invoice && invoice.customerId) {
@@ -163,7 +163,7 @@ export default function Page() {
       }
     } catch (error) {
       console.error("Failed to update invoice:", error);
-      toast.error("Nepodařilo se aktualizovat fakturu");
+      toast.error("Nepodařilo se aktualizovat fakturu", { position: "top-center" });
     } finally {
       setFormLoading(false);
     }
@@ -174,11 +174,11 @@ export default function Page() {
 
     try {
       await invoiceService.delete(invoice.id);
-      toast.success("Faktura byla úspěšně smazána");
+      toast.success("Faktura byla úspěšně smazána", { position: "top-center" });
       navigate("/dashboard/invoices");
     } catch (error) {
       console.error("Failed to delete invoice:", error);
-      toast.error("Nepodařilo se smazat fakturu");
+      toast.error("Nepodařilo se smazat fakturu", { position: "top-center" });
     } finally {
       setIsDeleteDialogOpen(false);
     }
@@ -196,10 +196,10 @@ export default function Page() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      toast.success("PDF bylo úspěšně staženo");
+      toast.success("PDF bylo úspěšně staženo", { position: "top-center" });
     } catch (error) {
       console.error("Failed to download PDF:", error);
-      toast.error("Nepodařilo se stáhnout PDF");
+      toast.error("Nepodařilo se stáhnout PDF", { position: "top-center" });
     }
   }
 
@@ -212,40 +212,41 @@ export default function Page() {
       setIsShareDialogOpen(true);
     } catch (error) {
       console.error("Failed to generate share link:", error);
-      toast.error("Nepodařilo se vygenerovat odkaz pro sdílení");
+      toast.error("Nepodařilo se vygenerovat odkaz pro sdílení", { position: "top-center" });
     }
   }
 
   function copyShareLink() {
     if (shareLink) {
       navigator.clipboard.writeText(shareLink);
-      toast.success("Odkaz byl zkopírován do schránky");
+      toast.success("Odkaz byl zkopírován do schránky", { position: "top-center" });
     }
   }
 
   async function handleDeletePayment(paymentId: number) {
     if (!invoice) return;
-    try {
+    toast.promise((async () => {
       await paymentService.delete(paymentId);
-      toast.success("Platba byla smazána");
       const paymentsData = await paymentService.getByInvoice(invoice.id);
       setPayments(paymentsData);
       setInvoice(await loadInvoice());
-    } catch (error) {
-      console.error("Failed to delete payment:", error);
-      toast.error("Nepodařilo se smazat platbu");
-    }
+    }), {
+      position: "top-center",
+      loading: "Mažu platbu...",
+      success: "Platba byla smazána",
+      error: "Nepodařilo se smazat platbu",
+    });
   }
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "Paid":
+      case "paid":
         return <Badge variant="default">Zaplaceno</Badge>;
-      case "Sent":
+      case "sent":
         return <Badge variant="outline">Odesláno</Badge>;
-      case "Overdue":
+      case "overdue":
         return <Badge variant="destructive">Po splatnosti</Badge>;
-      case "Draft":
+      case "draft":
         return <Badge variant="secondary">Koncept</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
@@ -563,19 +564,20 @@ export default function Page() {
                 invoiceId={invoice.id}
                 onSubmit={async (payment) => {
                   setSavingPayment(true);
-                  try {
+                  toast.promise((async () => {
                     await paymentService.create(payment);
-                    toast.success("Platba byla přidána");
                     setIsPaymentDrawerOpen(false);
+                    setSavingPayment(false);
+                    // Refresh payments from backend
                     const paymentsData = await paymentService.getByInvoice(invoice.id);
                     setPayments(paymentsData);
                     setInvoice(await loadInvoice());
-                  } catch (error) {
-                    console.error("Failed to add payment:", error);
-                    toast.error("Nepodařilo se přidat platbu");
-                  } finally {
-                    setSavingPayment(false);
-                  }
+                  }), {
+                    position: "top-center",
+                    loading: "Ukládám platbu...",
+                    success: "Platba byla přidána",
+                    error: "Nepodařilo se přidat platbu",
+                  });
                 }}
                 onCancel={() => setIsPaymentDrawerOpen(false)}
                 isLoading={savingPayment}

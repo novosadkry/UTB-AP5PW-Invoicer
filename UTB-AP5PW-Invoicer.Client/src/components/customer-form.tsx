@@ -176,7 +176,7 @@ export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }
 
             {formError && (
               <Field>
-                <FieldDescription className="text-red-600">
+                <FieldDescription className="text-destructive font-normal text-sm">
                   {formError}
                 </FieldDescription>
               </Field>

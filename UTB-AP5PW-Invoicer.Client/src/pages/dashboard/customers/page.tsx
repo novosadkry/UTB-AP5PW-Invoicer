@@ -61,7 +61,7 @@ export default function Page() {
       return customerService.getAll();
     } catch (error) {
       console.error("Failed to load customers:", error);
-      toast.error("Nepodařilo se načíst zákazníky");
+      toast.error("Nepodařilo se načíst zákazníky", { position: "top-center" });
     } finally {
       setLoading(false);
     }
@@ -76,12 +76,12 @@ export default function Page() {
     setFormLoading(true);
     try {
       await customerService.create(customer);
-      toast.success("Zákazník byl úspěšně vytvořen");
+      toast.success("Zákazník byl úspěšně vytvořen", { position: "top-center" });
       setIsDrawerOpen(false);
       setCustomers(await loadCustomers());
     } catch (error) {
       console.error("Failed to create customer:", error);
-      toast.error("Nepodařilo se vytvořit zákazníka");
+      toast.error("Nepodařilo se vytvořit zákazníka", { position: "top-center" });
     } finally {
       setFormLoading(false);
     }
@@ -91,13 +91,13 @@ export default function Page() {
     setFormLoading(true);
     try {
       await customerService.update(customer);
-      toast.success("Zákazník byl úspěšně aktualizován");
+      toast.success("Zákazník byl úspěšně aktualizován", { position: "top-center" });
       setIsDrawerOpen(false);
       setEditingCustomer(null);
       setCustomers(await loadCustomers());
     } catch (error) {
       console.error("Failed to update customer:", error);
-      toast.error("Nepodařilo se aktualizovat zákazníka");
+      toast.error("Nepodařilo se aktualizovat zákazníka", { position: "top-center" });
     } finally {
       setFormLoading(false);
     }
@@ -106,11 +106,11 @@ export default function Page() {
   async function handleDelete(id: number) {
     try {
       await customerService.delete(id);
-      toast.success("Zákazník byl úspěšně smazán");
+      toast.success("Zákazník byl úspěšně smazán", { position: "top-center" });
       setCustomers(await loadCustomers());
     } catch (error) {
       console.error("Failed to delete customer:", error);
-      toast.error("Nepodařilo se smazat zákazníka");
+      toast.error("Nepodařilo se smazat zákazníka", { position: "top-center" });
     } finally {
       setDeletingCustomerId(null);
     }
