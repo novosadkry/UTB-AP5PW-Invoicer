@@ -141,7 +141,6 @@ export default function Page() {
 
     return (
       <div className="space-y-6">
-        {/* Personal Information */}
         <Card>
           <CardHeader>
             <CardTitle>Osobní údaje</CardTitle>
@@ -233,7 +232,6 @@ export default function Page() {
           </CardContent>
         </Card>
 
-        {/* Change Password */}
         <Card>
           <CardHeader>
             <CardTitle>Změna hesla</CardTitle>

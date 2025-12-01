@@ -137,7 +137,6 @@ export default function Page() {
 
     return (
       <div className="space-y-6">
-        {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="pb-2">
@@ -159,7 +158,6 @@ export default function Page() {
           </Card>
         </div>
 
-        {/* Invoice Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="pb-2">
@@ -187,7 +185,6 @@ export default function Page() {
           </Card>
         </div>
 
-        {/* Revenue by Customer */}
         <Card>
           <CardHeader>
             <CardTitle>Tržby podle zákazníků</CardTitle>
@@ -221,7 +218,6 @@ export default function Page() {
           </CardContent>
         </Card>
 
-        {/* Monthly Revenue */}
         <Card>
           <CardHeader>
             <CardTitle>Měsíční přehled</CardTitle>
@@ -289,7 +285,6 @@ export default function Page() {
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6">
-              {/* Header with Filter */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <h1 className="text-2xl font-bold">Reporty a statistiky</h1>
                 <Button onClick={handleExportCsv} disabled={exporting || loading}>
@@ -298,7 +293,6 @@ export default function Page() {
                 </Button>
               </div>
 
-              {/* Date Filter */}
               <Card>
                 <CardContent className="pt-6">
                   <form onSubmit={handleFilterSubmit} className="flex flex-col sm:flex-row items-end gap-4">

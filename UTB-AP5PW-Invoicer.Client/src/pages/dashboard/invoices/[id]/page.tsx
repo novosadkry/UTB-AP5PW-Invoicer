@@ -46,8 +46,9 @@ import { CustomerService } from "@/services/customer.service";
 import { PaymentService } from "@/services/payment.service";
 import type { Invoice, UpdateInvoiceDto } from "@/types/invoice";
 import type { Customer } from "@/types/customer";
-import type { Payment, CreatePaymentDto } from "@/types/payment";
+import type { Payment } from "@/types/payment";
 import { InvoiceForm } from "@/components/invoice-form";
+import { PaymentForm } from "@/components/payment-form";
 import { toast } from "sonner";
 
 export default function Page() {
@@ -71,9 +72,6 @@ export default function Page() {
   const [shareLink, setShareLink] = useState<string | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [isPaymentDrawerOpen, setIsPaymentDrawerOpen] = useState(false);
-  const [paymentAmount, setPaymentAmount] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("");
-  const [paymentDate, setPaymentDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [savingPayment, setSavingPayment] = useState(false);
 
   const loadCustomers = useCallback(async () => {
@@ -222,34 +220,6 @@ export default function Page() {
     if (shareLink) {
       navigator.clipboard.writeText(shareLink);
       toast.success("Odkaz byl zkopírován do schránky");
-    }
-  }
-
-  async function handleAddPayment(e: React.FormEvent) {
-    e.preventDefault();
-    if (!invoice) return;
-    setSavingPayment(true);
-    try {
-      const payment: CreatePaymentDto = {
-        invoiceId: invoice.id,
-        amount: parseFloat(paymentAmount),
-        paymentDate: paymentDate,
-        paymentMethod: paymentMethod,
-      };
-      await paymentService.create(payment);
-      toast.success("Platba byla přidána");
-      setIsPaymentDrawerOpen(false);
-      setPaymentAmount("");
-      setPaymentMethod("");
-      // Reload payments and invoice
-      const paymentsData = await paymentService.getByInvoice(invoice.id);
-      setPayments(paymentsData);
-      setInvoice(await loadInvoice());
-    } catch (error) {
-      console.error("Failed to add payment:", error);
-      toast.error("Nepodařilo se přidat platbu");
-    } finally {
-      setSavingPayment(false);
     }
   }
 
@@ -420,7 +390,6 @@ export default function Page() {
             </div>
           </div>
 
-          {/* Payments Section */}
           <div className="pt-4 border-t">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-semibold">Platby</h3>
@@ -566,7 +535,6 @@ export default function Page() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Share Dialog */}
       <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -584,55 +552,35 @@ export default function Page() {
         </DialogContent>
       </Dialog>
 
-      {/* Payment Drawer */}
       <Drawer open={isPaymentDrawerOpen} onOpenChange={setIsPaymentDrawerOpen}>
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>Přidat platbu</DrawerTitle>
           </DrawerHeader>
           <div className="px-4 pb-4">
-            <form onSubmit={handleAddPayment} className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="paymentAmount" className="text-sm font-medium">Částka (Kč)</label>
-                <Input
-                  id="paymentAmount"
-                  type="number"
-                  step="0.01"
-                  value={paymentAmount}
-                  onChange={(e) => setPaymentAmount(e.target.value)}
-                  required
-                  placeholder="0.00"
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="paymentMethod" className="text-sm font-medium">Způsob platby</label>
-                <Input
-                  id="paymentMethod"
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  required
-                  placeholder="např. Bankovní převod"
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="paymentDate" className="text-sm font-medium">Datum platby</label>
-                <Input
-                  id="paymentDate"
-                  type="date"
-                  value={paymentDate}
-                  onChange={(e) => setPaymentDate(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="flex gap-2 justify-end">
-                <Button type="button" variant="outline" onClick={() => setIsPaymentDrawerOpen(false)}>
-                  Zrušit
-                </Button>
-                <Button type="submit" disabled={savingPayment}>
-                  {savingPayment ? "Ukládám..." : "Přidat platbu"}
-                </Button>
-              </div>
-            </form>
+            {invoice && (
+              <PaymentForm
+                invoiceId={invoice.id}
+                onSubmit={async (payment) => {
+                  setSavingPayment(true);
+                  try {
+                    await paymentService.create(payment);
+                    toast.success("Platba byla přidána");
+                    setIsPaymentDrawerOpen(false);
+                    const paymentsData = await paymentService.getByInvoice(invoice.id);
+                    setPayments(paymentsData);
+                    setInvoice(await loadInvoice());
+                  } catch (error) {
+                    console.error("Failed to add payment:", error);
+                    toast.error("Nepodařilo se přidat platbu");
+                  } finally {
+                    setSavingPayment(false);
+                  }
+                }}
+                onCancel={() => setIsPaymentDrawerOpen(false)}
+                isLoading={savingPayment}
+              />
+            )}
           </div>
         </DrawerContent>
       </Drawer>
