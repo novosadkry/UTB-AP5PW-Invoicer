@@ -1,4 +1,6 @@
-﻿export interface DashboardSummary {
+﻿import type { InvoiceStatus } from './invoice';
+
+export interface DashboardSummary {
   totalInvoices: number;
   unpaidInvoices: number;
   overdueInvoices: number;
@@ -12,6 +14,6 @@ export interface InvoiceSummary {
   customerName: string | null;
   issueDate: string;
   dueDate: string;
-  status: string;
+  status: InvoiceStatus;
   totalAmount: number;
 }

@@ -9,7 +9,7 @@ namespace UTB_AP5PW_Invoicer.Domain.Entities
         public int InvoiceId { get; set; }
 
         [Required]
-        public DateTime PaymentDate { get; set; }
+        public DateTimeOffset PaymentDate { get; set; }
 
         [Required]
         public decimal Amount { get; set; }

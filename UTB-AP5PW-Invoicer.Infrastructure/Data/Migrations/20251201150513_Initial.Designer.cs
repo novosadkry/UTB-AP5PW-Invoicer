@@ -12,7 +12,7 @@ using UTB_AP5PW_Invoicer.Infrastructure.Data;
 namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251126162925_Initial")]
+    [Migration("20251201150513_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -45,7 +45,7 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Dic")
@@ -58,7 +58,7 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("UserId")
@@ -79,25 +79,27 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("CustomerId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("DueDate")
+                    b.Property<DateTimeOffset>("DueDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("InvoiceNumber")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("IssueDate")
+                    b.Property<DateTimeOffset>("IssueDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
+                    b.Property<string>("ShareToken")
                         .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("numeric");
@@ -105,7 +107,7 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                     b.Property<decimal>("TotalVat")
                         .HasColumnType("numeric");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("UserId")
@@ -128,7 +130,7 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
@@ -150,7 +152,7 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("numeric");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("VatRate")
@@ -160,7 +162,7 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
 
                     b.HasIndex("InvoiceId");
 
-                    b.ToTable("InvoiceItem");
+                    b.ToTable("InvoiceItems");
                 });
 
             modelBuilder.Entity("UTB_AP5PW_Invoicer.Domain.Entities.Payment", b =>
@@ -174,20 +176,20 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("InvoiceId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("PaymentDate")
+                    b.Property<DateTimeOffset>("PaymentDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
@@ -205,8 +207,20 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<string>("CompanyAddress")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CompanyName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CompanyPhone")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Dic")
+                        .HasColumnType("text");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -216,11 +230,14 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Ico")
+                        .HasColumnType("text");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("PasswordResetExpiry")
+                    b.Property<DateTimeOffset?>("PasswordResetExpiry")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("PasswordResetToken")
@@ -229,7 +246,7 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
@@ -243,7 +260,7 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("ExpiresAt")
+                    b.Property<DateTimeOffset>("ExpiresAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("Revoked")

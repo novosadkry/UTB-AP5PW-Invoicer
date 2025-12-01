@@ -37,7 +37,6 @@ export function InvoiceForm({
       : "",
     status: invoice?.status || "draft",
     totalAmount: invoice?.totalAmount || 0,
-    totalVat: invoice?.totalVat || 0,
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -140,10 +139,10 @@ export function InvoiceForm({
                   <SelectValue placeholder="Vyberte stav" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="draft">Koncept</SelectItem>
-                  <SelectItem value="sent">Odesláno</SelectItem>
-                  <SelectItem value="paid">Zaplaceno</SelectItem>
-                  <SelectItem value="overdue">Po splatnosti</SelectItem>
+                  <SelectItem value="Draft">Koncept</SelectItem>
+                  <SelectItem value="Sent">Odesláno</SelectItem>
+                  <SelectItem value="Paid">Zaplaceno</SelectItem>
+                  <SelectItem value="Overdue">Po splatnosti</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
@@ -183,19 +182,6 @@ export function InvoiceForm({
                   step="0.01"
                   value={formData.totalAmount}
                   onChange={(e) => handleChange("totalAmount", parseFloat(e.target.value) || 0)}
-                  disabled={isLoading}
-                  required
-                />
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor="totalVat">DPH (Kč)</FieldLabel>
-                <Input
-                  id="totalVat"
-                  type="number"
-                  step="0.01"
-                  value={formData.totalVat}
-                  onChange={(e) => handleChange("totalVat", parseFloat(e.target.value) || 0)}
                   disabled={isLoading}
                   required
                 />

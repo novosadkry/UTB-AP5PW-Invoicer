@@ -19,6 +19,13 @@ namespace UTB_AP5PW_Invoicer.Domain.Entities
         public UserRole Role { get; set; }
 
         public string? PasswordResetToken { get; set; }
-        public DateTime? PasswordResetExpiry { get; set; }
+        public DateTimeOffset? PasswordResetExpiry { get; set; }
+
+        // Company/Business information
+        public string? CompanyName { get; set; }
+        public string? Ico { get; set; }
+        public string? Dic { get; set; }
+        public string? CompanyAddress { get; set; }
+        public string? CompanyPhone { get; set; }
     }
 }

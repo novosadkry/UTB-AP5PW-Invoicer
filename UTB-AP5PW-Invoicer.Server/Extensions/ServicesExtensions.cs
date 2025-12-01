@@ -1,14 +1,18 @@
 ﻿using System.Reflection;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using UTB_AP5PW_Invoicer.Application.Services;
 using UTB_AP5PW_Invoicer.Infrastructure.Configuration;
 using UTB_AP5PW_Invoicer.Infrastructure.Data;
+using UTB_AP5PW_Invoicer.Server.Utilities;
 
 namespace UTB_AP5PW_Invoicer.Server.Extensions
 {
@@ -35,6 +39,25 @@ namespace UTB_AP5PW_Invoicer.Server.Extensions
                     .AddClasses(classes => classes.AssignableTo<IService>())
                     .AsImplementedInterfaces()
                     .WithScopedLifetime());
+        }
+
+        public static IServiceCollection AddControllers(
+            this IServiceCollection services,
+            IConfiguration configuration)
+        {
+            services
+                .AddControllers(options =>
+                {
+                    options.Conventions.Add(
+                        new RouteTokenTransformerConvention(new SlugifyParameterTransformer()));
+                })
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(
+                        new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, false));
+                });
+
+            return services;
         }
 
         public static IServiceCollection AddAuthentication(

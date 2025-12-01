@@ -17,7 +17,7 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Authentication
         [Required]
         public string Token { get; set; }
 
-        public DateTime ExpiresAt { get; set; }
+        public DateTimeOffset ExpiresAt { get; set; }
 
         public bool Revoked { get; set; }
 

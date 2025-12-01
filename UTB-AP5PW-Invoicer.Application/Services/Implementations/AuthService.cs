@@ -38,7 +38,7 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
                 new Claim(ClaimTypes.Name, user.FullName)
             };
 
-            var expiresAt = DateTime.UtcNow.AddMinutes(15);
+            var expiresAt = DateTimeOffset.UtcNow.AddMinutes(15);
             var token = GenerateJwtToken(claims, expiresAt);
 
             return Task.FromResult(token);
@@ -52,7 +52,7 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
             {
                 Token = token,
                 UserId = user.Id,
-                ExpiresAt = DateTime.UtcNow.AddDays(7)
+                ExpiresAt = DateTimeOffset.UtcNow.AddDays(7)
             });
 
             var refreshToken = await _mediator.Send(new GetRefreshTokenQuery(id));
@@ -69,7 +69,7 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
         public async Task<UserDto?> ValidateRefreshTokenAsync(string token)
         {
             var refreshToken = await _mediator.Send(new GetRefreshTokenByValueQuery(token));
-            if (refreshToken == null || refreshToken.ExpiresAt < DateTime.UtcNow || refreshToken.Revoked)
+            if (refreshToken == null || refreshToken.ExpiresAt < DateTimeOffset.UtcNow || refreshToken.Revoked)
                 return null;
 
             return await _mediator.Send(new GetUserQuery(refreshToken.UserId));
@@ -89,14 +89,14 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
                 await _mediator.Send(new RevokeRefreshTokenCommand(refreshToken.Id));
         }
 
-        private string GenerateJwtToken(IEnumerable<Claim> claims, DateTime expires)
+        private string GenerateJwtToken(IEnumerable<Claim> claims, DateTimeOffset expires)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.SecretKey));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: expires,
+                expires: expires.UtcDateTime,
                 signingCredentials: credentials
             );
 

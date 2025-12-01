@@ -15,19 +15,18 @@ namespace UTB_AP5PW_Invoicer.Domain.Entities
         public string InvoiceNumber { get; set; }
 
         [Required]
-        public DateTime IssueDate { get; set; }
+        public DateTimeOffset IssueDate { get; set; }
 
         [Required]
-        public DateTime DueDate { get; set; }
+        public DateTimeOffset DueDate { get; set; }
 
         [Required]
-        public string Status { get; set; }
+        public InvoiceStatus Status { get; set; }
 
         [Required]
         public decimal TotalAmount { get; set; }
 
-        [Required]
-        public decimal TotalVat { get; set; }
+        public string? ShareToken { get; set; }
 
         public User User { get; set; }
         public Customer? Customer { get; set; }

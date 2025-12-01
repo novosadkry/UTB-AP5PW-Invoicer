@@ -1,4 +1,6 @@
-﻿namespace UTB_AP5PW_Invoicer.Application.DTOs
+﻿using UTB_AP5PW_Invoicer.Domain.Entities;
+
+namespace UTB_AP5PW_Invoicer.Application.DTOs
 {
     public record InvoiceDto
     {
@@ -6,12 +8,12 @@
         public int UserId { get; set; }
         public int? CustomerId { get; set; }
         public string InvoiceNumber { get; set; }
-        public DateTime IssueDate { get; set; }
-        public DateTime DueDate { get; set; }
-        public string Status { get; set; }
+        public DateTimeOffset IssueDate { get; set; }
+        public DateTimeOffset DueDate { get; set; }
+        public InvoiceStatus Status { get; set; }
         public decimal TotalAmount { get; set; }
-        public decimal TotalVat { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
+        public string? ShareToken { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
+        public DateTimeOffset UpdatedAt { get; set; }
     }
 }

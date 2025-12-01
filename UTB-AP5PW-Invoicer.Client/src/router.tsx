@@ -7,6 +7,8 @@ import Invoices from "@pages/dashboard/invoices/page";
 import Invoice from "@pages/dashboard/invoices/[id]/page";
 import Customers from "@pages/dashboard/customers/page";
 import Customer from "@pages/dashboard/customers/[id]/page";
+import Profile from "@pages/dashboard/profile/page";
+import Reports from "@pages/dashboard/reports/page";
 import ProtectedRoute from "@components/protected-route";
 import NotFound from "@pages/errors/404";
 
@@ -40,6 +42,16 @@ export default function AppRouter() {
         <Route path="/dashboard/customers/:id" element={
           <ProtectedRoute>
             <Customer />
+          </ProtectedRoute>
+        } />
+        <Route path="/dashboard/profile" element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        } />
+        <Route path="/dashboard/reports" element={
+          <ProtectedRoute>
+            <Reports />
           </ProtectedRoute>
         } />
         <Route path="*" element={<NotFound />} />

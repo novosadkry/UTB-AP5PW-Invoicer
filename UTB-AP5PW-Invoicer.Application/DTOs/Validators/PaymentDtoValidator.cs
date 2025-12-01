@@ -12,7 +12,10 @@ namespace UTB_AP5PW_Invoicer.Application.DTOs.Validators
             RuleFor(x => x.Amount)
                 .GreaterThan(0);
 
-            RuleFor(x => x.Method)
+            RuleFor(x => x.PaymentDate)
+                .NotEmpty();
+
+            RuleFor(x => x.PaymentMethod)
                 .NotEmpty()
                 .MaximumLength(100);
         }

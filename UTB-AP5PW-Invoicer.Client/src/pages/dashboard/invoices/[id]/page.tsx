@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate, useParams, Link } from "react-router";
-import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, Download, Share2, Copy } from "lucide-react";
 import { SidebarInset, SidebarProvider } from "@components/ui/sidebar.tsx";
 import { AppSidebar } from "@components/app-sidebar.tsx";
 import { SiteHeader } from "@components/site-header.tsx";
@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@components/ui/card.ts
 import { Badge } from "@components/ui/badge.tsx";
 import { Button } from "@components/ui/button.tsx";
 import { Skeleton } from "@components/ui/skeleton.tsx";
+import { Input } from "@components/ui/input.tsx";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -32,11 +33,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@components/ui/dialog";
 import { useAxiosPrivate } from "@/hooks/use-axios";
 import { InvoiceService } from "@/services/invoice.service";
 import { CustomerService } from "@/services/customer.service";
+import { PaymentService } from "@/services/payment.service";
 import type { Invoice, UpdateInvoiceDto } from "@/types/invoice";
 import type { Customer } from "@/types/customer";
+import type { Payment, CreatePaymentDto } from "@/types/payment";
 import { InvoiceForm } from "@/components/invoice-form";
 import { toast } from "sonner";
 
@@ -46,6 +56,7 @@ export default function Page() {
   const api = useAxiosPrivate();
   const invoiceService = useMemo(() => new InvoiceService(api), [api]);
   const customerService = useMemo(() => new CustomerService(api), [api]);
+  const paymentService = useMemo(() => new PaymentService(api), [api]);
 
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -56,6 +67,14 @@ export default function Page() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [shareLink, setShareLink] = useState<string | null>(null);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [isPaymentDrawerOpen, setIsPaymentDrawerOpen] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [paymentDate, setPaymentDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [savingPayment, setSavingPayment] = useState(false);
 
   const loadCustomers = useCallback(async () => {
     setCustomersLoading(true);
@@ -114,6 +133,15 @@ export default function Page() {
       } else {
         setCustomer(null);
       }
+      // Load payments
+      if (invoice) {
+        try {
+          const paymentsData = await paymentService.getByInvoice(invoice.id);
+          setPayments(paymentsData);
+        } catch (error) {
+          console.error("Failed to load payments:", error);
+        }
+      }
     });
   }, []);
 
@@ -158,15 +186,96 @@ export default function Page() {
     }
   }
 
+  async function handleDownloadPdf() {
+    if (!invoice) return;
+    try {
+      const blob = await invoiceService.downloadPdf(invoice.id);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `faktura-${invoice.invoiceNumber}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success("PDF bylo úspěšně staženo");
+    } catch (error) {
+      console.error("Failed to download PDF:", error);
+      toast.error("Nepodařilo se stáhnout PDF");
+    }
+  }
+
+  async function handleShare() {
+    if (!invoice) return;
+    try {
+      const result = await invoiceService.generateShareLink(invoice.id);
+      const baseUrl = window.location.origin;
+      setShareLink(`${baseUrl}/shared/invoice/${result.shareToken}`);
+      setIsShareDialogOpen(true);
+    } catch (error) {
+      console.error("Failed to generate share link:", error);
+      toast.error("Nepodařilo se vygenerovat odkaz pro sdílení");
+    }
+  }
+
+  function copyShareLink() {
+    if (shareLink) {
+      navigator.clipboard.writeText(shareLink);
+      toast.success("Odkaz byl zkopírován do schránky");
+    }
+  }
+
+  async function handleAddPayment(e: React.FormEvent) {
+    e.preventDefault();
+    if (!invoice) return;
+    setSavingPayment(true);
+    try {
+      const payment: CreatePaymentDto = {
+        invoiceId: invoice.id,
+        amount: parseFloat(paymentAmount),
+        paymentDate: paymentDate,
+        paymentMethod: paymentMethod,
+      };
+      await paymentService.create(payment);
+      toast.success("Platba byla přidána");
+      setIsPaymentDrawerOpen(false);
+      setPaymentAmount("");
+      setPaymentMethod("");
+      // Reload payments and invoice
+      const paymentsData = await paymentService.getByInvoice(invoice.id);
+      setPayments(paymentsData);
+      setInvoice(await loadInvoice());
+    } catch (error) {
+      console.error("Failed to add payment:", error);
+      toast.error("Nepodařilo se přidat platbu");
+    } finally {
+      setSavingPayment(false);
+    }
+  }
+
+  async function handleDeletePayment(paymentId: number) {
+    if (!invoice) return;
+    try {
+      await paymentService.delete(paymentId);
+      toast.success("Platba byla smazána");
+      const paymentsData = await paymentService.getByInvoice(invoice.id);
+      setPayments(paymentsData);
+      setInvoice(await loadInvoice());
+    } catch (error) {
+      console.error("Failed to delete payment:", error);
+      toast.error("Nepodařilo se smazat platbu");
+    }
+  }
+
   const getStatusBadge = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "paid":
+    switch (status) {
+      case "Paid":
         return <Badge variant="default">Zaplaceno</Badge>;
-      case "sent":
+      case "Sent":
         return <Badge variant="outline">Odesláno</Badge>;
-      case "overdue":
+      case "Overdue":
         return <Badge variant="destructive">Po splatnosti</Badge>;
-      case "draft":
+      case "Draft":
         return <Badge variant="secondary">Koncept</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
@@ -226,7 +335,24 @@ export default function Page() {
             <Button
               variant="outline"
               size="icon"
+              onClick={handleDownloadPdf}
+              title="Stáhnout PDF"
+            >
+              <Download className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleShare}
+              title="Sdílet"
+            >
+              <Share2 className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
               onClick={() => setIsDrawerOpen(true)}
+              title="Upravit"
             >
               <Pencil className="w-4 h-4" />
             </Button>
@@ -234,6 +360,7 @@ export default function Page() {
               variant="destructive"
               size="icon"
               onClick={() => setIsDeleteDialogOpen(true)}
+              title="Smazat"
             >
               <Trash2 className="w-4 h-4" />
             </Button>
@@ -255,10 +382,6 @@ export default function Page() {
                 <div className="flex justify-between">
                   <dt className="text-muted-foreground">Datum splatnosti</dt>
                   <dd>{new Date(invoice.dueDate).toLocaleDateString("cs-CZ")}</dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">DPH</dt>
-                  <dd>{invoice.totalVat.toFixed(2)} Kč</dd>
                 </div>
               </dl>
             </div>
@@ -295,6 +418,54 @@ export default function Page() {
                 </p>
               )}
             </div>
+          </div>
+
+          {/* Payments Section */}
+          <div className="pt-4 border-t">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-semibold">Platby</h3>
+              <Button variant="outline" size="sm" onClick={() => setIsPaymentDrawerOpen(true)}>
+                Přidat platbu
+              </Button>
+            </div>
+            {payments.length > 0 ? (
+              <div className="space-y-2">
+                {payments.map((payment) => (
+                  <div key={payment.id} className="flex items-center justify-between p-2 bg-muted rounded-md">
+                    <div className="text-sm">
+                      <span className="font-medium">{payment.amount.toFixed(2)} Kč</span>
+                      <span className="text-muted-foreground ml-2">
+                        {payment.paymentMethod} • {new Date(payment.paymentDate).toLocaleDateString("cs-CZ")}
+                      </span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => handleDeletePayment(payment.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+                <div className="flex justify-between text-sm pt-2 border-t">
+                  <span className="text-muted-foreground">Celkem zaplaceno:</span>
+                  <span className="font-medium">
+                    {payments.reduce((sum, p) => sum + p.amount, 0).toFixed(2)} Kč
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Zbývá k úhradě:</span>
+                  <span className="font-medium">
+                    {(invoice.totalAmount - payments.reduce((sum, p) => sum + p.amount, 0)).toFixed(2)} Kč
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                K této faktuře zatím nejsou žádné platby.
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -394,6 +565,77 @@ export default function Page() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Share Dialog */}
+      <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Sdílet fakturu</DialogTitle>
+            <DialogDescription>
+              Zkopírujte odkaz pro sdílení faktury s klientem.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2">
+            <Input value={shareLink || ""} readOnly className="flex-1" />
+            <Button onClick={copyShareLink} variant="outline">
+              <Copy className="w-4 h-4" />
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Drawer */}
+      <Drawer open={isPaymentDrawerOpen} onOpenChange={setIsPaymentDrawerOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Přidat platbu</DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-4">
+            <form onSubmit={handleAddPayment} className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="paymentAmount" className="text-sm font-medium">Částka (Kč)</label>
+                <Input
+                  id="paymentAmount"
+                  type="number"
+                  step="0.01"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  required
+                  placeholder="0.00"
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="paymentMethod" className="text-sm font-medium">Způsob platby</label>
+                <Input
+                  id="paymentMethod"
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  required
+                  placeholder="např. Bankovní převod"
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="paymentDate" className="text-sm font-medium">Datum platby</label>
+                <Input
+                  id="paymentDate"
+                  type="date"
+                  value={paymentDate}
+                  onChange={(e) => setPaymentDate(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button type="button" variant="outline" onClick={() => setIsPaymentDrawerOpen(false)}>
+                  Zrušit
+                </Button>
+                <Button type="submit" disabled={savingPayment}>
+                  {savingPayment ? "Ukládám..." : "Přidat platbu"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </SidebarProvider>
   );
 }

@@ -9,9 +9,16 @@ namespace UTB_AP5PW_Invoicer.Application.DTOs
         public string PasswordHash { get; set; }
         public string FullName { get; set; }
         public UserRole Role { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
+        public DateTimeOffset UpdatedAt { get; set; }
         public string? PasswordResetToken { get; set; }
-        public DateTime? PasswordResetExpiry { get; set; }
+        public DateTimeOffset? PasswordResetExpiry { get; set; }
+
+        // Company/Business information
+        public string? CompanyName { get; set; }
+        public string? Ico { get; set; }
+        public string? Dic { get; set; }
+        public string? CompanyAddress { get; set; }
+        public string? CompanyPhone { get; set; }
     }
 }

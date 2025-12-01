@@ -5,7 +5,9 @@ using UTB_AP5PW_Invoicer.Application.DTOs;
 using UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.Create;
 using UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.Delete;
 using UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.Update;
+using UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.GenerateShareToken;
 using UTB_AP5PW_Invoicer.Application.Features.Invoices.Queries.Get;
+using UTB_AP5PW_Invoicer.Application.Features.Invoices.Queries.GetByShareToken;
 using UTB_AP5PW_Invoicer.Application.Features.Invoices.Queries.List;
 using UTB_AP5PW_Invoicer.Application.Services.Interfaces;
 
@@ -29,6 +31,11 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
             return await _mediator.Send(new GetInvoiceQuery(id));
         }
 
+        public async Task<InvoiceDto?> GetInvoiceByShareTokenAsync(string token)
+        {
+            return await _mediator.Send(new GetInvoiceByShareTokenQuery(token));
+        }
+
         public async Task CreateInvoiceAsync(InvoiceDto invoice)
         {
             await _invoiceValidator.ValidateAndThrowAsync(invoice);
@@ -49,6 +56,11 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
         {
             await _invoiceValidator.ValidateAndThrowAsync(invoice);
             await _mediator.Send(_mapper.Map<UpdateInvoiceCommand>(invoice));
+        }
+
+        public async Task<string?> GenerateShareTokenAsync(int invoiceId)
+        {
+            return await _mediator.Send(new GenerateShareTokenCommand(invoiceId));
         }
     }
 }

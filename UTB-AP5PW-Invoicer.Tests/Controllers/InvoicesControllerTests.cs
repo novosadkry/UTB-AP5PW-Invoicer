@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -10,6 +11,28 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
 {
     public class InvoicesControllerTests
     {
+        private readonly Mock<IInvoiceService> _mockInvoiceService;
+        private readonly Mock<IUserService> _mockUserService;
+        private readonly Mock<ICustomerService> _mockCustomerService;
+        private readonly Mock<IMediator> _mockMediator;
+
+        public InvoicesControllerTests()
+        {
+            _mockInvoiceService = new Mock<IInvoiceService>();
+            _mockUserService = new Mock<IUserService>();
+            _mockCustomerService = new Mock<ICustomerService>();
+            _mockMediator = new Mock<IMediator>();
+        }
+
+        private InvoicesController CreateController()
+        {
+            return new InvoicesController(
+                _mockInvoiceService.Object,
+                _mockUserService.Object,
+                _mockCustomerService.Object,
+                _mockMediator.Object);
+        }
+
         private static InvoiceDto GetTestInvoice(int id)
         {
             return new InvoiceDto
@@ -23,75 +46,67 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
         [Fact]
         public async Task GetInvoices_ReturnsListFromService()
         {
-            var mockService = new Mock<IInvoiceService>();
             var invoices = new List<InvoiceDto> { GetTestInvoice(1), GetTestInvoice(2) };
-            mockService.Setup(s => s.ListInvoicesAsync()).ReturnsAsync(invoices);
+            _mockInvoiceService.Setup(s => s.ListInvoicesAsync()).ReturnsAsync(invoices);
 
-            var controller = new InvoicesController(mockService.Object);
+            var controller = CreateController();
             var result = await controller.GetInvoices();
 
             Assert.Equal(2, result.Count());
-            mockService.Verify(s => s.ListInvoicesAsync(), Times.Once);
+            _mockInvoiceService.Verify(s => s.ListInvoicesAsync(), Times.Once);
         }
 
         [Fact]
         public async Task GetInvoice_ReturnsOk_WhenInvoiceExists()
         {
-            var mockService = new Mock<IInvoiceService>();
             var invoice = GetTestInvoice(1);
-            mockService.Setup(s => s.GetInvoiceByIdAsync(1)).ReturnsAsync(invoice);
+            _mockInvoiceService.Setup(s => s.GetInvoiceByIdAsync(1)).ReturnsAsync(invoice);
 
-            var controller = new InvoicesController(mockService.Object);
+            var controller = CreateController();
             var result = await controller.GetInvoice(1);
 
             var ok = Assert.IsType<OkObjectResult>(result.Result);
             Assert.Equal(invoice, ok.Value);
-            mockService.Verify(s => s.GetInvoiceByIdAsync(1), Times.Once);
+            _mockInvoiceService.Verify(s => s.GetInvoiceByIdAsync(1), Times.Once);
         }
 
         [Fact]
         public async Task GetInvoice_ReturnsNotFound_WhenInvoiceDoesNotExist()
         {
-            var mockService = new Mock<IInvoiceService>();
-            mockService.Setup(s => s.GetInvoiceByIdAsync(1)).ReturnsAsync((InvoiceDto?)null);
+            _mockInvoiceService.Setup(s => s.GetInvoiceByIdAsync(1)).ReturnsAsync((InvoiceDto?)null);
 
-            var controller = new InvoicesController(mockService.Object);
+            var controller = CreateController();
             var result = await controller.GetInvoice(1);
 
             Assert.IsType<NotFoundResult>(result.Result);
-            mockService.Verify(s => s.GetInvoiceByIdAsync(1), Times.Once);
+            _mockInvoiceService.Verify(s => s.GetInvoiceByIdAsync(1), Times.Once);
         }
 
         [Fact]
         public async Task CreateInvoice_CallsService_AndReturnsCreatedAt()
         {
-            var mockService = new Mock<IInvoiceService>();
             var httpContext = new DefaultHttpContext
             {
                 User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, "1")]))
             };
             var invoice = GetTestInvoice(1);
 
-            var controller = new InvoicesController(mockService.Object)
-            {
-                ControllerContext = new ControllerContext { HttpContext = httpContext }
-            };
+            var controller = CreateController();
+            controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
             var result = await controller.CreateInvoice(invoice);
 
             Assert.IsType<CreatedAtActionResult>(result);
-            mockService.Verify(s => s.CreateInvoiceAsync(invoice), Times.Once);
+            _mockInvoiceService.Verify(s => s.CreateInvoiceAsync(invoice), Times.Once);
         }
 
         [Fact]
         public async Task DeleteInvoice_CallsService_AndReturnsOk()
         {
-            var mockService = new Mock<IInvoiceService>();
-
-            var controller = new InvoicesController(mockService.Object);
+            var controller = CreateController();
             var result = await controller.DeleteInvoice(1);
 
             Assert.IsType<OkResult>(result);
-            mockService.Verify(s => s.DeleteInvoiceAsync(It.Is<InvoiceDto>(i => i.Id == 1)), Times.Once);
+            _mockInvoiceService.Verify(s => s.DeleteInvoiceAsync(It.Is<InvoiceDto>(i => i.Id == 1)), Times.Once);
         }
     }
 }

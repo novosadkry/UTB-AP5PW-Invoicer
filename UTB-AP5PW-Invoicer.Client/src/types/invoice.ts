@@ -1,10 +1,12 @@
+export type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue';
+
 export interface Invoice {
   id: number;
   customerId: number | null;
   invoiceNumber: string;
   issueDate: string;
   dueDate: string;
-  status: string;
+  status: InvoiceStatus;
   totalAmount: number;
   totalVat: number;
   createdAt: string;
@@ -16,7 +18,7 @@ export interface CreateInvoiceDto {
   invoiceNumber: string;
   issueDate: string;
   dueDate: string;
-  status: string;
+  status: InvoiceStatus;
   totalAmount: number;
   totalVat: number;
 }

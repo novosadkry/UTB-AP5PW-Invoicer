@@ -16,10 +16,7 @@ namespace UTB_AP5PW_Invoicer.Application.DTOs.Validators
             RuleFor(x => x.Quantity)
                 .GreaterThan(0);
 
-            RuleFor(x => x.VatAmount)
-                .GreaterThanOrEqualTo(0);
-
-            RuleFor(x => x.LineTotal)
+            RuleFor(x => x.TotalPrice)
                 .GreaterThanOrEqualTo(0);
         }
     }

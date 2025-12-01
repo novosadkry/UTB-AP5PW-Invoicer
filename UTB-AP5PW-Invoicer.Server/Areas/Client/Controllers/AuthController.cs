@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using UTB_AP5PW_Invoicer.Application.Services.Interfaces;
 using UTB_AP5PW_Invoicer.Server.Areas.Client.Models;
+using UTB_AP5PW_Invoicer.Server.Extensions;
 
 namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
 {
@@ -162,6 +164,48 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
                 accessToken,
                 user = new { user.Id, user.Email, user.FullName }
             });
+        }
+
+        [HttpPost("change-password")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordModel model)
+        {
+            var userId = HttpContext.User.GetUserId();
+            var result = await _userService.ChangePasswordAsync(userId, model.CurrentPassword, model.NewPassword);
+
+            if (!result)
+                return BadRequest("Current password is incorrect or unable to change password");
+
+            return Ok();
+        }
+
+        [HttpPost("forgot-password")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult> ForgotPassword([FromBody] ForgotPasswordModel model)
+        {
+            var token = await _userService.ForgotPasswordAsync(model.Email);
+
+            _logger.LogInformation("Created password reset token for User[Email={Email}]: {Token}", model.Email, token);
+
+            // TODO: await _emailService.SendPasswordResetEmail(model.Email, token);
+
+            return Ok();
+        }
+
+        [HttpPost("reset-password")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordModel model)
+        {
+            var result = await _userService.ResetPasswordAsync(model.Token, model.NewPassword);
+
+            if (!result)
+                return BadRequest("Invalid or expired reset token");
+
+            return Ok();
         }
     }
 }

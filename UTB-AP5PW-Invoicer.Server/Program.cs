@@ -1,6 +1,5 @@
-using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using QuestPDF.Infrastructure;
 using UTB_AP5PW_Invoicer.Server.Extensions;
-using UTB_AP5PW_Invoicer.Server.Utilities;
 
 namespace UTB_AP5PW_Invoicer.Server
 {
@@ -8,22 +7,19 @@ namespace UTB_AP5PW_Invoicer.Server
     {
         public static void Main(string[] args)
         {
+            QuestPDF.Settings.License = LicenseType.Community;
+
             var builder = WebApplication.CreateBuilder(args);
             builder.AddServiceDefaults();
 
             builder.Services
                 .AddDatabase(builder.Configuration)
                 .AddConfigurationOptions(builder.Configuration)
+                .AddControllers(builder.Configuration)
                 .AddAuthentication(builder.Configuration)
                 .AddServicesFromAssembly(builder.Configuration)
                 .AddFeaturesFromAssembly(builder.Configuration)
                 .AddSwaggerApi(builder.Configuration);
-
-            builder.Services.AddControllers(options =>
-            {
-                options.Conventions.Add(
-                    new RouteTokenTransformerConvention(new SlugifyParameterTransformer()));
-            });
 
             var app = builder.Build();
 

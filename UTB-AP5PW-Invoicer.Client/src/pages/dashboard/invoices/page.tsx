@@ -156,14 +156,14 @@ export default function Page() {
   }
 
   const getStatusBadge = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "paid":
+    switch (status) {
+      case "Paid":
         return <Badge variant="default">Zaplaceno</Badge>;
-      case "sent":
+      case "Sent":
         return <Badge variant="outline">Odesláno</Badge>;
-      case "overdue":
+      case "Overdue":
         return <Badge variant="destructive">Po splatnosti</Badge>;
-      case "draft":
+      case "Draft":
         return <Badge variant="secondary">Koncept</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;

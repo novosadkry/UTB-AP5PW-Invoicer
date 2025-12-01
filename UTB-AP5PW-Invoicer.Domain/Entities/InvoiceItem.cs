@@ -18,13 +18,7 @@ namespace UTB_AP5PW_Invoicer.Domain.Entities
         public decimal UnitPrice { get; set; }
 
         [Required]
-        public decimal VatRate { get; set; }
-
-        [Required]
         public decimal TotalPrice { get; set; }
-
-        [Required]
-        public decimal TotalVat { get; set; }
 
         public Invoice Invoice { get; set; }
     }

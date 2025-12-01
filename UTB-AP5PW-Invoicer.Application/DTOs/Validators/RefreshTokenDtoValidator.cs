@@ -13,7 +13,7 @@ namespace UTB_AP5PW_Invoicer.Application.DTOs.Validators
                 .NotEmpty();
 
             RuleFor(x => x.ExpiresAt)
-                .GreaterThan(DateTime.UtcNow);
+                .GreaterThan(DateTimeOffset.UtcNow);
         }
     }
 }

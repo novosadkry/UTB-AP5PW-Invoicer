@@ -23,9 +23,14 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                     FullName = table.Column<string>(type: "text", nullable: false),
                     Role = table.Column<int>(type: "integer", nullable: false),
                     PasswordResetToken = table.Column<string>(type: "text", nullable: true),
-                    PasswordResetExpiry = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    PasswordResetExpiry = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    CompanyName = table.Column<string>(type: "text", nullable: true),
+                    Ico = table.Column<string>(type: "text", nullable: true),
+                    Dic = table.Column<string>(type: "text", nullable: true),
+                    CompanyAddress = table.Column<string>(type: "text", nullable: true),
+                    CompanyPhone = table.Column<string>(type: "text", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -45,8 +50,8 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                     Address = table.Column<string>(type: "text", nullable: false),
                     ContactEmail = table.Column<string>(type: "text", nullable: false),
                     ContactPhone = table.Column<string>(type: "text", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -66,7 +71,7 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                     RefreshTokenId = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<int>(type: "integer", nullable: false),
                     Token = table.Column<string>(type: "text", nullable: false),
-                    ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ExpiresAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Revoked = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -89,13 +94,14 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                     UserId = table.Column<int>(type: "integer", nullable: false),
                     CustomerId = table.Column<int>(type: "integer", nullable: true),
                     InvoiceNumber = table.Column<string>(type: "text", nullable: false),
-                    IssueDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    DueDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: false),
+                    IssueDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    DueDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
                     TotalAmount = table.Column<decimal>(type: "numeric", nullable: false),
                     TotalVat = table.Column<decimal>(type: "numeric", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    ShareToken = table.Column<string>(type: "text", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -114,7 +120,7 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "InvoiceItem",
+                name: "InvoiceItems",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -126,14 +132,14 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                     VatRate = table.Column<decimal>(type: "numeric", nullable: false),
                     TotalPrice = table.Column<decimal>(type: "numeric", nullable: false),
                     TotalVat = table.Column<decimal>(type: "numeric", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_InvoiceItem", x => x.Id);
+                    table.PrimaryKey("PK_InvoiceItems", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_InvoiceItem_Invoices_InvoiceId",
+                        name: "FK_InvoiceItems_Invoices_InvoiceId",
                         column: x => x.InvoiceId,
                         principalTable: "Invoices",
                         principalColumn: "Id",
@@ -147,11 +153,11 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     InvoiceId = table.Column<int>(type: "integer", nullable: false),
-                    PaymentDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    PaymentDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Amount = table.Column<decimal>(type: "numeric", nullable: false),
                     PaymentMethod = table.Column<string>(type: "text", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -170,8 +176,8 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_InvoiceItem_InvoiceId",
-                table: "InvoiceItem",
+                name: "IX_InvoiceItems_InvoiceId",
+                table: "InvoiceItems",
                 column: "InvoiceId");
 
             migrationBuilder.CreateIndex(
@@ -205,7 +211,7 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "InvoiceItem");
+                name: "InvoiceItems");
 
             migrationBuilder.DropTable(
                 name: "Payments");

@@ -191,18 +191,18 @@ export default function Page() {
                               {new Date(invoice.dueDate).toLocaleDateString("cs-CZ")}
                             </td>
                             <td className="py-2 pr-4">
-                              {invoice.status.toLowerCase() === "paid" && (
+                              {invoice.status === "Paid" && (
                                 <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
                                   Uhrazeno
                                 </span>
                               )}
-                              {invoice.status.toLowerCase() !== "paid" &&
-                                invoice.status.toLowerCase() !== "overdue" && (
+                              {invoice.status !== "Paid" &&
+                                invoice.status !== "Overdue" && (
                                   <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
                                     Neuhrazeno
                                   </span>
                                 )}
-                              {invoice.status.toLowerCase() === "overdue" && (
+                              {invoice.status === "Overdue" && (
                                 <span className="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 dark:bg-red-500/10 dark:text-red-300">
                                   Po splatnosti
                                 </span>

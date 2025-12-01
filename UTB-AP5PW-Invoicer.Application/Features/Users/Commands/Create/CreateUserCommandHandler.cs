@@ -12,8 +12,8 @@ namespace UTB_AP5PW_Invoicer.Application.Features.Users.Commands.Create
         {
             var user = mapper.Map<User>(request);
             user.Role = UserRole.User;
-            user.CreatedAt = DateTime.UtcNow;
-            user.UpdatedAt = DateTime.UtcNow;
+            user.CreatedAt = DateTimeOffset.UtcNow;
+            user.UpdatedAt = DateTimeOffset.UtcNow;
 
             dbContext.Users.Add(user);
             await dbContext.SaveChangesAsync(cancellationToken);

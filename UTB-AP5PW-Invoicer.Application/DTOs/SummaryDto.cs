@@ -13,8 +13,8 @@
     {
         public decimal TotalAmount { get; set; }
         public string Status { get; set; } = string.Empty;
-        public DateTime DueDate { get; set; }
-        public DateTime IssueDate { get; set; }
+        public DateTimeOffset DueDate { get; set; }
+        public DateTimeOffset IssueDate { get; set; }
         public string? CustomerName { get; set; }
         public string InvoiceNumber { get; set; } = string.Empty;
         public int Id { get; set; }

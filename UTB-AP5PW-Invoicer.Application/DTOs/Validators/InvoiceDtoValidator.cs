@@ -14,13 +14,9 @@ namespace UTB_AP5PW_Invoicer.Application.DTOs.Validators
                 .LessThanOrEqualTo(x => x.DueDate);
 
             RuleFor(x => x.Status)
-                .NotEmpty()
-                .MaximumLength(50);
+                .IsInEnum();
 
             RuleFor(x => x.TotalAmount)
-                .GreaterThanOrEqualTo(0);
-
-            RuleFor(x => x.TotalVat)
                 .GreaterThanOrEqualTo(0);
         }
     }

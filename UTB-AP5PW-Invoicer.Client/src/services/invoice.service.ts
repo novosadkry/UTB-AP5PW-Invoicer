@@ -34,4 +34,28 @@ export class InvoiceService {
   async delete(id: number): Promise<void> {
     await this.api.delete(`/invoices/${id}`);
   }
+
+  async downloadPdf(id: number): Promise<Blob> {
+    const response = await this.api.get(`/invoices/${id}/pdf`, {
+      responseType: 'blob'
+    });
+    return response.data;
+  }
+
+  async generateShareLink(id: number): Promise<{ shareToken: string }> {
+    const response = await this.api.post<{ shareToken: string }>(`/invoices/${id}/share`);
+    return response.data;
+  }
+
+  async getSharedInvoice(token: string): Promise<Invoice> {
+    const response = await this.api.get<Invoice>(`/invoices/shared/${token}`);
+    return response.data;
+  }
+
+  async downloadSharedPdf(token: string): Promise<Blob> {
+    const response = await this.api.get(`/invoices/shared/${token}/pdf`, {
+      responseType: 'blob'
+    });
+    return response.data;
+  }
 }

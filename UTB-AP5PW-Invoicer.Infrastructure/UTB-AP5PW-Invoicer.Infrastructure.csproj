@@ -17,4 +17,8 @@
     <ProjectReference Include="..\UTB-AP5PW-Invoicer.Domain\UTB-AP5PW-Invoicer.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\Migrations\" />
+  </ItemGroup>
+
 </Project>

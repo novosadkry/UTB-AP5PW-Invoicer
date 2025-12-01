@@ -7,12 +7,11 @@ namespace UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.Update
         public int Id { get; set; }
         public int? CustomerId { get; set; }
         public string InvoiceNumber { get; set; }
-        public DateTime IssueDate { get; set; }
-        public DateTime DueDate { get; set; }
+        public DateTimeOffset IssueDate { get; set; }
+        public DateTimeOffset DueDate { get; set; }
         public string Status { get; set; }
         public decimal TotalAmount { get; set; }
-        public decimal TotalVat { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
+        public DateTimeOffset UpdatedAt { get; set; }
     }
 }
