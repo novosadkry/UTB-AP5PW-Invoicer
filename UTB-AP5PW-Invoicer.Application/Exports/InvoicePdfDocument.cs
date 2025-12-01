@@ -4,7 +4,7 @@ using QuestPDF.Infrastructure;
 using UTB_AP5PW_Invoicer.Application.DTOs;
 using UTB_AP5PW_Invoicer.Domain.Entities;
 
-namespace UTB_AP5PW_Invoicer.Server.Exports
+namespace UTB_AP5PW_Invoicer.Application.Exports
 {
     public class InvoicePdfDocument : IDocument
     {
