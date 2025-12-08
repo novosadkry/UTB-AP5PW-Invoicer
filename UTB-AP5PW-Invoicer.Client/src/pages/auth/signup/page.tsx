@@ -2,10 +2,10 @@
 
 export default function Page() {
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+    <main className="min-h-screen flex items-center justify-center px-4 py-10 animate-page">
       <div className="w-full max-w-sm animate-in fade-in slide-in-from-top-2">
         <SignupForm />
       </div>
-    </div>
-  )
+    </main>
+  );
 }

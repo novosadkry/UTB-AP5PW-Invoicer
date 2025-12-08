@@ -145,7 +145,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
           Zadejte své údaje pro vytvoření nového účtu.
         </CardDescription>
         <CardAction>
-          <ThemeToggle />
+          <ThemeToggle size="lg" />
         </CardAction>
       </CardHeader>
       <CardContent>

@@ -1,0 +1,92 @@
+﻿@layer utilities {
+  /* Page / layout transitions */
+  .animate-page {
+    @apply animate-in fade-in slide-in-from-bottom-2 duration-500;
+  }
+
+  .animate-page-left {
+    @apply animate-in fade-in slide-in-from-left-2 duration-500;
+  }
+
+  .animate-page-right {
+    @apply animate-in fade-in slide-in-from-right-2 duration-500;
+  }
+
+  /* Sections / cards */
+  .animate-section {
+    @apply animate-in fade-in-50 zoom-in-95 duration-400;
+  }
+
+  .animate-card-in {
+    @apply animate-in fade-in-50 zoom-in-95 duration-300;
+  }
+
+  .animate-list-item {
+    @apply animate-in fade-in slide-in-from-bottom-1 duration-200;
+  }
+
+  /* Stagger helpers */
+  .animate-delay-1 {
+    @apply delay-75;
+  }
+
+  .animate-delay-2 {
+    @apply delay-150;
+  }
+
+  .animate-delay-3 {
+    @apply delay-300;
+  }
+
+  /* Micro interactions */
+  .animate-btn {
+    @apply transition-all duration-150 ease-out hover:translate-y-px active:translate-y-0.5;
+  }
+
+  .animate-card-hover {
+    @apply transition-all duration-150 ease-out hover:-translate-y-px hover:shadow-md;
+  }
+
+  .animate-row-hover {
+    @apply transition-colors duration-150 hover:bg-muted/60;
+  }
+
+  /* Dialogs / overlays */
+  .animate-overlay-in {
+    @apply animate-in fade-in-0 duration-150;
+  }
+
+  .animate-overlay-out {
+    @apply animate-out fade-out-0 duration-150;
+  }
+
+  .animate-dialog-in {
+    @apply animate-in fade-in-0 zoom-in-95 duration-200;
+  }
+
+  .animate-dialog-out {
+    @apply animate-out fade-out-0 zoom-out-95 duration-150;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-page,
+  .animate-page-left,
+  .animate-page-right,
+  .animate-section,
+  .animate-card-in,
+  .animate-list-item,
+  .animate-overlay-in,
+  .animate-overlay-out,
+  .animate-dialog-in,
+  .animate-dialog-out {
+    animation: none !important;
+  }
+
+  .animate-btn,
+  .animate-card-hover,
+  .animate-row-hover {
+    transition-duration: 0ms !important;
+    transform: none !important;
+  }
+}

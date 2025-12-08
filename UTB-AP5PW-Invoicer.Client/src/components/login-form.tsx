@@ -131,7 +131,7 @@ export function LoginForm({
             Zadejte své údaje pro přístup k účtu.
           </CardDescription>
           <CardAction>
-            <ThemeToggle />
+            <ThemeToggle size="lg" />
           </CardAction>
         </CardHeader>
         <CardContent>

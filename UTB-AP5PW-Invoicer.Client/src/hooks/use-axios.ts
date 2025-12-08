@@ -43,7 +43,7 @@ export function useAxiosPrivate() {
             withCredentials: true,
           });
 
-          const refreshResponse = await axiosRefresh.post('/auth/refresh');
+          const refreshResponse = await axiosRefresh.post('/client/auth/refresh');
           const newAccessToken = refreshResponse.data.accessToken;
 
           setAccessToken(newAccessToken);
@@ -102,7 +102,7 @@ export function useAxiosAdmin() {
             withCredentials: true,
           });
 
-          const refreshResponse = await axiosRefresh.post('/auth/refresh');
+          const refreshResponse = await axiosRefresh.post('/client/auth/refresh');
           const newAccessToken = refreshResponse.data.accessToken;
 
           setAccessToken(newAccessToken);

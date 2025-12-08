@@ -100,10 +100,11 @@ export default function Page() {
   }
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('cs-CZ', {
+    return value.toLocaleString('cs-CZ', {
       style: 'currency',
       currency: 'CZK',
-    }).format(value);
+      minimumFractionDigits: 2,
+    })
   };
 
   const getMonthName = (month: number) => {
@@ -307,7 +308,7 @@ export default function Page() {
                   <CardDescription>Vyberte období pro zobrazení reportu</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleFilterSubmit} className="flex flex-col sm:flex-row items-end gap-4">
+                  <form onSubmit={handleFilterSubmit} className="flex flex-col sm:flex-row sm:items-end gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="periodStart">Od:</Label>
                       <DateInput
@@ -327,13 +328,15 @@ export default function Page() {
                       />
                     </div>
                     <Button type="submit" disabled={loading}>
-                      {loading ? "Načítám..." : "Filtrovat"}
+                      Filtrovat
                     </Button>
                   </form>
                 </CardContent>
               </Card>
 
-              {renderContent()}
+              <div className="flex flex-1 flex-col gap-4 animate-page-left">
+                {renderContent()}
+              </div>
             </div>
           </div>
         </div>

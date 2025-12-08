@@ -1,7 +1,6 @@
 ﻿import { useEffect, useState } from "react";
 import { Input } from "@components/ui/input.tsx";
 import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover.tsx";
-import { Button } from "@components/ui/button.tsx";
 import { Calendar } from "@components/ui/calendar.tsx";
 import { CalendarIcon } from "lucide-react"
 
@@ -57,13 +56,14 @@ export function DateInput({ value, onChange, ...props } : DateInputProps) {
       />
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button
+          <div
             id="date-picker"
-            variant="ghost"
-            className="absolute top-1/2 right-2 size-6 -translate-y-1/2"
+            className="absolute top-1/2 right-2 size-6 -translate-y-1/2
+            hover:cursor-pointer text-muted-foreground hover:text-foreground
+            flex items-center justify-center transition-colors duration-150"
           >
-            <CalendarIcon className="size-3.5 invisible" />
-          </Button>
+            <CalendarIcon className="size-3.5" />
+          </div>
         </PopoverTrigger>
         <PopoverContent className="w-auto overflow-hidden p-0" align="end">
           <Calendar

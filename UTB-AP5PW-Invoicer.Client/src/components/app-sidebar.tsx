@@ -20,6 +20,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/hooks/use-auth"
+import { ThemeToggle } from "@components/theme-toggle.tsx";
 
 const navMain = [
   {
@@ -69,12 +70,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
+              className="data-[slot=sidebar-menu-button]:!p-1.5 w-5/6"
             >
-              <a href="/dashboard">
-                <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Invoicer</span>
-              </a>
+              <div className="flex justify-between gap-2">
+                <a href="/dashboard" className="flex items-center gap-2">
+                  <IconInnerShadowTop className="!size-5" />
+                  <span className="text-base font-semibold">Invoicer</span>
+                </a>
+                <ThemeToggle size="sm" className="absolute right-0" />
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
