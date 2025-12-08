@@ -8,19 +8,19 @@ export class ReportService {
     this.api = api;
   }
 
-  async getReport(periodStart?: string, periodEnd?: string): Promise<Report> {
+  async getReport(periodStart?: Date, periodEnd?: Date): Promise<Report> {
     const params = new URLSearchParams();
-    if (periodStart) params.append('periodStart', periodStart);
-    if (periodEnd) params.append('periodEnd', periodEnd);
+    if (periodStart) params.append('periodStart', periodStart.toISOString());
+    if (periodEnd) params.append('periodEnd', periodEnd.toISOString());
     
     const response = await this.api.get<Report>(`/reports?${params.toString()}`);
     return response.data;
   }
 
-  async exportCsv(periodStart?: string, periodEnd?: string): Promise<Blob> {
+  async exportCsv(periodStart?: Date, periodEnd?: Date): Promise<Blob> {
     const params = new URLSearchParams();
-    if (periodStart) params.append('periodStart', periodStart);
-    if (periodEnd) params.append('periodEnd', periodEnd);
+    if (periodStart) params.append('periodStart', periodStart.toISOString());
+    if (periodEnd) params.append('periodEnd', periodEnd.toISOString());
     
     const response = await this.api.get(`/reports/csv?${params.toString()}`, {
       responseType: 'blob'

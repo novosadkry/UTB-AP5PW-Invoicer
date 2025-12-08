@@ -10,5 +10,8 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Interfaces
         public Task<UserDto?> ValidateRefreshTokenAsync(string token);
         public Task<bool> DeleteRefreshTokenAsync(string token);
         public Task<bool> RevokeRefreshTokenAsync(string token);
+        public Task<bool> ChangePasswordAsync(UserDto userId, string newPassword);
+        public Task<string?> ForgotPasswordAsync(string email);
+        public Task<bool> ResetPasswordAsync(string token, string newPassword);
     }
 }

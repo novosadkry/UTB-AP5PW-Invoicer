@@ -256,7 +256,7 @@ export default function Page() {
                           </p>
                           <div className="flex items-center gap-2">
                             <p className="text-muted-foreground">
-                              {invoice.totalAmount.toFixed(2)} Kč
+                              {invoice.totalAmount.toLocaleString()} Kč
                             </p>
                             {getStatusBadge(invoice.status)}
                           </div>

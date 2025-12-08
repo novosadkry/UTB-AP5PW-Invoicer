@@ -19,12 +19,12 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
             _userService = userService;
         }
 
-        [HttpGet]
+        [HttpGet("profile")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<object>> GetProfile()
+        public async Task<ActionResult<GetProfileModel>> GetProfile()
         {
             var userId = HttpContext.User.GetUserId();
             var user = await _userService.GetUserAsync(userId);
@@ -32,23 +32,19 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
             if (user == null)
                 return NotFound();
 
-            return Ok(new
+            return Ok(new GetProfileModel
             {
-                user.Id,
-                user.Email,
-                user.FullName,
-                user.Role,
-                user.CompanyName,
-                user.Ico,
-                user.Dic,
-                user.CompanyAddress,
-                user.CompanyPhone,
-                user.CreatedAt,
-                user.UpdatedAt
+                Email = user.Email,
+                FullName = user.FullName,
+                CompanyName = user.CompanyName,
+                Ico = user.Ico,
+                Dic = user.Dic,
+                CompanyAddress = user.CompanyAddress,
+                CompanyPhone = user.CompanyPhone
             });
         }
 
-        [HttpPut]
+        [HttpPut("profile")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -69,8 +65,7 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
             };
 
             var result = await _userService.UpdateUserAsync(userDto);
-            if (!result)
-                return BadRequest("Unable to update profile");
+            if (!result) return BadRequest("Unable to update profile");
 
             return Ok();
         }

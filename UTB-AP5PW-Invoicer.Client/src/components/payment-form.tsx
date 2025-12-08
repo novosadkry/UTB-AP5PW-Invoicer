@@ -7,6 +7,7 @@ import type { CreatePaymentDto, UpdatePaymentDto, Payment } from "@/types/paymen
 import { z } from "zod";
 import { getZodFieldErrors } from "@/types/zod";
 import { getValidationErrors } from "@/types/api.ts";
+import { DateInput } from "@components/date-input.tsx";
 
 interface PaymentFormProps {
   invoiceId: number;
@@ -18,19 +19,14 @@ interface PaymentFormProps {
 
 const paymentSchema = z.object({
   amount: z
-    .string()
-    .min(1, "Částka je povinná")
-    .transform((val) => Number.parseFloat(val.replace(",", ".")))
-    .refine((val) => !Number.isNaN(val) && val > 0, {
-      message: "Částka musí být větší než 0",
-    }),
+    .number("Částka je povinné pole.")
+    .gt(0, "Částka nesmí být záporná nebo nulová hodnota."),
   paymentMethod: z
     .string()
     .trim()
-    .min(1, "Způsob platby je povinný"),
+    .min(1, "Způsob platby je povinné pole."),
   paymentDate: z
-    .string()
-    .min(1, "Datum platby je povinné"),
+    .date("Datum platby je povinné pole."),
 });
 
 export function PaymentForm({
@@ -43,9 +39,9 @@ export function PaymentForm({
   const [formData, setFormData] = useState({
     amount: payment ? String(payment.amount) : "",
     paymentMethod: payment?.paymentMethod ?? "",
-    paymentDate: payment?.paymentDate
-      ? payment.paymentDate.split("T")[0]
-      : new Date().toISOString().split("T")[0],
+    paymentDate: new Date(payment?.paymentDate
+      ? Date.parse(payment.paymentDate)
+      : Date.now()),
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
@@ -72,7 +68,7 @@ export function PaymentForm({
         invoiceId,
         amount,
         paymentMethod,
-        paymentDate,
+        paymentDate: paymentDate.toISOString(),
       };
       const payload = payment ? { ...base, id: payment.id } : base;
       await onSubmit(payload);
@@ -87,7 +83,7 @@ export function PaymentForm({
     }
   };
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -113,10 +109,10 @@ export function PaymentForm({
                 type="number"
                 step="0.01"
                 value={formData.amount}
-                onChange={(e) => handleChange("amount", e.target.value)}
+                onChange={(e) => handleChange("amount", parseFloat(e.target.value))}
                 disabled={isLoading}
                 required
-                placeholder="0.00"
+                placeholder="0,00"
                 aria-invalid={!!fieldErrors.amount}
               />
               {fieldErrors.amount && (
@@ -140,11 +136,11 @@ export function PaymentForm({
             </Field>
             <Field data-invalid={!!fieldErrors.paymentDate}>
               <FieldLabel htmlFor="paymentDate">Datum platby</FieldLabel>
-              <Input
+              <DateInput
                 id="paymentDate"
                 type="date"
                 value={formData.paymentDate}
-                onChange={(e) => handleChange("paymentDate", e.target.value)}
+                onChange={(date) => handleChange("paymentDate", date)}
                 disabled={isLoading}
                 required
                 aria-invalid={!!fieldErrors.paymentDate}

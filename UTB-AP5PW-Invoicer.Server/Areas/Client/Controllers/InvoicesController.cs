@@ -137,6 +137,46 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
             return Ok(invoice);
         }
 
+        [HttpGet("shared/{token}/items")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> GetSharedInvoiceItems(string token)
+        {
+            var invoice = await _invoiceService.GetInvoiceByShareTokenAsync(token);
+            if (invoice == null) return NotFound();
+
+            var items = await _mediator.Send(new ListInvoiceItemsQuery(invoice.Id));
+            return Ok(items);
+        }
+
+        [HttpGet("shared/{token}/payments")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> GetSharedInvoicePayments(string token)
+        {
+            var invoice = await _invoiceService.GetInvoiceByShareTokenAsync(token);
+            if (invoice == null) return NotFound();
+
+            var payments = await _mediator.Send(new ListPaymentsQuery(invoice.Id));
+            return Ok(payments);
+        }
+
+        [HttpGet("shared/{token}/customer")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> GetSharedInvoiceCustomer(string token)
+        {
+            var invoice = await _invoiceService.GetInvoiceByShareTokenAsync(token);
+            if (invoice == null) return NotFound();
+
+            if (!invoice.CustomerId.HasValue) return NotFound();
+
+            var customer = await _customerService.GetCustomerByIdAsync(invoice.CustomerId.Value);
+            if (customer == null) return NotFound();
+            
+            return Ok(customer);
+        }
+
         [HttpGet("shared/{token}/pdf")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

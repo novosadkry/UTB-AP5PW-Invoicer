@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button"
 import {
   Card, CardAction,
@@ -33,6 +33,7 @@ import { AlertCircleIcon } from "lucide-react";
 import type { AxiosError } from "axios";
 import { z } from "zod";
 import { getZodFieldErrors } from "@/types/zod.ts";
+import { AuthService } from "@/services/auth.service.ts";
 
 const signupSchema = z.object({
   fullName: z
@@ -55,6 +56,9 @@ const signupSchema = z.object({
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const navigate = useNavigate();
+  const api = useAxiosPublic();
+  const authService = useMemo(() => new AuthService(api), [api]);
+
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -63,7 +67,6 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
-  const api = useAxiosPublic();
   const { search } = useLocation();
   const [searchParams] = useSearchParams();
   const { setAccessToken, user, setUser } = useAuth();
@@ -104,13 +107,12 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 
     setLoading(true);
     try {
-      const res = await api.post("/auth/signup", {
+      const { accessToken, user } = await authService.signup({
         fullName: parseResult.data.fullName,
         email: parseResult.data.email,
         password: parseResult.data.password,
       });
 
-      const { accessToken, user } = await res.data;
       setAccessToken(accessToken);
       setUser(user);
 

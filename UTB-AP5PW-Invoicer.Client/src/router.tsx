@@ -9,7 +9,10 @@ import Customers from "@pages/dashboard/customers/page";
 import Customer from "@pages/dashboard/customers/[id]/page";
 import Profile from "@pages/dashboard/profile/page";
 import Reports from "@pages/dashboard/reports/page";
+import Admin from "@pages/dashboard/admin/page";
+import SharedInvoice from "@pages/shared/invoice/page";
 import ProtectedRoute from "@components/protected-route";
+import AdminProtectedRoute from "@components/admin-protected-route";
 import NotFound from "@pages/errors/404";
 
 export default function AppRouter() {
@@ -54,6 +57,12 @@ export default function AppRouter() {
             <Reports />
           </ProtectedRoute>
         } />
+        <Route path="/dashboard/admin" element={
+          <AdminProtectedRoute>
+            <Admin />
+          </AdminProtectedRoute>
+        } />
+        <Route path="/shared/invoice/:token" element={<SharedInvoice />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

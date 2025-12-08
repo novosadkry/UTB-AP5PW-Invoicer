@@ -57,7 +57,7 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
             return Ok(new
             {
                 accessToken,
-                user = new { user.Id, user.Email, user.FullName }
+                user = new { user.Id, user.Email, user.FullName, user.Role }
             });
         }
 
@@ -120,7 +120,7 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
             return Ok(new
             {
                 accessToken,
-                user = new { user.Id, user.Email, user.FullName }
+                user = new { user.Id, user.Email, user.FullName, user.Role }
             });
         }
 
@@ -162,7 +162,7 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
             return Ok(new
             {
                 accessToken,
-                user = new { user.Id, user.Email, user.FullName }
+                user = new { user.Id, user.Email, user.FullName, user.Role }
             });
         }
 
@@ -174,10 +174,16 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
         public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordModel model)
         {
             var userId = HttpContext.User.GetUserId();
-            var result = await _userService.ChangePasswordAsync(userId, model.CurrentPassword, model.NewPassword);
+            var user = await _userService.GetUserAsync(userId);
 
-            if (!result)
-                return BadRequest("Current password is incorrect or unable to change password");
+            if (user == null)
+                return Unauthorized();
+
+            var isCurrentValid = await _authService.VerifyPasswordAsync(user, model.CurrentPassword);
+            if (!isCurrentValid) return BadRequest("Current password is incorrect");
+
+            var result = await _authService.ChangePasswordAsync(user, model.NewPassword);
+            if (!result) return BadRequest("Unable to change password");
 
             return Ok();
         }
@@ -186,8 +192,7 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult> ForgotPassword([FromBody] ForgotPasswordModel model)
         {
-            var token = await _userService.ForgotPasswordAsync(model.Email);
-
+            var token = await _authService.ForgotPasswordAsync(model.Email);
             _logger.LogInformation("Created password reset token for User[Email={Email}]: {Token}", model.Email, token);
 
             // TODO: await _emailService.SendPasswordResetEmail(model.Email, token);
@@ -200,11 +205,8 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordModel model)
         {
-            var result = await _userService.ResetPasswordAsync(model.Token, model.NewPassword);
-
-            if (!result)
-                return BadRequest("Invalid or expired reset token");
-
+            var result = await _authService.ResetPasswordAsync(model.Token, model.NewPassword);
+            if (!result) return BadRequest("Invalid or expired reset token");
             return Ok();
         }
     }

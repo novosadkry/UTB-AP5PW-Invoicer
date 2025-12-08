@@ -33,24 +33,15 @@ export default function Page() {
 
   async function loadSummary() {
     setLoading(true);
-    toast.promise(
-      (async () => {
-        const data = await summaryService.getDashboardSummary();
-        setSummary(data);
-      })(),
-      {
-        position: "top-center",
-        loading: "Načítám data pro přehled...",
-        success: () => {
-          setLoading(false);
-          return "Data pro přehled byla načtena";
-        },
-        error: () => {
-          setLoading(false);
-          return "Nepodařilo se načíst data pro přehled.";
-        },
-      }
-    );
+    try {
+      const data = await summaryService.getDashboardSummary();
+      setSummary(data);
+    } catch (error) {
+      console.error("Error loading dashboard summary:", error);
+      toast.error("Nepodařilo se načíst přehled", { position: "top-center" });
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {

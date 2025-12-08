@@ -1,8 +1,8 @@
-export interface UserProfile {
+export interface UserDto {
   id: number;
   email: string;
   fullName: string;
-  role: string;
+  role: "user" | "admin";
   companyName?: string;
   ico?: string;
   dic?: string;
@@ -12,7 +12,7 @@ export interface UserProfile {
   updatedAt: string;
 }
 
-export interface UpdateProfileDto {
+export interface UpdateUserDto {
   email: string;
   fullName: string;
   companyName?: string;
@@ -20,9 +20,4 @@ export interface UpdateProfileDto {
   dic?: string;
   companyAddress?: string;
   companyPhone?: string;
-}
-
-export interface ChangePasswordDto {
-  currentPassword: string;
-  newPassword: string;
 }

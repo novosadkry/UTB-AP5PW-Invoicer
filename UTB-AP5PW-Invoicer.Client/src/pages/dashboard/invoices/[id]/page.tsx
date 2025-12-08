@@ -143,6 +143,13 @@ export default function Page() {
     });
   }, []);
 
+  // Load customers when drawer opens
+  useEffect(() => {
+    if (!customersLoading && customers.length === 0) {
+      void loadCustomers();
+    }
+  }, [isDrawerOpen]);
+
   async function handleUpdateInvoice(updated: UpdateInvoiceDto) {
     if (!invoice) return;
     setFormLoading(true);
@@ -312,7 +319,7 @@ export default function Page() {
             <div className="mt-2 flex items-center gap-2">
               {getStatusBadge(invoice.status)}
               <span className="text-sm text-muted-foreground">
-                Celková částka: {invoice.totalAmount.toFixed(2)} Kč
+                Celková částka: {invoice.totalAmount.toLocaleString()} Kč
               </span>
             </div>
           </div>
@@ -417,7 +424,7 @@ export default function Page() {
                 {payments.map((payment) => (
                   <div key={payment.id} className="flex items-center justify-between p-2 bg-muted rounded-md">
                     <div className="text-sm">
-                      <span className="font-medium">{payment.amount.toFixed(2)} Kč</span>
+                      <span className="font-medium">{payment.amount.toLocaleString()} Kč</span>
                       <span className="text-muted-foreground ml-2">
                         {payment.paymentMethod} • {new Date(payment.paymentDate).toLocaleDateString("cs-CZ")}
                       </span>
@@ -435,13 +442,13 @@ export default function Page() {
                 <div className="flex justify-between text-sm pt-2 border-t">
                   <span className="text-muted-foreground">Celkem zaplaceno:</span>
                   <span className="font-medium">
-                    {payments.reduce((sum, p) => sum + p.amount, 0).toFixed(2)} Kč
+                    {payments.reduce((sum, p) => sum + p.amount, 0).toLocaleString()} Kč
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Zbývá k úhradě:</span>
                   <span className="font-medium">
-                    {(invoice.totalAmount - payments.reduce((sum, p) => sum + p.amount, 0)).toFixed(2)} Kč
+                    {(invoice.totalAmount - payments.reduce((sum, p) => sum + p.amount, 0)).toLocaleString()} Kč
                   </span>
                 </div>
               </div>
@@ -509,9 +516,6 @@ export default function Page() {
 
       <Drawer open={isDrawerOpen} onOpenChange={(open) => {
         setIsDrawerOpen(open);
-        if (open && !customersLoading && customers.length === 0) {
-          void loadCustomers();
-        }
       }}>
         <DrawerContent>
           <DrawerHeader>

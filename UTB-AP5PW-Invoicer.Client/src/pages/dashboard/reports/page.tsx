@@ -6,7 +6,6 @@ import { AppSidebar } from "@components/app-sidebar.tsx";
 import { SiteHeader } from "@components/site-header.tsx";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@components/ui/card.tsx";
 import { Button } from "@components/ui/button.tsx";
-import { Input } from "@components/ui/input.tsx";
 import { Label } from "@components/ui/label.tsx";
 import { Skeleton } from "@components/ui/skeleton.tsx";
 import {
@@ -29,6 +28,7 @@ import { useAxiosPrivate } from "@/hooks/use-axios";
 import { ReportService } from "@/services/report.service";
 import type { Report } from "@/types/report";
 import { toast } from "sonner";
+import { DateInput } from "@components/date-input.tsx";
 
 export default function Page() {
   const api = useAxiosPrivate();
@@ -39,17 +39,17 @@ export default function Page() {
   const [exporting, setExporting] = useState(false);
 
   // Date filter state
-  const [periodStart, setPeriodStart] = useState<string>(() => {
+  const [periodStart, setPeriodStart] = useState<Date>(() => {
     const date = new Date();
     date.setFullYear(date.getFullYear() - 1);
-    return date.toISOString().split('T')[0];
+    return date;
   });
-  const [periodEnd, setPeriodEnd] = useState<string>(() => {
-    return new Date().toISOString().split('T')[0];
+  const [periodEnd, setPeriodEnd] = useState<Date>(() => {
+    return new Date();
   });
 
   useEffect(() => {
-    loadReport();
+    void loadReport();
   }, []);
 
   async function loadReport() {
@@ -96,7 +96,7 @@ export default function Page() {
 
   function handleFilterSubmit(e: React.FormEvent) {
     e.preventDefault();
-    loadReport();
+    void loadReport();
   }
 
   const formatCurrency = (value: number) => {
@@ -302,24 +302,28 @@ export default function Page() {
               </div>
 
               <Card>
-                <CardContent className="pt-6">
+                <CardHeader>
+                  <CardTitle>Filtr období</CardTitle>
+                  <CardDescription>Vyberte období pro zobrazení reportu</CardDescription>
+                </CardHeader>
+                <CardContent>
                   <form onSubmit={handleFilterSubmit} className="flex flex-col sm:flex-row items-end gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="periodStart">Od</Label>
-                      <Input
+                      <Label htmlFor="periodStart">Od:</Label>
+                      <DateInput
                         id="periodStart"
                         type="date"
                         value={periodStart}
-                        onChange={(e) => setPeriodStart(e.target.value)}
+                        onChange={(date) => setPeriodStart(date ?? new Date())}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="periodEnd">Do</Label>
-                      <Input
+                      <Label htmlFor="periodEnd">Do:</Label>
+                      <DateInput
                         id="periodEnd"
                         type="date"
                         value={periodEnd}
-                        onChange={(e) => setPeriodEnd(e.target.value)}
+                        onChange={(date) => setPeriodEnd(date ?? new Date())}
                       />
                     </div>
                     <Button type="submit" disabled={loading}>

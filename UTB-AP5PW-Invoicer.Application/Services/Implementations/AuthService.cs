@@ -10,6 +10,9 @@ using UTB_AP5PW_Invoicer.Application.Features.RefreshTokens.Commands.Create;
 using UTB_AP5PW_Invoicer.Application.Features.RefreshTokens.Commands.Delete;
 using UTB_AP5PW_Invoicer.Application.Features.RefreshTokens.Commands.Revoke;
 using UTB_AP5PW_Invoicer.Application.Features.RefreshTokens.Queries.Get;
+using UTB_AP5PW_Invoicer.Application.Features.Users.Commands.ChangePassword;
+using UTB_AP5PW_Invoicer.Application.Features.Users.Commands.ForgotPassword;
+using UTB_AP5PW_Invoicer.Application.Features.Users.Commands.ResetPassword;
 using UTB_AP5PW_Invoicer.Application.Features.Users.Queries.Get;
 using UTB_AP5PW_Invoicer.Application.Services.Interfaces;
 using UTB_AP5PW_Invoicer.Infrastructure.Configuration;
@@ -35,7 +38,8 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.FullName)
+                new Claim(ClaimTypes.Name, user.FullName),
+                new Claim(ClaimTypes.Role, user.Role.ToString())
             };
 
             var expiresAt = DateTimeOffset.UtcNow.AddMinutes(15);
@@ -105,6 +109,27 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public async Task<bool> ChangePasswordAsync(UserDto user, string newPassword)
+        {
+            var command = new ChangePasswordCommand
+            {
+                UserId = user.Id,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword)
+            };
+
+            return await _mediator.Send(command);
+        }
+
+        public Task<string?> ForgotPasswordAsync(string email)
+        {
+            return _mediator.Send(new ForgotPasswordCommand { Email = email });
+        }
+
+        public Task<bool> ResetPasswordAsync(string token, string newPassword)
+        {
+            return _mediator.Send(new ResetPasswordCommand { Token = token, NewPassword = newPassword });
         }
     }
 }

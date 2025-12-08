@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils"
 import {
   Link,
@@ -30,6 +30,7 @@ import { AlertCircleIcon } from "lucide-react";
 import { z } from "zod";
 import { getZodFieldErrors } from "@/types/zod.ts";
 import type { AxiosError } from "axios";
+import { AuthService } from "@/services/auth.service.ts";
 
 const loginSchema = z.object({
   email: z
@@ -44,14 +45,16 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const api = useAxiosPublic();
   const navigate = useNavigate();
+  const authService = useMemo(() => new AuthService(api), [api]);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
-  const api = useAxiosPublic();
   const { search } = useLocation();
   const [searchParams] = useSearchParams();
   const { setAccessToken, user, setUser } = useAuth();
@@ -91,15 +94,11 @@ export function LoginForm({
     setLoading(true);
 
     try {
-      const res = await api.post(
-        "/auth/login",
-        {
-          email: parseResult.data.email,
-          password: parseResult.data.password,
-        }
-      );
+      const { accessToken, user } = await authService.login({
+        email: parseResult.data.email,
+        password: parseResult.data.password,
+      });
 
-      const { accessToken, user } = await res.data;
       setAccessToken(accessToken);
       setUser(user);
 
@@ -116,6 +115,7 @@ export function LoginForm({
         setError("Neplatné přihlašovací údaje.");
       } else {
         setError("Došlo k neznámé chybě. Zkuste to prosím znovu.");
+        console.error(err);
       }
     } finally {
       setLoading(false);

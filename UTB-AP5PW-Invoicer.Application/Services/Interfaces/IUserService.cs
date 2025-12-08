@@ -6,10 +6,9 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Interfaces
     {
         public Task<UserDto?> GetUserAsync(int userId);
         public Task<UserDto?> GetUserByEmailAsync(string email);
+        public Task<ICollection<UserDto>> ListUsersAsync();
         public Task<int> CreateUserAsync(string email, string fullName, string password);
         public Task<bool> UpdateUserAsync(UserDto user);
-        public Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword);
-        public Task<string?> ForgotPasswordAsync(string email);
-        public Task<bool> ResetPasswordAsync(string token, string newPassword);
+        public Task<bool> DeleteUserAsync(int userId);
     }
 }

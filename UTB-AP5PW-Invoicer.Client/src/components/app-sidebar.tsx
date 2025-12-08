@@ -4,12 +4,11 @@ import {
   IconDashboard,
   IconFileDescription,
   IconInnerShadowTop,
-  IconSettings,
+  IconShield,
   IconUsers,
 } from "@tabler/icons-react"
 
 import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
@@ -45,14 +44,6 @@ const navMain = [
   },
 ]
 
-const navSecondary = [
-  {
-    title: "Profil",
-    url: "/dashboard/profile",
-    icon: IconSettings,
-  },
-]
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth()
   
@@ -61,6 +52,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     email: user?.email || "",
     avatar: "",
   }
+
+  // Add admin menu item if user is admin
+  const navMainItems = user?.role === "admin"
+    ? [...navMain, {
+        title: "Admin",
+        url: "/dashboard/admin",
+        icon: IconShield,
+      }]
+    : navMain;
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -80,8 +80,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navMain} />
-        <NavSecondary items={navSecondary} className="mt-auto" />
+        <NavMain items={navMainItems} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={userData} />

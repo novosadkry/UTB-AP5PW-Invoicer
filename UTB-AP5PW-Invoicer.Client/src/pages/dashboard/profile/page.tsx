@@ -19,48 +19,40 @@ import {
 } from "@components/ui/breadcrumb.tsx";
 import { useAxiosPrivate } from "@/hooks/use-axios";
 import { UserService } from "@/services/user.service";
-import type { UserProfile, UpdateProfileDto, ChangePasswordDto } from "@/types/user";
+import { AuthService } from "@/services/auth.service.ts";
+import type { UserDto, UpdateUserDto } from "@/types/user";
+import type { ChangePasswordDto } from "@/types/auth.ts";
 import { toast } from "sonner";
 
 export default function Page() {
   const api = useAxiosPrivate();
   const userService = useMemo(() => new UserService(api), [api]);
+  const authService = useMemo(() => new AuthService(api), [api]);
 
-  const [_profile, setProfile] = useState<UserProfile | null>(null);
+  const [profile, setProfile] = useState<UserDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
 
-  // Profile form state
-  const [email, setEmail] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [companyName, setCompanyName] = useState("");
-  const [ico, setIco] = useState("");
-  const [dic, setDic] = useState("");
-  const [companyAddress, setCompanyAddress] = useState("");
-  const [companyPhone, setCompanyPhone] = useState("");
-
-  // Password form state
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   useEffect(() => {
-    loadProfile();
+    void loadProfile();
   }, []);
+
+  function setProfileData(key: keyof UserDto, value: string) {
+    if (!profile) return;
+    const data = { ...profile, [key]: value };
+    setProfile(data);
+  }
 
   async function loadProfile() {
     setLoading(true);
     try {
       const data = await userService.getProfile();
       setProfile(data);
-      setEmail(data.email);
-      setFullName(data.fullName);
-      setCompanyName(data.companyName || "");
-      setIco(data.ico || "");
-      setDic(data.dic || "");
-      setCompanyAddress(data.companyAddress || "");
-      setCompanyPhone(data.companyPhone || "");
     } catch (error) {
       console.error("Failed to load profile:", error);
       toast.error("Nepodařilo se načíst profil", { position: "top-center" });
@@ -72,15 +64,14 @@ export default function Page() {
   async function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    const updateData: UpdateProfileDto = {
-      email,
-      fullName,
-      companyName: companyName || undefined,
-      ico: ico || undefined,
-      dic: dic || undefined,
-      companyAddress: companyAddress || undefined,
-      companyPhone: companyPhone || undefined,
-    };
+
+    if (!profile) {
+      toast.error("Profil nebyl načten", { position: "top-center" });
+      setSaving(false);
+      return;
+    }
+
+    const updateData: UpdateUserDto = { ...profile };
 
     toast.promise(
       (async () => {
@@ -105,11 +96,11 @@ export default function Page() {
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      toast.error("Nová hesla se neshodují", { position: "top-center" });
+      toast.error("Nová hesla se neshodují.", { position: "top-center" });
       return;
     }
     if (newPassword.length < 6) {
-      toast.error("Nové heslo musí mít alespoň 6 znaků", { position: "top-center" });
+      toast.error("Nové heslo musí mít alespoň 6 znaků.", { position: "top-center" });
       return;
     }
     setChangingPassword(true);
@@ -120,7 +111,7 @@ export default function Page() {
 
     toast.promise(
       (async () => {
-        await userService.changePassword(data);
+        await authService.changePassword(data);
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
@@ -130,11 +121,11 @@ export default function Page() {
         loading: "Měním heslo...",
         success: () => {
           setChangingPassword(false);
-          return "Heslo bylo úspěšně změněno";
+          return "Heslo bylo úspěšně změněno.";
         },
         error: () => {
           setChangingPassword(false);
-          return "Nepodařilo se změnit heslo. Zkontrolujte aktuální heslo.";
+          return "Aktuální heslo je neplatné.";
         },
       }
     );
@@ -172,8 +163,8 @@ export default function Page() {
                   <Input
                     id="email"
                     type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={profile?.email}
+                    onChange={(e) => setProfileData("email", e.target.value)}
                     required
                   />
                 </div>
@@ -181,8 +172,8 @@ export default function Page() {
                   <Label htmlFor="fullName">Celé jméno</Label>
                   <Input
                     id="fullName"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
+                    value={profile?.fullName}
+                    onChange={(e) => setProfileData("fullName", e.target.value)}
                     required
                   />
                 </div>
@@ -197,8 +188,8 @@ export default function Page() {
                     <Label htmlFor="companyName">Název firmy</Label>
                     <Input
                       id="companyName"
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
+                      value={profile?.companyName}
+                      onChange={(e) => setProfileData("companyName", e.target.value)}
                       placeholder="Volitelné"
                     />
                   </div>
@@ -206,8 +197,8 @@ export default function Page() {
                     <Label htmlFor="ico">IČO</Label>
                     <Input
                       id="ico"
-                      value={ico}
-                      onChange={(e) => setIco(e.target.value)}
+                      value={profile?.ico}
+                      onChange={(e) => setProfileData("ico", e.target.value)}
                       placeholder="12345678"
                     />
                   </div>
@@ -215,8 +206,8 @@ export default function Page() {
                     <Label htmlFor="dic">DIČ</Label>
                     <Input
                       id="dic"
-                      value={dic}
-                      onChange={(e) => setDic(e.target.value)}
+                      value={profile?.dic}
+                      onChange={(e) => setProfileData("dic", e.target.value)}
                       placeholder="CZ12345678"
                     />
                   </div>
@@ -224,8 +215,8 @@ export default function Page() {
                     <Label htmlFor="companyPhone">Telefon firmy</Label>
                     <Input
                       id="companyPhone"
-                      value={companyPhone}
-                      onChange={(e) => setCompanyPhone(e.target.value)}
+                      value={profile?.companyPhone}
+                      onChange={(e) => setProfileData("companyPhone", e.target.value)}
                       placeholder="+420 123 456 789"
                     />
                   </div>
@@ -233,8 +224,8 @@ export default function Page() {
                     <Label htmlFor="companyAddress">Adresa firmy</Label>
                     <Input
                       id="companyAddress"
-                      value={companyAddress}
-                      onChange={(e) => setCompanyAddress(e.target.value)}
+                      value={profile?.companyAddress}
+                      onChange={(e) => setProfileData("companyAddress", e.target.value)}
                       placeholder="Ulice 123, 123 45 Město"
                     />
                   </div>

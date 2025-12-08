@@ -1,0 +1,15 @@
+﻿export interface LoginDto {
+  email: string;
+  password: string;
+}
+
+export interface SignupDto {
+  fullName: string;
+  email: string;
+  password: string;
+}
+
+export interface ChangePasswordDto {
+  currentPassword: string;
+  newPassword: string;
+}

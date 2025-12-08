@@ -1,4 +1,6 @@
-﻿namespace UTB_AP5PW_Invoicer.Application.DTOs
+﻿using UTB_AP5PW_Invoicer.Domain.Entities;
+
+namespace UTB_AP5PW_Invoicer.Application.DTOs
 {
     public record DashboardSummaryDto
     {
@@ -12,7 +14,7 @@
     public record InvoiceSummaryDto
     {
         public decimal TotalAmount { get; set; }
-        public string Status { get; set; } = string.Empty;
+        public InvoiceStatus Status { get; set; }
         public DateTimeOffset DueDate { get; set; }
         public DateTimeOffset IssueDate { get; set; }
         public string? CustomerName { get; set; }

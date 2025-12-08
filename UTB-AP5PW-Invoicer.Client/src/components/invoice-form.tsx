@@ -9,6 +9,7 @@ import type { Customer } from "@/types/customer";
 import { z } from "zod";
 import { getZodFieldErrors } from "@/types/zod";
 import { getValidationErrors } from "@/types/api.ts";
+import { DateInput } from "@components/date-input.tsx";
 
 interface InvoiceFormProps {
   invoice?: Invoice;
@@ -22,11 +23,13 @@ interface InvoiceFormProps {
 
 const invoiceSchema = z.object({
   customerId: z.number().int().positive().nullable().optional(),
-  invoiceNumber: z.string().min(1, "Číslo faktury je povinné"),
-  issueDate: z.string().min(1, "Datum vystavení je povinné"),
-  dueDate: z.string().min(1, "Datum splatnosti je povinné"),
+  invoiceNumber: z.string().min(1, "Číslo faktury je povinné pole."),
+  issueDate: z.date("Datum vystavení je povinné pole."),
+  dueDate: z.date("Datum splatnosti je povinné pole."),
   status: z.enum(["draft", "sent", "paid", "overdue"]),
-  totalAmount: z.number().gt(0, "Částka musí být větší než 0"),
+  totalAmount: z
+    .number("Částka je povinné pole.")
+    .gt(0, "Částka nesmí být záporná nebo nulová hodnota."),
 });
 
 export function InvoiceForm({
@@ -41,12 +44,12 @@ export function InvoiceForm({
   const [formData, setFormData] = useState({
     customerId: invoice?.customerId || null,
     invoiceNumber: invoice?.invoiceNumber || "",
-    issueDate: invoice?.issueDate
-      ? invoice.issueDate.split("T")[0]
-      : new Date().toISOString().split("T")[0],
-    dueDate: invoice?.dueDate
-      ? invoice.dueDate.split("T")[0]
-      : "",
+    issueDate: new Date(invoice?.issueDate
+      ? Date.parse(invoice.issueDate)
+      : Date.now()),
+    dueDate: new Date(invoice?.dueDate
+      ? Date.parse(invoice.dueDate)
+      : Date.now()),
     status: invoice?.status || "draft",
     totalAmount: invoice?.totalAmount || 0,
   });
@@ -89,7 +92,7 @@ export function InvoiceForm({
     }
   };
 
-  const handleChange = (field: string, value: string | number | null) => {
+  const handleChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -185,11 +188,11 @@ export function InvoiceForm({
             <div className="grid grid-cols-2 gap-4">
               <Field data-invalid={!!fieldErrors.issueDate}>
                 <FieldLabel htmlFor="issueDate">Datum vystavení</FieldLabel>
-                <Input
+                <DateInput
                   id="issueDate"
                   type="date"
                   value={formData.issueDate}
-                  onChange={(e) => handleChange("issueDate", e.target.value)}
+                  onChange={(date) => handleChange("issueDate", date)}
                   disabled={isLoading}
                   required
                   aria-invalid={!!fieldErrors.issueDate}
@@ -201,11 +204,11 @@ export function InvoiceForm({
 
               <Field data-invalid={!!fieldErrors.dueDate}>
                 <FieldLabel htmlFor="dueDate">Datum splatnosti</FieldLabel>
-                <Input
+                <DateInput
                   id="dueDate"
                   type="date"
                   value={formData.dueDate}
-                  onChange={(e) => handleChange("dueDate", e.target.value)}
+                  onChange={(date) => handleChange("dueDate", date)}
                   disabled={isLoading}
                   required
                   aria-invalid={!!fieldErrors.dueDate}
@@ -224,11 +227,10 @@ export function InvoiceForm({
                   type="number"
                   step="0.01"
                   value={formData.totalAmount}
-                  onChange={(e) =>
-                    handleChange("totalAmount", parseFloat(e.target.value) || 0)
-                  }
+                  onChange={(e) => handleChange("totalAmount", parseFloat(e.target.value))}
                   disabled={isLoading}
                   required
+                  placeholder="0,00"
                   aria-invalid={!!fieldErrors.totalAmount}
                 />
                 {fieldErrors.totalAmount && (

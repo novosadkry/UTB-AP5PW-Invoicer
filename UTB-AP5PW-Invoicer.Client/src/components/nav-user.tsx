@@ -1,11 +1,9 @@
+import { Link } from "react-router"
 import {
-  IconCreditCard,
   IconDotsVertical,
   IconLogout,
-  IconNotification,
   IconUserCircle,
 } from "@tabler/icons-react"
-
 import {
   Avatar,
   AvatarFallback,
@@ -26,6 +24,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useAuth } from "@/hooks/use-auth.tsx";
 
 export function NavUser({
   user,
@@ -36,7 +35,8 @@ export function NavUser({
     avatar: string
   }
 }) {
-  const { isMobile } = useSidebar()
+  const auth = useAuth();
+  const { isMobile } = useSidebar();
 
   return (
     <SidebarMenu>
@@ -84,21 +84,17 @@ export function NavUser({
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <IconUserCircle />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconCreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconNotification />
-                Notifications
+                <Link to="/dashboard/profile">
+                  Uživatelský profil
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => {
+              auth.logout();
+            }}>
               <IconLogout />
-              Log out
+              Odhlásit se
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

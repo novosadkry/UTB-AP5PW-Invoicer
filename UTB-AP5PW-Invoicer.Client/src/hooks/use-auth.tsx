@@ -1,27 +1,29 @@
 ﻿import React, { createContext, useState, useContext, useEffect } from 'react';
-import type { AxiosResponse } from "axios";
 
-type AuthContextType = {
+export type AuthContextType = {
   accessToken: string | null,
   setAccessToken: (token: string | null) => void,
-  user: LoginResponse['data']['user'] | null,
-  setUser: (user: LoginResponse['data']['user'] | null) => void,
+  user: LoginResponse['user'] | null,
+  setUser: (user: LoginResponse['user'] | null) => void,
+  logout: () => void,
 };
 
-type LoginResponse = AxiosResponse<{
+export type LoginResponse = {
   accessToken: string;
   user: {
     id: string;
     email: string;
     fullName: string;
+    role: "user" | "admin";
   };
-}>;
+}
 
 const AuthContext = createContext<AuthContextType>({
   accessToken: null,
   setAccessToken: () => {},
   user: null,
   setUser: () => {},
+  logout: () => {},
 });
 
 export const AuthProvider = ({ children }: React.PropsWithChildren) => {
@@ -51,6 +53,10 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
     setAccessToken,
     user,
     setUser,
+    logout: () => {
+      setAccessToken(null);
+      setUser(null);
+    },
   };
 
   return (

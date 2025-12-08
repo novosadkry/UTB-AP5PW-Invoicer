@@ -33,7 +33,7 @@ namespace UTB_AP5PW_Invoicer.Application.Features.Summary.Queries
                     CustomerName = i.Customer?.Name,
                     IssueDate = i.IssueDate,
                     DueDate = i.DueDate,
-                    Status = i.Status.ToString(),
+                    Status = i.Status,
                     TotalAmount = i.TotalAmount,
                 })
                 .ToList();
