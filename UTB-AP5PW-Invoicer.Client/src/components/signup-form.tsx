@@ -38,11 +38,11 @@ import { AuthService } from "@/services/auth.service.ts";
 const signupSchema = z.object({
   fullName: z
     .string()
-    .min(1, "Jméno je povinné.")
+    .nonempty("Jméno je povinné pole.")
     .max(100, "Jméno je příliš dlouhé."),
   email: z
     .email("Zadejte platnou e-mailovou adresu.")
-    .min(1, "E-mail je povinný."),
+    .nonempty("E-mail je povinné pole."),
   password: z
     .string()
     .min(5, "Heslo musí být alespoň 5 znaků dlouhé."),

@@ -35,7 +35,7 @@ import { AuthService } from "@/services/auth.service.ts";
 const loginSchema = z.object({
   email: z
     .email("Zadejte platnou e-mailovou adresu.")
-    .min(1, "E-mail je povinný."),
+    .min(1, "E-mail je povinné pole."),
   password: z
     .string()
     .min(5, "Heslo musí být alespoň 5 znaků dlouhé."),

@@ -10,6 +10,8 @@ import { z } from "zod";
 import { getZodFieldErrors } from "@/types/zod";
 import { getValidationErrors } from "@/types/api.ts";
 import { DateInput } from "@components/date-input.tsx";
+import { Alert, AlertDescription, AlertTitle } from "@components/ui/alert.tsx";
+import { AlertCircleIcon } from "lucide-react";
 
 interface InvoiceFormProps {
   invoice?: Invoice;
@@ -23,7 +25,7 @@ interface InvoiceFormProps {
 
 const invoiceSchema = z.object({
   customerId: z.number().int().positive().nullable().optional(),
-  invoiceNumber: z.string().min(1, "Číslo faktury je povinné pole."),
+  invoiceNumber: z.string().nonempty("Číslo faktury je povinné pole."),
   issueDate: z.date("Datum vystavení je povinné pole."),
   dueDate: z.date("Datum splatnosti je povinné pole."),
   status: z.enum(["draft", "sent", "paid", "overdue"]),
@@ -242,11 +244,13 @@ export function InvoiceForm({
             </div>
 
             {formError && (
-              <Field>
-                <FieldDescription className="text-destructive font-normal text-sm">
-                  {formError}
-                </FieldDescription>
-              </Field>
+              <Alert variant="destructive">
+                <AlertCircleIcon />
+                <AlertTitle>Ukládání selhalo</AlertTitle>
+                <AlertDescription>
+                  <p>{formError}</p>
+                </AlertDescription>
+              </Alert>
             )}
 
             <div className="flex gap-2 justify-end">

@@ -20,6 +20,7 @@ namespace UTB_AP5PW_Invoicer.Application.DTOs.Validators
 
             RuleFor(x => x.ContactPhone)
                 .NotEmpty()
+                .Matches(@"^\+420\d{9}$")
                 .MaximumLength(50);
         }
     }

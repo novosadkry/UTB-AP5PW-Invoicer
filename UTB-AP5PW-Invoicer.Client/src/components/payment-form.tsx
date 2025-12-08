@@ -1,13 +1,15 @@
 ﻿import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field, FieldGroup, FieldLabel, FieldDescription, FieldError } from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import type { CreatePaymentDto, UpdatePaymentDto, Payment } from "@/types/payment";
 import { z } from "zod";
 import { getZodFieldErrors } from "@/types/zod";
 import { getValidationErrors } from "@/types/api.ts";
 import { DateInput } from "@components/date-input.tsx";
+import { Alert, AlertDescription, AlertTitle } from "@components/ui/alert.tsx";
+import { AlertCircleIcon } from "lucide-react";
 
 interface PaymentFormProps {
   invoiceId: number;
@@ -151,11 +153,13 @@ export function PaymentForm({
             </Field>
 
             {formError && (
-              <Field>
-                <FieldDescription className="text-destructive font-normal text-sm">
-                  {formError}
-                </FieldDescription>
-              </Field>
+              <Alert variant="destructive">
+                <AlertCircleIcon />
+                <AlertTitle>Ukládání selhalo</AlertTitle>
+                <AlertDescription>
+                  <p>{formError}</p>
+                </AlertDescription>
+              </Alert>
             )}
 
             <div className="flex gap-2 justify-end mt-2">

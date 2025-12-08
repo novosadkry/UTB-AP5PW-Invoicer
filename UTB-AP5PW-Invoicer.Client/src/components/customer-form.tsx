@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field, FieldGroup, FieldLabel, FieldDescription, FieldError } from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import type { Customer, CreateCustomerDto, UpdateCustomerDto } from "@/types/customer";
 import { z } from "zod";
 import { getZodFieldErrors } from "@/types/zod";
 import { getValidationErrors } from "@/types/api.ts";
+import { Alert, AlertDescription, AlertTitle } from "@components/ui/alert.tsx";
+import { AlertCircleIcon } from "lucide-react";
 
 interface CustomerFormProps {
   customer?: Customer;
@@ -16,14 +18,17 @@ interface CustomerFormProps {
 }
 
 const customerSchema = z.object({
-  name: z.string().min(1, "Název zákazníka je povinný"),
+  name: z.string().nonempty("Název zákazníka je povinné pole"),
   ico: z.string().optional(),
   dic: z.string().optional(),
-  address: z.string().optional(),
+  address: z.string().nonempty("Adresa je povinné pole."),
   contactEmail: z
     .email("Zadejte platnou e-mailovou adresu.")
-    .min(1, "Kontaktní e-mail je povinný"),
-  contactPhone: z.string().optional(),
+    .nonempty( "Kontaktní e-mail je povinné pole."),
+  contactPhone: z
+    .string()
+    .regex(/^\+420\d{9}$/, "Zadejte telefonní číslo v platném formátu (+420XXXXXXXXX).")
+    .nonempty("Telefon je povinné pole."),
 });
 
 export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }: CustomerFormProps) {
@@ -112,6 +117,7 @@ export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }
                   value={formData.ico}
                   onChange={(e) => handleChange("ico", e.target.value)}
                   disabled={isLoading}
+                  aria-invalid={!!fieldErrors.ico}
                 />
                 {fieldErrors.ico && (
                   <FieldError errors={fieldErrors.ico.map((message) => ({ message }))} />
@@ -125,6 +131,7 @@ export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }
                   value={formData.dic}
                   onChange={(e) => handleChange("dic", e.target.value)}
                   disabled={isLoading}
+                  aria-invalid={!!fieldErrors.dic}
                 />
                 {fieldErrors.dic && (
                   <FieldError errors={fieldErrors.dic.map((message) => ({ message }))} />
@@ -139,6 +146,7 @@ export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }
                 value={formData.address}
                 onChange={(e) => handleChange("address", e.target.value)}
                 disabled={isLoading}
+                aria-invalid={!!fieldErrors.address}
               />
               {fieldErrors.address && (
                 <FieldError errors={fieldErrors.address.map((message) => ({ message }))} />
@@ -171,6 +179,7 @@ export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }
                   value={formData.contactPhone}
                   onChange={(e) => handleChange("contactPhone", e.target.value)}
                   disabled={isLoading}
+                  aria-invalid={!!fieldErrors.contactPhone}
                 />
                 {fieldErrors.contactPhone && (
                   <FieldError
@@ -181,11 +190,13 @@ export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }
             </div>
 
             {formError && (
-              <Field>
-                <FieldDescription className="text-destructive font-normal text-sm">
-                  {formError}
-                </FieldDescription>
-              </Field>
+              <Alert variant="destructive">
+                <AlertCircleIcon />
+                <AlertTitle>Ukládání selhalo</AlertTitle>
+                <AlertDescription>
+                  <p>{formError}</p>
+                </AlertDescription>
+              </Alert>
             )}
 
             <div className="flex gap-2 justify-end">
