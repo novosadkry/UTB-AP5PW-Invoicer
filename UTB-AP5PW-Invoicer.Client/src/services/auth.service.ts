@@ -1,6 +1,6 @@
 ﻿import type { AxiosInstance } from 'axios';
 import type { LoginResponse } from "@/hooks/use-auth.tsx";
-import type { ChangePasswordDto, LoginDto, SignupDto } from '@/types/auth';
+import type { ChangePasswordDto, LoginDto, SignupDto, ForgotPasswordDto, ResetPasswordDto } from '@/types/auth';
 
 export class AuthService {
   private api: AxiosInstance;
@@ -29,5 +29,13 @@ export class AuthService {
 
   async changePassword(data: ChangePasswordDto): Promise<void> {
     await this.api.post('/auth/change-password', data);
+  }
+
+  async forgotPassword(data: ForgotPasswordDto): Promise<void> {
+    await this.api.post('/auth/forgot-password', data);
+  }
+
+  async resetPassword(data: ResetPasswordDto): Promise<void> {
+    await this.api.post('/auth/reset-password', data);
   }
 }

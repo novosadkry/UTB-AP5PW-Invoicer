@@ -6,6 +6,7 @@ using UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.Create;
 using UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.Delete;
 using UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.Update;
 using UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.GenerateShareToken;
+using UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.RecalculateTotal;
 using UTB_AP5PW_Invoicer.Application.Features.Invoices.Queries.Get;
 using UTB_AP5PW_Invoicer.Application.Features.Invoices.Queries.GetByShareToken;
 using UTB_AP5PW_Invoicer.Application.Features.Invoices.Queries.List;
@@ -58,9 +59,14 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
             return await _mediator.Send(_mapper.Map<UpdateInvoiceCommand>(invoice));
         }
 
-        public async Task<string?> GenerateShareTokenAsync(int invoiceId)
+        public async Task<string?> GenerateShareTokenAsync(InvoiceDto invoice)
         {
-            return await _mediator.Send(new GenerateShareTokenCommand(invoiceId));
+            return await _mediator.Send(new GenerateShareTokenCommand(invoice.Id));
+        }
+
+        public async Task RecalculateInvoiceTotalAsync(InvoiceDto invoice)
+        {
+            await _mediator.Send(new RecalculateInvoiceTotalCommand(invoice.Id));
         }
     }
 }

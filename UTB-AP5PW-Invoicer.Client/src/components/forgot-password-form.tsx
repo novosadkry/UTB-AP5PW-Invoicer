@@ -1,14 +1,10 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils"
-import {
-  Link,
-  useNavigate,
-  useLocation,
-  useSearchParams,
-} from "react-router";
+import { Link } from "react-router";
 import { Button } from "@/components/ui/button"
 import {
-  Card, CardAction,
+  Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -16,74 +12,49 @@ import {
 } from "@/components/ui/card"
 import {
   Field,
-  FieldDescription, FieldError,
+  FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { ThemeToggle } from "@components/theme-toggle";
-import { useAuth } from "@/hooks/use-auth";
 import { useAxiosPublic } from "@/hooks/use-axios.ts";
 import { getValidationErrors } from "@/types/api.ts";
 import { Alert, AlertDescription, AlertTitle } from "@components/ui/alert.tsx";
-import { AlertCircleIcon } from "lucide-react";
+import { AlertCircleIcon, CheckCircle2Icon } from "lucide-react";
 import { z } from "zod";
 import { getZodFieldErrors } from "@/types/zod.ts";
-import type { AxiosError } from "axios";
 import { AuthService } from "@/services/auth.service.ts";
 
-const loginSchema = z.object({
+const forgotPasswordSchema = z.object({
   email: z
     .email("Zadejte platnou e-mailovou adresu.")
     .min(1, "E-mail je povinné pole."),
-  password: z
-    .string()
-    .min(5, "Heslo musí být alespoň 5 znaků dlouhé."),
 });
 
-export function LoginForm({
+export function ForgotPasswordForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const api = useAxiosPublic();
-  const navigate = useNavigate();
   const authService = useMemo(() => new AuthService(api), [api]);
 
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
-
-  const { search } = useLocation();
-  const [searchParams] = useSearchParams();
-  const { setAccessToken, user, setUser } = useAuth();
-
-  useEffect(() => {
-    if (user) {
-      navigate(
-        searchParams.get("redirect") ?? "/dashboard",
-        { replace: true }
-      );
-    }
-  }, []);
-
-  // If user is already logged in, do not show the login form
-  if (user) {
-    return null;
-  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (loading) return;
 
     setError(null);
+    setSuccess(false);
     setFieldErrors({});
 
-    const parseResult = loginSchema.safeParse({
-      email,
-      password,
-    });
+    const parseResult = forgotPasswordSchema.safeParse({ email });
 
     if (!parseResult.success) {
       setFieldErrors(getZodFieldErrors(parseResult.error));
@@ -94,27 +65,19 @@ export function LoginForm({
     setLoading(true);
 
     try {
-      const { accessToken, user } = await authService.login({
+      await authService.forgotPassword({
         email: parseResult.data.email,
-        password: parseResult.data.password,
       });
 
-      setAccessToken(accessToken);
-      setUser(user);
-
-      navigate(
-        searchParams.get("redirect") ?? "/dashboard",
-        { replace: true }
-      );
+      setSuccess(true);
+      setEmail("");
     } catch (err) {
       const validation = getValidationErrors(err);
       if (validation?.errors) {
         setFieldErrors(validation.errors);
         setError("Formulář obsahuje chyby. Zkontrolujte zvýrazněná pole.");
-      } else if ((err as AxiosError)?.response?.status === 401) {
-        setError("Neplatné přihlašovací údaje.");
       } else {
-        setError("Došlo k neznámé chybě. Zkuste to prosím znovu.");
+        setError("Došlo k chybě. Zkuste to prosím znovu.");
         console.error(err);
       }
     } finally {
@@ -126,9 +89,9 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle>Přihlásit se</CardTitle>
+          <CardTitle>Zapomenuté heslo</CardTitle>
           <CardDescription>
-            Zadejte své údaje pro přístup k účtu.
+            Zadejte svůj e-mail a my vám pošleme odkaz pro obnovení hesla.
           </CardDescription>
           <CardAction>
             <ThemeToggle size="lg" />
@@ -148,53 +111,39 @@ export function LoginForm({
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  disabled={loading}
+                  disabled={loading || success}
                   aria-invalid={!!fieldErrors.email}
                 />
                 {fieldErrors.email && (
                   <FieldError errors={fieldErrors.email.map(message => ({ message }))} />
                 )}
               </Field>
-              <Field data-invalid={!!fieldErrors.password}>
-                <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Heslo</FieldLabel>
-                  <Link
-                    to="/forgot-password"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
-                    Zapomněli jste heslo?
-                  </Link>
-                </div>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={loading}
-                  aria-invalid={!!fieldErrors.password}
-                />
-                {fieldErrors.password && (
-                  <FieldError errors={fieldErrors.password.map(message => ({ message }))} />
-                )}
-              </Field>
               {error && (
                 <Alert variant="destructive">
                   <AlertCircleIcon />
-                  <AlertTitle>Přihlášení selhalo</AlertTitle>
+                  <AlertTitle>Chyba</AlertTitle>
                   <AlertDescription>
                     <p>{error}</p>
                   </AlertDescription>
                 </Alert>
               )}
+              {success && (
+                <Alert>
+                  <CheckCircle2Icon className="h-4 w-4" />
+                  <AlertTitle>E-mail odeslán</AlertTitle>
+                  <AlertDescription>
+                    <p>
+                      Pokud účet s touto e-mailovou adresou existuje, byl odeslán e-mail s instrukcemi pro obnovení hesla.
+                    </p>
+                  </AlertDescription>
+                </Alert>
+              )}
               <Field>
-                <Button type="submit" disabled={loading}>
-                  {loading ? "Přihlašuji…" : "Přihlásit se"}
+                <Button type="submit" disabled={loading || success}>
+                  {loading ? "Odesílám…" : "Odeslat odkaz"}
                 </Button>
                 <FieldDescription className="text-center">
-                  Ještě nemáte účet? <Link to={{ pathname: "/signup", search }}>Registrovat se</Link>
+                  <Link to="/login">Zpět na přihlášení</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

@@ -2,6 +2,8 @@
 import Index from "@pages/index/page";
 import Login from "@pages/auth/login/page";
 import Signup from "@pages/auth/signup/page";
+import ForgotPassword from "@pages/auth/forgot-password/page";
+import ResetPassword from "@pages/auth/reset-password/page";
 import Dashboard from "@pages/dashboard/page";
 import Invoices from "@pages/dashboard/invoices/page";
 import Invoice from "@pages/dashboard/invoices/[id]/page";
@@ -22,6 +24,8 @@ export default function AppRouter() {
         <Route path="/" element={<Index />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <Dashboard />

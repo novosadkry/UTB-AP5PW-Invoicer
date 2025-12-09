@@ -49,6 +49,13 @@ import type { Customer } from "@/types/customer";
 import type { Payment } from "@/types/payment";
 import { InvoiceForm } from "@/components/invoice-form";
 import { PaymentForm } from "@/components/payment-form";
+import { InvoiceItemsManager } from "@/components/invoice-items-manager";
+import { InvoiceItemForm } from "@/components/invoice-item-form";
+import type { InvoiceItem } from "@/types/invoice-item";
+import {
+  InvoiceItemService,
+  type UpdateInvoiceItemDto
+} from "@/services/invoice-item.service";
 import { toast } from "sonner";
 
 export default function Page() {
@@ -58,6 +65,7 @@ export default function Page() {
   const invoiceService = useMemo(() => new InvoiceService(api), [api]);
   const customerService = useMemo(() => new CustomerService(api), [api]);
   const paymentService = useMemo(() => new PaymentService(api), [api]);
+  const invoiceItemService = useMemo(() => new InvoiceItemService(api), [api]);
 
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -73,6 +81,9 @@ export default function Page() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [isPaymentDrawerOpen, setIsPaymentDrawerOpen] = useState(false);
   const [savingPayment, setSavingPayment] = useState(false);
+  const [isInvoiceItemDrawerOpen, setIsInvoiceItemDrawerOpen] = useState(false);
+  const [editingInvoiceItem, setEditingInvoiceItem] = useState<InvoiceItem | null>(null);
+  const [savingInvoiceItem, setSavingInvoiceItem] = useState(false);
 
   const loadCustomers = useCallback(async () => {
     setCustomersLoading(true);
@@ -412,6 +423,25 @@ export default function Page() {
             </div>
           </div>
 
+          <InvoiceItemsManager
+            invoiceId={invoice.id}
+            onItemsChange={async () => {
+              // Reload invoice to get updated total amount
+              const updatedInvoice = await loadInvoice();
+              if (updatedInvoice) {
+                setInvoice(updatedInvoice);
+              }
+            }}
+            onAddItem={() => {
+              setEditingInvoiceItem(null);
+              setIsInvoiceItemDrawerOpen(true);
+            }}
+            onEditItem={(item) => {
+              setEditingInvoiceItem(item);
+              setIsInvoiceItemDrawerOpen(true);
+            }}
+          />
+
           <div className="pt-4 border-t">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-semibold">Platby</h3>
@@ -609,6 +639,60 @@ export default function Page() {
                 }}
                 onCancel={() => setIsPaymentDrawerOpen(false)}
                 isLoading={savingPayment}
+              />
+            )}
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      <Drawer open={isInvoiceItemDrawerOpen} onOpenChange={setIsInvoiceItemDrawerOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>{editingInvoiceItem ? "Upravit položku" : "Přidat položku"}</DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-4">
+            {invoice && (
+              <InvoiceItemForm
+                invoiceId={invoice.id}
+                invoiceItem={editingInvoiceItem || undefined}
+                onSubmit={async (item) => {
+                  setSavingInvoiceItem(true);
+
+                  const promise = (async () => {
+                    if (editingInvoiceItem) {
+                      await invoiceItemService.update(invoice.id, item as UpdateInvoiceItemDto);
+                    } else {
+                      await invoiceItemService.create(invoice.id, item);
+                    }
+                    setIsInvoiceItemDrawerOpen(false);
+                    setEditingInvoiceItem(null);
+
+                    const updatedInvoice = await loadInvoice();
+                    if (updatedInvoice) {
+                      setInvoice(updatedInvoice);
+                    }
+                  })();
+
+                  toast.promise(promise, {
+                    position: "top-center",
+                    loading: editingInvoiceItem ? "Ukládám položku..." : "Přidávám položku...",
+                    success: () => {
+                      setSavingInvoiceItem(false);
+                      return editingInvoiceItem ? "Položka byla aktualizována" : "Položka byla přidána";
+                    },
+                    error: () => {
+                      setSavingInvoiceItem(false);
+                      return "Nepodařilo se uložit položku";
+                    },
+                  });
+
+                  return promise;
+                }}
+                onCancel={() => {
+                  setIsInvoiceItemDrawerOpen(false);
+                  setEditingInvoiceItem(null);
+                }}
+                isLoading={savingInvoiceItem}
               />
             )}
           </div>

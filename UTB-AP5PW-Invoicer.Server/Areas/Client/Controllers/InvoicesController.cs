@@ -19,17 +19,20 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
         private readonly IInvoiceService _invoiceService;
         private readonly IUserService _userService;
         private readonly ICustomerService _customerService;
+        private readonly IInvoiceItemService _invoiceItemService;
         private readonly IMediator _mediator;
 
         public InvoicesController(
             IInvoiceService invoiceService,
             IUserService userService,
             ICustomerService customerService,
+            IInvoiceItemService invoiceItemService,
             IMediator mediator)
         {
             _invoiceService = invoiceService;
             _userService = userService;
             _customerService = customerService;
+            _invoiceItemService = invoiceItemService;
             _mediator = mediator;
         }
 
@@ -122,8 +125,12 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult> GenerateShareLink(int id)
         {
-            var token = await _invoiceService.GenerateShareTokenAsync(id);
+            var invoice = await _invoiceService.GetInvoiceByIdAsync(id);
+            if (invoice == null) return NotFound();
+
+            var token = await _invoiceService.GenerateShareTokenAsync(invoice);
             if (token == null) return NotFound();
+
             return Ok(new { shareToken = token });
         }
 
@@ -173,7 +180,7 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
 
             var customer = await _customerService.GetCustomerByIdAsync(invoice.CustomerId.Value);
             if (customer == null) return NotFound();
-            
+
             return Ok(customer);
         }
 
@@ -199,6 +206,66 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
             var pdfBytes = document.GeneratePdf();
 
             return File(pdfBytes, "application/pdf", $"faktura-{invoice.InvoiceNumber}.pdf");
+        }
+
+        [HttpGet("{invoiceId:int}/items")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<IEnumerable<InvoiceItemDto>>> GetInvoiceItems(int invoiceId)
+        {
+            var items = await _mediator.Send(new ListInvoiceItemsQuery(invoiceId));
+            return Ok(items);
+        }
+
+        [HttpPost("{invoiceId:int}/items")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult> CreateInvoiceItem(int invoiceId, [FromBody] InvoiceItemDto invoiceItem)
+        {
+            var invoice = await _invoiceService.GetInvoiceByIdAsync(invoiceId);
+            if (invoice == null) return NotFound();
+
+            invoiceItem.InvoiceId = invoiceId;
+            var id = await _invoiceItemService.CreateInvoiceItemAsync(invoiceItem);
+            await _invoiceService.RecalculateInvoiceTotalAsync(invoice);
+
+            return CreatedAtAction(nameof(GetInvoiceItems), new { invoiceId }, invoiceItem);
+        }
+
+        [HttpPut("{invoiceId:int}/items/{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> UpdateInvoiceItem(int invoiceId, int id, [FromBody] InvoiceItemDto invoiceItem)
+        {
+            var invoice = await _invoiceService.GetInvoiceByIdAsync(invoiceId);
+            if (invoice == null) return NotFound();
+
+            var existingItem = await _invoiceItemService.GetInvoiceItemByIdAsync(id);
+            if (existingItem == null) return NotFound();
+
+            invoiceItem.InvoiceId = invoiceId;
+            await _invoiceItemService.UpdateInvoiceItemAsync(invoiceItem);
+            await _invoiceService.RecalculateInvoiceTotalAsync(invoice);
+
+            return Ok();
+        }
+
+        [HttpDelete("{invoiceId:int}/items/{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> DeleteInvoiceItem(int invoiceId, int id)
+        {
+            var invoice = await _invoiceService.GetInvoiceByIdAsync(invoiceId);
+            if (invoice == null) return NotFound();
+
+            await _invoiceItemService.DeleteInvoiceItemAsync(new InvoiceItemDto { Id = id });
+            await _invoiceService.RecalculateInvoiceTotalAsync(invoice);
+
+            return Ok();
         }
     }
 }

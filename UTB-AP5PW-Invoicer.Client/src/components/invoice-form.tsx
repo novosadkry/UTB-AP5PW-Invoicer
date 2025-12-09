@@ -29,9 +29,6 @@ const invoiceSchema = z.object({
   issueDate: z.date("Datum vystavení je povinné pole."),
   dueDate: z.date("Datum splatnosti je povinné pole."),
   status: z.enum(["draft", "sent", "paid", "overdue"]),
-  totalAmount: z
-    .number("Částka je povinné pole.")
-    .gt(0, "Částka nesmí být záporná nebo nulová hodnota."),
 });
 
 export function InvoiceForm({
@@ -53,7 +50,6 @@ export function InvoiceForm({
       ? Date.parse(invoice.dueDate)
       : Date.now()),
     status: invoice?.status || "draft",
-    totalAmount: invoice?.totalAmount || 0,
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
@@ -221,27 +217,25 @@ export function InvoiceForm({
               </Field>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Field data-invalid={!!fieldErrors.totalAmount}>
+            {invoice && (
+              <Field>
                 <FieldLabel htmlFor="totalAmount">Celková částka (Kč)</FieldLabel>
                 <Input
                   id="totalAmount"
-                  type="number"
-                  step="0.01"
-                  value={formData.totalAmount}
-                  onChange={(e) => handleChange("totalAmount", parseFloat(e.target.value))}
-                  disabled={isLoading}
-                  required
-                  placeholder="0,00"
-                  aria-invalid={!!fieldErrors.totalAmount}
+                  type="text"
+                  value={new Intl.NumberFormat('cs-CZ', { 
+                    style: 'currency', 
+                    currency: 'CZK' 
+                  }).format(invoice.totalAmount)}
+                  disabled
+                  readOnly
+                  className="bg-muted"
                 />
-                {fieldErrors.totalAmount && (
-                  <FieldError
-                    errors={fieldErrors.totalAmount.map((message) => ({ message }))}
-                  />
-                )}
+                <FieldDescription>
+                  Částka se počítá automaticky z položek faktury.
+                </FieldDescription>
               </Field>
-            </div>
+            )}
 
             {formError && (
               <Alert variant="destructive">

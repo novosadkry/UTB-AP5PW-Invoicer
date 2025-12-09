@@ -69,7 +69,7 @@ export default function SharedInvoicePage() {
     }
 
     loadSharedInvoice();
-  }, [token, publicApi]);
+  }, [token]);
 
   async function handleDownloadPdf() {
     if (!token) return;

@@ -19,8 +19,6 @@ export interface CreateInvoiceDto {
   issueDate: string;
   dueDate: string;
   status: InvoiceStatus;
-  totalAmount: number;
-  totalVat: number;
 }
 
 export interface UpdateInvoiceDto extends CreateInvoiceDto {

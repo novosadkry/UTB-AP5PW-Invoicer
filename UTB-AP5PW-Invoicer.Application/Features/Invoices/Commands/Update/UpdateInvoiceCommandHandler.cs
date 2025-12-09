@@ -12,7 +12,14 @@ namespace UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.Update
             var invoice = await dbContext.Invoices.FindAsync([request.Id], cancellationToken);
             if (invoice == null) return false;
 
+            // Store the current TotalAmount before mapping
+            var currentTotalAmount = invoice.TotalAmount;
+            
             mapper.Map(request, invoice);
+            
+            // Restore TotalAmount - it should only be modified by invoice items
+            invoice.TotalAmount = currentTotalAmount;
+            
             await dbContext.SaveChangesAsync(cancellationToken);
 
             return true;

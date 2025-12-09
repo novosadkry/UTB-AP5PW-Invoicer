@@ -10,6 +10,7 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Interfaces
         public Task<int> CreateInvoiceAsync(InvoiceDto invoice);
         public Task<bool> UpdateInvoiceAsync(InvoiceDto invoice);
         public Task<bool> DeleteInvoiceAsync(InvoiceDto invoice);
-        public Task<string?> GenerateShareTokenAsync(int invoiceId);
+        public Task<string?> GenerateShareTokenAsync(InvoiceDto invoice);
+        public Task RecalculateInvoiceTotalAsync(InvoiceDto invoice);
     }
 }

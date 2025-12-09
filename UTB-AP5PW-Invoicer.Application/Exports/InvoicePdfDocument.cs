@@ -172,7 +172,6 @@ namespace UTB_AP5PW_Invoicer.Application.Exports
                         columns.RelativeColumn();
                         columns.RelativeColumn();
                         columns.RelativeColumn();
-                        columns.RelativeColumn();
                     });
 
                     table.Header(header =>

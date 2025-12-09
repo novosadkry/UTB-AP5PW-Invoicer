@@ -10,7 +10,6 @@ namespace UTB_AP5PW_Invoicer.Application.Features.Invoices.Commands.Create
         public DateTimeOffset IssueDate { get; set; }
         public DateTimeOffset DueDate { get; set; }
         public string Status { get; set; }
-        public decimal TotalAmount { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
         public DateTimeOffset UpdatedAt { get; set; }
     }

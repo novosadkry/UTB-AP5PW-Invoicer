@@ -14,6 +14,7 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
         private readonly Mock<IInvoiceService> _mockInvoiceService;
         private readonly Mock<IUserService> _mockUserService;
         private readonly Mock<ICustomerService> _mockCustomerService;
+        private readonly Mock<IInvoiceItemService> _mockInvoiceItemService;
         private readonly Mock<IMediator> _mockMediator;
 
         public InvoicesControllerTests()
@@ -21,6 +22,7 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
             _mockInvoiceService = new Mock<IInvoiceService>();
             _mockUserService = new Mock<IUserService>();
             _mockCustomerService = new Mock<ICustomerService>();
+            _mockInvoiceItemService = new Mock<IInvoiceItemService>();
             _mockMediator = new Mock<IMediator>();
         }
 
@@ -30,6 +32,7 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
                 _mockInvoiceService.Object,
                 _mockUserService.Object,
                 _mockCustomerService.Object,
+                _mockInvoiceItemService.Object,
                 _mockMediator.Object);
         }
 
