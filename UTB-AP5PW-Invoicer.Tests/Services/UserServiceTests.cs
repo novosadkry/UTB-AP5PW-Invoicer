@@ -38,6 +38,15 @@ namespace UTB_AP5PW_Invoicer.Tests.Services
             var mockMediator = new Mock<IMediator>();
             var mockValidator = new Mock<IValidator<UserDto>>();
 
+            mockMapper
+                .Setup(m => m.Map<CreateUserCommand>(It.IsAny<UserDto>()))
+                .Returns(new CreateUserCommand
+                {
+                    Email = "a@b.com",
+                    FullName = "Name",
+                    PasswordHash = "pwHash"
+                });
+
             mockMediator
                 .Setup(m => m.Send(It.IsAny<CreateUserCommand>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(1);
