@@ -38,6 +38,28 @@ namespace UTB_AP5PW_Invoicer.Application.Features.Summary.Queries
                 })
                 .ToList();
 
+            var paymentsQuery = dbContext.Payments
+                .Include(p => p.Invoice)
+                    .ThenInclude(i => i.Customer)
+                .Where(p => p.Invoice.UserId == request.UserId)
+                .AsNoTracking();
+
+            var latestPayments = await paymentsQuery
+                .OrderByDescending(p => p.PaymentDate)
+                .Take(5)
+                .Select(p => new PaymentSummaryDto
+                {
+                    Id = p.Id,
+                    InvoiceId = p.InvoiceId,
+                    InvoiceNumber = p.Invoice.InvoiceNumber,
+                    CustomerName = p.Invoice.Customer != null
+                        ? p.Invoice.Customer.Name : null,
+                    PaymentDate = p.PaymentDate,
+                    Amount = p.Amount,
+                    PaymentMethod = p.PaymentMethod,
+                })
+                .ToListAsync(cancellationToken);
+
             return new DashboardSummaryDto
             {
                 TotalInvoices = totalInvoices,
@@ -45,6 +67,7 @@ namespace UTB_AP5PW_Invoicer.Application.Features.Summary.Queries
                 OverdueInvoices = overdueInvoices,
                 TotalAmount = totalAmount,
                 LatestInvoices = latestInvoices,
+                LatestPayments = latestPayments,
             };
         }
     }

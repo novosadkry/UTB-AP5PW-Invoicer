@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useMemo, useState } from "react"
+import { useNavigate } from "react-router";
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import {
@@ -26,6 +27,7 @@ import { toast } from "sonner";
 
 export default function Page() {
   const api = useAxiosPrivate()
+  const navigate = useNavigate()
   const summaryService = useMemo(() => new SummaryService(api), [api])
 
   const [summary, setSummary] = useState<DashboardSummary | null>(null)
@@ -53,6 +55,7 @@ export default function Page() {
   const totalAmount = summary?.totalAmount ?? 0
   const overdueInvoices = summary?.overdueInvoices ?? 0
   const latestInvoices = summary?.latestInvoices ?? []
+  const latestPayments = summary?.latestPayments ?? []
 
   return (
     <SidebarProvider
@@ -181,7 +184,11 @@ export default function Page() {
                           </thead>
                           <tbody>
                             {latestInvoices.map((invoice) => (
-                              <tr key={invoice.id} className="border-b last:border-0">
+                              <tr
+                                key={invoice.id}
+                                className="border-b last:border-0 cursor-pointer hover:bg-muted/40"
+                                onClick={() => navigate(`/dashboard/invoices/${invoice.id}`)}
+                              >
                                 <td className="py-2 pr-4 font-medium">{invoice.invoiceNumber}</td>
                                 <td className="py-2 pr-4">
                                   {invoice.customerName ?? "-"}
@@ -236,9 +243,57 @@ export default function Page() {
                     <CardDescription>Rychlý přehled naposledy přijatých plateb</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      TODO: Implementovat přehled plateb
-                    </p>
+                    {loading ? (
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-11/12" />
+                        <Skeleton className="h-4 w-10/12" />
+                        <Skeleton className="h-4 w-9/12" />
+                      </div>
+                    ) : latestPayments.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">
+                        Zatím nemáte žádné platby.
+                      </p>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead className="border-b text-left text-xs text-muted-foreground">
+                            <tr>
+                              <th className="py-2 pr-4">Datum</th>
+                              <th className="py-2 pr-4">Faktura</th>
+                              <th className="py-2 pr-4">Zákazník</th>
+                              <th className="py-2 pr-4">Metoda</th>
+                              <th className="py-2 pl-4 text-right">Částka</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {latestPayments.map((payment) => (
+                              <tr
+                                key={payment.id}
+                                className="border-b last:border-0 cursor-pointer hover:bg-muted/40"
+                                onClick={() => navigate(`/dashboard/invoices/${payment.invoiceId}`)}
+                              >
+                                <td className="py-2 pr-4">
+                                  {new Date(payment.paymentDate).toLocaleDateString("cs-CZ")}
+                                </td>
+                                <td className="py-2 pr-4 font-medium text-primary underline-offset-2">
+                                  {payment.invoiceNumber}
+                                </td>
+                                <td className="py-2 pr-4">{payment.customerName ?? "-"}</td>
+                                <td className="py-2 pr-4">{payment.paymentMethod}</td>
+                                <td className="py-2 pl-4 text-right">
+                                  {payment.amount.toLocaleString("cs-CZ", {
+                                    style: "currency",
+                                    currency: "CZK",
+                                    maximumFractionDigits: 0,
+                                  })}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>

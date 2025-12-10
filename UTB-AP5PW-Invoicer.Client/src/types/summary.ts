@@ -6,6 +6,7 @@ export interface DashboardSummary {
   overdueInvoices: number;
   totalAmount: number;
   latestInvoices: InvoiceSummary[];
+  latestPayments: PaymentSummary[];
 }
 
 export interface InvoiceSummary {
@@ -16,4 +17,14 @@ export interface InvoiceSummary {
   dueDate: string;
   status: InvoiceStatus;
   totalAmount: number;
+}
+
+export interface PaymentSummary {
+  id: number;
+  invoiceId: number;
+  invoiceNumber: string;
+  customerName: string | null;
+  paymentDate: string;
+  amount: number;
+  paymentMethod: string;
 }
