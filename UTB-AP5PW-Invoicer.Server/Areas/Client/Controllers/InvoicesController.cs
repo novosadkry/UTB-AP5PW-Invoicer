@@ -184,6 +184,20 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
             return Ok(customer);
         }
 
+        [HttpGet("shared/{token}/supplier")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<UserDto>> GetSharedInvoiceSupplier(string token)
+        {
+            var invoice = await _invoiceService.GetInvoiceByShareTokenAsync(token);
+            if (invoice == null) return NotFound();
+
+            var user = await _userService.GetUserAsync(invoice.UserId);
+            if (user == null) return NotFound();
+
+            return Ok(user);
+        }
+
         [HttpGet("shared/{token}/pdf")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

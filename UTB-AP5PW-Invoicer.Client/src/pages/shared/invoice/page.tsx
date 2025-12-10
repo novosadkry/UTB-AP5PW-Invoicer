@@ -10,6 +10,7 @@ import type { Invoice } from "@/types/invoice";
 import type { Customer } from "@/types/customer";
 import type { InvoiceItem } from "@/types/invoice-item";
 import type { Payment } from "@/types/payment";
+import type { UserDto } from "@/types/user";
 import { toast } from "sonner";
 import { SharedService } from "@/services/shared.service";
 import {
@@ -24,9 +25,10 @@ import {
 export default function SharedInvoicePage() {
   const { token } = useParams();
   const [invoice, setInvoice] = useState<Invoice | null>(null);
-  const [customer, setCustomer] = useState<Customer | null>(null);
   const [items, setItems] = useState<InvoiceItem[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [supplier, setSupplier] = useState<UserDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,6 +67,13 @@ export default function SharedInvoicePage() {
           setCustomer(customerData);
         } catch (err) {
           console.error("Failed to load customer:", err);
+        }
+
+        try {
+          const supplierData = await sharedService.getSharedSupplier(token);
+          setSupplier(supplierData);
+        } catch (err) {
+          console.error("Failed to load supplier:", err);
         }
       } catch (err) {
         console.error("Failed to load shared invoice:", err);
@@ -181,19 +190,43 @@ export default function SharedInvoicePage() {
               </div>
             </div>
 
-            {customer && (
-              <div>
-                <h3 className="font-semibold mb-2">Zákazník</h3>
-                <div className="space-y-1">
-                  <p className="font-medium">{customer.name}</p>
-                  {customer.ico && <p className="text-sm text-muted-foreground">IČ: {customer.ico}</p>}
-                  {customer.dic && <p className="text-sm text-muted-foreground">DIČ: {customer.dic}</p>}
-                  {customer.address && <p className="text-sm text-muted-foreground">{customer.address}</p>}
-                  {customer.contactEmail && <p className="text-sm text-muted-foreground">{customer.contactEmail}</p>}
-                  {customer.contactPhone && <p className="text-sm text-muted-foreground">{customer.contactPhone}</p>}
+            <div className="grid grid-cols-2 gap-4">
+              {supplier && (
+                <div>
+                  <h3 className="font-semibold mb-2">Dodavatel</h3>
+                  <div className="space-y-1">
+                    {(supplier.companyName || supplier.fullName) && (
+                      <p className="font-medium">{supplier.companyName || supplier.fullName}</p>
+                    )}
+                    {supplier.ico && <p className="text-sm text-muted-foreground">IČ: {supplier.ico}</p>}
+                    {supplier.dic && <p className="text-sm text-muted-foreground">DIČ: {supplier.dic}</p>}
+                    {supplier.companyAddress && (
+                      <p className="text-sm text-muted-foreground">{supplier.companyAddress}</p>
+                    )}
+                    {supplier.email && (
+                      <p className="text-sm text-muted-foreground">{supplier.email}</p>
+                    )}
+                    {supplier.companyPhone && (
+                      <p className="text-sm text-muted-foreground">{supplier.companyPhone}</p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+
+              {customer && (
+                <div>
+                  <h3 className="font-semibold mb-2">Odběratel</h3>
+                  <div className="space-y-1">
+                    <p className="font-medium">{customer.name}</p>
+                    {customer.ico && <p className="text-sm text-muted-foreground">IČ: {customer.ico}</p>}
+                    {customer.dic && <p className="text-sm text-muted-foreground">DIČ: {customer.dic}</p>}
+                    {customer.address && <p className="text-sm text-muted-foreground">{customer.address}</p>}
+                    {customer.contactEmail && <p className="text-sm text-muted-foreground">{customer.contactEmail}</p>}
+                    {customer.contactPhone && <p className="text-sm text-muted-foreground">{customer.contactPhone}</p>}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {items.length > 0 && (
               <div>

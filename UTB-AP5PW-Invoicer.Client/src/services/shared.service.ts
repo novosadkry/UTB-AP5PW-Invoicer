@@ -3,6 +3,7 @@ import type { Invoice } from '@/types/invoice';
 import type { InvoiceItem } from '@/types/invoice-item';
 import type { Payment } from '@/types/payment';
 import type { Customer } from '@/types/customer';
+import type { UserDto } from '@/types/user';
 
 export class SharedService {
   private api: AxiosInstance;
@@ -28,6 +29,11 @@ export class SharedService {
 
   async getSharedCustomer(token: string): Promise<Customer> {
     const response = await this.api.get<Customer>(`/invoices/shared/${token}/customer`);
+    return response.data;
+  }
+
+  async getSharedSupplier(token: string): Promise<UserDto> {
+    const response = await this.api.get<UserDto>(`/invoices/shared/${token}/supplier`);
     return response.data;
   }
 
