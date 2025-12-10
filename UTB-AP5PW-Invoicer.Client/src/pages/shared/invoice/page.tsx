@@ -12,6 +12,14 @@ import type { InvoiceItem } from "@/types/invoice-item";
 import type { Payment } from "@/types/payment";
 import { toast } from "sonner";
 import { SharedService } from "@/services/shared.service";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
 
 export default function SharedInvoicePage() {
   const { token } = useParams();
@@ -191,26 +199,26 @@ export default function SharedInvoicePage() {
               <div>
                 <h3 className="font-semibold mb-2">Položky</h3>
                 <div className="border rounded-lg overflow-hidden">
-                  <table className="w-full">
-                    <thead className="bg-muted">
-                      <tr>
-                        <th className="text-left p-3">Popis</th>
-                        <th className="text-right p-3">Množství</th>
-                        <th className="text-right p-3">Jednotková cena</th>
-                        <th className="text-right p-3">Celkem</th>
-                      </tr>
-                    </thead>
-                    <tbody>
+                  <Table className="w-full">
+                    <TableHeader className="bg-muted">
+                      <TableRow>
+                        <TableHead className="text-left p-3">Popis</TableHead>
+                        <TableHead className="text-right p-3">Množství</TableHead>
+                        <TableHead className="text-right p-3">Jednotková cena</TableHead>
+                        <TableHead className="text-right p-3">Celkem</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
                       {items.map((item, index) => (
-                        <tr key={item.id || index} className="border-t">
-                          <td className="p-3">{item.description}</td>
-                          <td className="text-right p-3">{item.quantity}</td>
-                          <td className="text-right p-3">{item.unitPrice.toLocaleString()} Kč</td>
-                          <td className="text-right p-3">{item.totalPrice.toLocaleString()} Kč</td>
-                        </tr>
+                        <TableRow key={item.id || index} className="border-t">
+                          <TableCell className="p-3">{item.description}</TableCell>
+                          <TableCell className="text-right p-3">{item.quantity}</TableCell>
+                          <TableCell className="text-right p-3">{item.unitPrice.toLocaleString()} Kč</TableCell>
+                          <TableCell className="text-right p-3">{item.totalPrice.toLocaleString()} Kč</TableCell>
+                        </TableRow>
                       ))}
-                    </tbody>
-                  </table>
+                    </TableBody>
+                  </Table>
                 </div>
               </div>
             )}

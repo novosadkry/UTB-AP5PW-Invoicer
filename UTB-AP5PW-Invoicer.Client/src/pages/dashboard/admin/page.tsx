@@ -30,6 +30,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@components/ui/alert-dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
 
 export default function AdminPage() {
   const [users, setUsers] = useState<UserDto[]>([]);
@@ -82,24 +90,24 @@ export default function AdminPage() {
 
   const renderUsersTable = () => (
     <div className="border rounded-lg overflow-hidden">
-      <table className="w-full">
-        <thead className="bg-muted">
-          <tr>
-            <th className="text-left p-3">ID</th>
-            <th className="text-left p-3">Email</th>
-            <th className="text-left p-3">Jméno</th>
-            <th className="text-left p-3">Role</th>
-            <th className="text-left p-3">Akce</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table className="w-full">
+        <TableHeader className="bg-muted">
+          <TableRow>
+            <TableHead className="text-left p-3">ID</TableHead>
+            <TableHead className="text-left p-3">Email</TableHead>
+            <TableHead className="text-left p-3">Jméno</TableHead>
+            <TableHead className="text-left p-3">Role</TableHead>
+            <TableHead className="text-left p-3">Akce</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {users.map((user) => (
-            <tr key={user.id} className="border-t">
-              <td className="p-3">{user.id}</td>
-              <td className="p-3">{user.email}</td>
-              <td className="p-3">{user.fullName}</td>
-              <td className="p-3">{user.role}</td>
-              <td className="p-3">
+            <TableRow key={user.id} className="border-t">
+              <TableCell className="p-3">{user.id}</TableCell>
+              <TableCell className="p-3">{user.email}</TableCell>
+              <TableCell className="p-3">{user.fullName}</TableCell>
+              <TableCell className="p-3">{user.role}</TableCell>
+              <TableCell className="p-3">
                 <Button
                   variant="destructive"
                   size="sm"
@@ -107,34 +115,34 @@ export default function AdminPage() {
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 
   const renderCustomersTable = () => (
     <div className="border rounded-lg overflow-hidden">
-      <table className="w-full">
-        <thead className="bg-muted">
-          <tr>
-            <th className="text-left p-3">ID</th>
-            <th className="text-left p-3">Název</th>
-            <th className="text-left p-3">IČ</th>
-            <th className="text-left p-3">Email</th>
-            <th className="text-left p-3">Akce</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table className="w-full">
+        <TableHeader className="bg-muted">
+          <TableRow>
+            <TableHead className="text-left p-3">ID</TableHead>
+            <TableHead className="text-left p-3">Název</TableHead>
+            <TableHead className="text-left p-3">IČ</TableHead>
+            <TableHead className="text-left p-3">Email</TableHead>
+            <TableHead className="text-left p-3">Akce</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {customers.map((customer) => (
-            <tr key={customer.id} className="border-t">
-              <td className="p-3">{customer.id}</td>
-              <td className="p-3">{customer.name}</td>
-              <td className="p-3">{customer.ico || "-"}</td>
-              <td className="p-3">{customer.contactEmail}</td>
-              <td className="p-3">
+            <TableRow key={customer.id} className="border-t">
+              <TableCell className="p-3">{customer.id}</TableCell>
+              <TableCell className="p-3">{customer.name}</TableCell>
+              <TableCell className="p-3">{customer.ico || "-"}</TableCell>
+              <TableCell className="p-3">{customer.contactEmail}</TableCell>
+              <TableCell className="p-3">
                 <Button
                   variant="destructive"
                   size="sm"
@@ -142,36 +150,36 @@ export default function AdminPage() {
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 
   const renderInvoicesTable = () => (
     <div className="border rounded-lg overflow-hidden">
-      <table className="w-full">
-        <thead className="bg-muted">
-          <tr>
-            <th className="text-left p-3">ID</th>
-            <th className="text-left p-3">Číslo faktury</th>
-            <th className="text-left p-3">Datum vystavení</th>
-            <th className="text-left p-3">Částka</th>
-            <th className="text-left p-3">Stav</th>
-            <th className="text-left p-3">Akce</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table className="w-full">
+        <TableHeader className="bg-muted">
+          <TableRow>
+            <TableHead className="text-left p-3">ID</TableHead>
+            <TableHead className="text-left p-3">Číslo faktury</TableHead>
+            <TableHead className="text-left p-3">Datum vystavení</TableHead>
+            <TableHead className="text-left p-3">Částka</TableHead>
+            <TableHead className="text-left p-3">Stav</TableHead>
+            <TableHead className="text-left p-3">Akce</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {invoices.map((invoice) => (
-            <tr key={invoice.id} className="border-t">
-              <td className="p-3">{invoice.id}</td>
-              <td className="p-3">{invoice.invoiceNumber}</td>
-              <td className="p-3">{new Date(invoice.issueDate).toLocaleDateString('cs-CZ')}</td>
-              <td className="p-3">{invoice.totalAmount.toLocaleString()} Kč</td>
-              <td className="p-3">{invoice.status}</td>
-              <td className="p-3">
+            <TableRow key={invoice.id} className="border-t">
+              <TableCell className="p-3">{invoice.id}</TableCell>
+              <TableCell className="p-3">{invoice.invoiceNumber}</TableCell>
+              <TableCell className="p-3">{new Date(invoice.issueDate).toLocaleDateString('cs-CZ')}</TableCell>
+              <TableCell className="p-3">{invoice.totalAmount.toLocaleString()} Kč</TableCell>
+              <TableCell className="p-3">{invoice.status}</TableCell>
+              <TableCell className="p-3">
                 <Button
                   variant="destructive"
                   size="sm"
@@ -179,11 +187,11 @@ export default function AdminPage() {
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 

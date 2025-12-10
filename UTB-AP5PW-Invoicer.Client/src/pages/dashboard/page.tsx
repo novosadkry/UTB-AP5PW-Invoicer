@@ -24,6 +24,14 @@ import { useAxiosPrivate } from "@/hooks/use-axios"
 import { SummaryService } from "@/services/summary.service.ts";
 import type { DashboardSummary } from "@/types/summary.ts";
 import { toast } from "sonner";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table"
 
 export default function Page() {
   const api = useAxiosPrivate()
@@ -171,35 +179,35 @@ export default function Page() {
                       </p>
                     ) : (
                       <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                          <thead className="border-b text-left text-xs text-muted-foreground">
-                            <tr>
-                              <th className="py-2 pr-4">Číslo</th>
-                              <th className="py-2 pr-4">Zákazník</th>
-                              <th className="py-2 pr-4">Vystaveno</th>
-                              <th className="py-2 pr-4">Splatnost</th>
-                              <th className="py-2 pr-4">Stav</th>
-                              <th className="py-2 pr-4 text-right">Částka</th>
-                            </tr>
-                          </thead>
-                          <tbody>
+                        <Table className="w-full text-sm">
+                          <TableHeader className="border-b text-left text-xs text-muted-foreground">
+                            <TableRow>
+                              <TableHead className="py-2 pr-4">Číslo</TableHead>
+                              <TableHead className="py-2 pr-4">Zákazník</TableHead>
+                              <TableHead className="py-2 pr-4">Vystaveno</TableHead>
+                              <TableHead className="py-2 pr-4">Splatnost</TableHead>
+                              <TableHead className="py-2 pr-4">Stav</TableHead>
+                              <TableHead className="py-2 pr-4 text-right">Částka</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
                             {latestInvoices.map((invoice) => (
-                              <tr
+                              <TableRow
                                 key={invoice.id}
                                 className="border-b last:border-0 cursor-pointer hover:bg-muted/40"
                                 onClick={() => navigate(`/dashboard/invoices/${invoice.id}`)}
                               >
-                                <td className="py-2 pr-4 font-medium">{invoice.invoiceNumber}</td>
-                                <td className="py-2 pr-4">
+                                <TableCell className="py-2 pr-4 font-medium">{invoice.invoiceNumber}</TableCell>
+                                <TableCell className="py-2 pr-4">
                                   {invoice.customerName ?? "-"}
-                                </td>
-                                <td className="py-2 pr-4">
+                                </TableCell>
+                                <TableCell className="py-2 pr-4">
                                   {new Date(invoice.issueDate).toLocaleDateString("cs-CZ")}
-                                </td>
-                                <td className="py-2 pr-4">
+                                </TableCell>
+                                <TableCell className="py-2 pr-4">
                                   {new Date(invoice.dueDate).toLocaleDateString("cs-CZ")}
-                                </td>
-                                <td className="py-2 pr-4">
+                                </TableCell>
+                                <TableCell className="py-2 pr-4">
                                   {invoice.status === "draft" && (
                                     <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800 dark:bg-gray-700/50 dark:text-gray-300">
                                       Koncept
@@ -220,18 +228,18 @@ export default function Page() {
                                       Po splatnosti
                                     </span>
                                   )}
-                                </td>
-                                <td className="py-2 pl-4 text-right">
+                                </TableCell>
+                                <TableCell className="py-2 pl-4 text-right">
                                   {invoice.totalAmount.toLocaleString("cs-CZ", {
                                     style: "currency",
                                     currency: "CZK",
                                     maximumFractionDigits: 0,
                                   })}
-                                </td>
-                              </tr>
+                                </TableCell>
+                              </TableRow>
                             ))}
-                          </tbody>
-                        </table>
+                          </TableBody>
+                        </Table>
                       </div>
                     )}
                   </CardContent>
@@ -256,42 +264,42 @@ export default function Page() {
                       </p>
                     ) : (
                       <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                          <thead className="border-b text-left text-xs text-muted-foreground">
-                            <tr>
-                              <th className="py-2 pr-4">Datum</th>
-                              <th className="py-2 pr-4">Faktura</th>
-                              <th className="py-2 pr-4">Zákazník</th>
-                              <th className="py-2 pr-4">Metoda</th>
-                              <th className="py-2 pl-4 text-right">Částka</th>
-                            </tr>
-                          </thead>
-                          <tbody>
+                        <Table className="w-full text-sm">
+                          <TableHeader className="border-b text-left text-xs text-muted-foreground">
+                            <TableRow>
+                              <TableHead className="py-2 pr-4">Datum</TableHead>
+                              <TableHead className="py-2 pr-4">Faktura</TableHead>
+                              <TableHead className="py-2 pr-4">Zákazník</TableHead>
+                              <TableHead className="py-2 pr-4">Metoda</TableHead>
+                              <TableHead className="py-2 pl-4 text-right">Částka</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
                             {latestPayments.map((payment) => (
-                              <tr
+                              <TableRow
                                 key={payment.id}
                                 className="border-b last:border-0 cursor-pointer hover:bg-muted/40"
                                 onClick={() => navigate(`/dashboard/invoices/${payment.invoiceId}`)}
                               >
-                                <td className="py-2 pr-4">
+                                <TableCell className="py-2 pr-4">
                                   {new Date(payment.paymentDate).toLocaleDateString("cs-CZ")}
-                                </td>
-                                <td className="py-2 pr-4 font-medium text-primary underline-offset-2">
+                                </TableCell>
+                                <TableCell className="py-2 pr-4 font-medium text-primary underline-offset-2">
                                   {payment.invoiceNumber}
-                                </td>
-                                <td className="py-2 pr-4">{payment.customerName ?? "-"}</td>
-                                <td className="py-2 pr-4">{payment.paymentMethod}</td>
-                                <td className="py-2 pl-4 text-right">
+                                </TableCell>
+                                <TableCell className="py-2 pr-4">{payment.customerName ?? "-"}</TableCell>
+                                <TableCell className="py-2 pr-4">{payment.paymentMethod}</TableCell>
+                                <TableCell className="py-2 pl-4 text-right">
                                   {payment.amount.toLocaleString("cs-CZ", {
                                     style: "currency",
                                     currency: "CZK",
                                     maximumFractionDigits: 0,
                                   })}
-                                </td>
-                              </tr>
+                                </TableCell>
+                              </TableRow>
                             ))}
-                          </tbody>
-                        </table>
+                          </TableBody>
+                        </Table>
                       </div>
                     )}
                   </CardContent>
