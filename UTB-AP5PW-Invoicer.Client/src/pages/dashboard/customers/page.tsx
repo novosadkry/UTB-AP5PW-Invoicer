@@ -33,6 +33,7 @@ import { useAxiosPrivate } from "@/hooks/use-axios";
 import { CustomerService } from "@/services/customer.service";
 import type { Customer, CreateCustomerDto, UpdateCustomerDto } from "@/types/customer";
 import { CustomerForm } from "@/components/customer-form";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -133,7 +134,13 @@ export default function Page() {
         position: "top-center",
         loading: "Mažu zákazníka...",
         success: "Zákazník byl úspěšně smazán",
-        error: "Nepodařilo se smazat zákazníka",
+        error: (e) => {
+          if (e instanceof AxiosError && e.response?.status === 400) {
+            return "Zákazníka nelze smazat, jelikož má přiřazené faktury.";
+          } else {
+            return "Nepodařilo se smazat zákazníka";
+          }
+        },
       }
     );
     setDeletingCustomerId(null);

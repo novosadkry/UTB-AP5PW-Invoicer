@@ -74,10 +74,12 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
         [HttpDelete("{id:int}")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult> DeleteCustomer(int id)
         {
-            await _customerService.DeleteCustomerAsync(new CustomerDto { Id = id });
+            var result = await _customerService.DeleteCustomerAsync(new CustomerDto { Id = id });
+            if (!result) return BadRequest();
             return Ok();
         }
     }
