@@ -24,7 +24,11 @@ namespace UTB_AP5PW_Invoicer.Server.Extensions
         {
             return services
                 .AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<IService>())
-                .AddAutoMapper(cfg => cfg.AddMaps(typeof(IService).Assembly))
+                .AddAutoMapper(cfg =>
+                {
+                    cfg.AddMaps(typeof(IService).Assembly);
+                    cfg.AddMaps(Assembly.GetExecutingAssembly());
+                })
                 .AddFluentValidationAutoValidation()
                 .AddValidatorsFromAssemblyContaining<IService>()
                 .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());

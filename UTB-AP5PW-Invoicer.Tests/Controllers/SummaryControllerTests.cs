@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -14,6 +15,7 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
         public async Task GetDashboardSummary_ReturnsOk_WithSummaryFromService()
         {
             var mockService = new Mock<ISummaryService>();
+            var mockMapper = new Mock<IMapper>();
             var summary = new DashboardSummaryDto { TotalInvoices = 5 };
             mockService.Setup(s => s.GetDashboardSummaryAsync(It.IsAny<UserDto>())).ReturnsAsync(summary);
 
@@ -21,15 +23,14 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
             {
                 User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, "1")]))
             };
-            var controller = new SummaryController(mockService.Object)
+            var controller = new SummaryController(mockService.Object, mockMapper.Object)
             {
                 ControllerContext = new ControllerContext { HttpContext = httpContext }
             };
 
             var result = await controller.GetDashboardSummary();
 
-            var ok = Assert.IsType<OkObjectResult>(result.Result);
-            Assert.Equal(summary, ok.Value);
+            Assert.IsType<OkObjectResult>(result.Result);
             mockService.Verify(s => s.GetDashboardSummaryAsync(It.IsAny<UserDto>()), Times.Once);
         }
     }

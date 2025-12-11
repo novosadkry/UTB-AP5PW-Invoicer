@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using UTB_AP5PW_Invoicer.Application.DTOs;
 using UTB_AP5PW_Invoicer.Application.Services.Interfaces;
 using UTB_AP5PW_Invoicer.Server.Areas.Client.Models;
+using UTB_AP5PW_Invoicer.Server.Areas.Client.ViewModels;
 using UTB_AP5PW_Invoicer.Server.Extensions;
 
 namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
@@ -24,7 +25,7 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<GetProfileModel>> GetProfile()
+        public async Task<ActionResult<ProfileViewModel>> GetProfile()
         {
             var userId = HttpContext.User.GetUserId();
             var user = await _userService.GetUserAsync(userId);
@@ -32,7 +33,7 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Client.Controllers
             if (user == null)
                 return NotFound();
 
-            return Ok(new GetProfileModel
+            return Ok(new ProfileViewModel
             {
                 Email = user.Email,
                 FullName = user.FullName,

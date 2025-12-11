@@ -1,7 +1,10 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UTB_AP5PW_Invoicer.Application.DTOs;
 using UTB_AP5PW_Invoicer.Application.Services.Interfaces;
+using UTB_AP5PW_Invoicer.Server.Areas.Admin.Models;
+using UTB_AP5PW_Invoicer.Server.Areas.Admin.ViewModels;
 
 namespace UTB_AP5PW_Invoicer.Server.Areas.Admin.Controllers
 {
@@ -13,23 +16,26 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Admin.Controllers
     {
         private readonly IInvoiceService _invoiceService;
         private readonly IInvoiceItemService _invoiceItemService;
+        private readonly IMapper _mapper;
 
         public InvoicesController(
             IInvoiceService invoiceService,
-            IInvoiceItemService invoiceItemService)
+            IInvoiceItemService invoiceItemService,
+            IMapper mapper)
         {
             _invoiceService = invoiceService;
             _invoiceItemService = invoiceItemService;
+            _mapper = mapper;
         }
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<IEnumerable<InvoiceDto>>> GetAllInvoices()
+        public async Task<ActionResult<IEnumerable<InvoiceViewModel>>> GetAllInvoices()
         {
             var invoices = await _invoiceService.ListInvoicesAsync();
-            return Ok(invoices);
+            return Ok(_mapper.Map<IEnumerable<InvoiceViewModel>>(invoices));
         }
 
         [HttpGet("{id:int}")]
@@ -37,11 +43,11 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Admin.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<InvoiceDto>> GetInvoice(int id)
+        public async Task<ActionResult<InvoiceViewModel>> GetInvoice(int id)
         {
             var invoice = await _invoiceService.GetInvoiceByIdAsync(id);
             if (invoice == null) return NotFound();
-            return Ok(invoice);
+            return Ok(_mapper.Map<InvoiceViewModel>(invoice));
         }
 
         [HttpPost]
@@ -49,10 +55,11 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Admin.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult> CreateInvoice([FromBody] InvoiceDto invoice)
+        public async Task<ActionResult> CreateInvoice([FromBody] CreateInvoiceModel model)
         {
+            var invoice = _mapper.Map<InvoiceDto>(model);
             var id = await _invoiceService.CreateInvoiceAsync(invoice);
-            return CreatedAtAction(nameof(GetInvoice), new { id }, invoice);
+            return CreatedAtAction(nameof(GetInvoice), new { id }, null);
         }
 
         [HttpPut("{id:int}")]
@@ -60,8 +67,9 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Admin.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult> UpdateInvoice(int id, [FromBody] InvoiceDto invoice)
+        public async Task<ActionResult> UpdateInvoice(int id, [FromBody] UpdateInvoiceModel model)
         {
+            var invoice = _mapper.Map<InvoiceDto>(model);
             invoice.Id = id;
             await _invoiceService.UpdateInvoiceAsync(invoice);
             return Ok();
@@ -81,13 +89,13 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Admin.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<IEnumerable<InvoiceItemDto>>> GetInvoiceItems(int invoiceId)
+        public async Task<ActionResult<IEnumerable<InvoiceItemViewModel>>> GetInvoiceItems(int invoiceId)
         {
             var invoice = await _invoiceService.GetInvoiceByIdAsync(invoiceId);
             if (invoice == null) return NotFound();
 
             var items = await _invoiceItemService.ListInvoiceItemsAsync(invoice);
-            return Ok(items);
+            return Ok(_mapper.Map<IEnumerable<InvoiceItemViewModel>>(items));
         }
     }
 }

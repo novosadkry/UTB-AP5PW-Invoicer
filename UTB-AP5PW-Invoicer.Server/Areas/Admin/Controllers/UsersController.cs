@@ -1,7 +1,10 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UTB_AP5PW_Invoicer.Application.DTOs;
 using UTB_AP5PW_Invoicer.Application.Services.Interfaces;
+using UTB_AP5PW_Invoicer.Server.Areas.Admin.Models;
+using UTB_AP5PW_Invoicer.Server.Areas.Admin.ViewModels;
 
 namespace UTB_AP5PW_Invoicer.Server.Areas.Admin.Controllers
 {
@@ -12,20 +15,23 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Admin.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IMapper _mapper;
 
-        public UsersController(IUserService userService)
+        public UsersController(IUserService userService, IMapper mapper)
         {
             _userService = userService;
+            _mapper = mapper;
         }
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()
+        public async Task<ActionResult<IEnumerable<UserViewModel>>> GetAllUsers()
         {
             var users = await _userService.ListUsersAsync();
-            return Ok(users);
+            var viewModels = _mapper.Map<IEnumerable<UserViewModel>>(users);
+            return Ok(viewModels);
         }
 
         [HttpGet("{id:int}")]
@@ -33,11 +39,11 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Admin.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<UserDto>> GetUser(int id)
+        public async Task<ActionResult<UserViewModel>> GetUser(int id)
         {
             var user = await _userService.GetUserAsync(id);
             if (user == null) return NotFound();
-            return Ok(user);
+            return Ok(_mapper.Map<UserViewModel>(user));
         }
 
         [HttpPut("{id:int}")]
@@ -45,8 +51,9 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Admin.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult> UpdateUser(int id, [FromBody] UserDto user)
+        public async Task<ActionResult> UpdateUser(int id, [FromBody] UpdateUserModel model)
         {
+            var user = _mapper.Map<UserDto>(model);
             user.Id = id;
             var result = await _userService.UpdateUserAsync(user);
             if (!result) return BadRequest("Unable to update user");
