@@ -13,6 +13,11 @@ export interface Invoice {
   updatedAt: string;
 }
 
+export interface InvoicePdf {
+  filename: string;
+  data: Blob;
+}
+
 export interface CreateInvoiceDto {
   customerId: number | null;
   invoiceNumber: string;

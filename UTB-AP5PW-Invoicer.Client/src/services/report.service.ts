@@ -1,5 +1,5 @@
 import type { AxiosInstance } from 'axios';
-import type { Report } from '@/types/report';
+import type { Report, ReportCsv } from '@/types/report';
 
 export class ReportService {
   private api: AxiosInstance;
@@ -17,7 +17,7 @@ export class ReportService {
     return response.data;
   }
 
-  async exportCsv(periodStart?: Date, periodEnd?: Date): Promise<Blob> {
+  async exportCsv(periodStart?: Date, periodEnd?: Date): Promise<ReportCsv> {
     const params = new URLSearchParams();
     if (periodStart) params.append('periodStart', periodStart.toISOString());
     if (periodEnd) params.append('periodEnd', periodEnd.toISOString());
@@ -25,6 +25,11 @@ export class ReportService {
     const response = await this.api.get(`/reports/csv?${params.toString()}`, {
       responseType: 'blob'
     });
-    return response.data;
+    const filename = response.headers['content-disposition'].match(/filename=([^"]+);/);
+
+    return {
+      filename: filename ? filename[1] : 'report.csv',
+      data: response.data
+    }
   }
 }

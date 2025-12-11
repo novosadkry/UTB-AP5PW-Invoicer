@@ -215,11 +215,11 @@ export default function Page() {
     if (!invoice) return;
 
     toast.promise(async () => {
-      const blob = await invoiceService.downloadPdf(invoice.id);
-      const url = window.URL.createObjectURL(blob);
+      const pdf = await invoiceService.downloadPdf(invoice.id);
+      const url = window.URL.createObjectURL(pdf.data);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `faktura-${invoice.invoiceNumber}.pdf`;
+      a.download = pdf.filename;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);

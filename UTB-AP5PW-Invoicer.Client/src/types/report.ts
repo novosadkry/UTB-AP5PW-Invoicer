@@ -13,6 +13,11 @@ export interface Report {
   monthlyRevenue: MonthlyRevenue[];
 }
 
+export interface ReportCsv {
+  filename: string;
+  data: Blob;
+}
+
 export interface CustomerRevenue {
   customerId: number;
   customerName: string;

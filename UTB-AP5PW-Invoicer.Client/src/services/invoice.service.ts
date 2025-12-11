@@ -1,6 +1,7 @@
 import type { AxiosInstance } from 'axios';
 import type {
   Invoice,
+  InvoicePdf,
   CreateInvoiceDto,
   UpdateInvoiceDto,
 } from '@/types/invoice';
@@ -35,11 +36,16 @@ export class InvoiceService {
     await this.api.delete(`/invoices/${id}`);
   }
 
-  async downloadPdf(id: number): Promise<Blob> {
+  async downloadPdf(id: number): Promise<InvoicePdf> {
     const response = await this.api.get(`/invoices/${id}/pdf`, {
       responseType: 'blob'
     });
-    return response.data;
+    const match = response.headers['content-disposition'].match(/filename=([^"]+);/);
+
+    return {
+      filename: match ? match[1] : `invoice_${id}.pdf`,
+      data: response.data
+    }
   }
 
   async generateShareLink(id: number): Promise<{ shareToken: string }> {

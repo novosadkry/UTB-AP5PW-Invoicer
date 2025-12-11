@@ -4,7 +4,14 @@ import { Download } from "lucide-react";
 import { SidebarInset, SidebarProvider } from "@components/ui/sidebar.tsx";
 import { AppSidebar } from "@components/app-sidebar.tsx";
 import { SiteHeader } from "@components/site-header.tsx";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@components/ui/card.tsx";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "@components/ui/card.tsx";
 import { Button } from "@components/ui/button.tsx";
 import { Label } from "@components/ui/label.tsx";
 import { Skeleton } from "@components/ui/skeleton.tsx";
@@ -69,11 +76,11 @@ export default function Page() {
     setExporting(true);
     toast.promise(
       (async () => {
-        const blob = await reportService.exportCsv(periodStart, periodEnd);
-        const url = window.URL.createObjectURL(blob);
+        const csv = await reportService.exportCsv(periodStart, periodEnd);
+        const url = window.URL.createObjectURL(csv.data);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `report-${periodStart}-${periodEnd}.csv`;
+        a.download = csv.filename;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
@@ -291,21 +298,19 @@ export default function Page() {
             </BreadcrumbList>
           </Breadcrumb>
         </SiteHeader>
-        <div className="flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col animate-page">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <h1 className="text-2xl font-bold">Reporty a statistiky</h1>
-                <Button onClick={handleExportCsv} disabled={exporting || loading}>
-                  <Download className="w-4 h-4 mr-2" />
-                  {exporting ? "Exportuji..." : "Export CSV"}
-                </Button>
-              </div>
-
               <Card>
                 <CardHeader>
                   <CardTitle>Filtr období</CardTitle>
                   <CardDescription>Vyberte období pro zobrazení reportu</CardDescription>
+                  <CardAction>
+                    <Button onClick={handleExportCsv} disabled={exporting || loading}>
+                      <Download className="w-4 h-4 mr-2" />
+                      {exporting ? "Exportuji..." : "Export CSV"}
+                    </Button>
+                  </CardAction>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleFilterSubmit} className="flex flex-col sm:flex-row sm:items-end gap-4">
