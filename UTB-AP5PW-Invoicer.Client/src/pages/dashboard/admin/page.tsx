@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router";
 import { SidebarInset, SidebarProvider } from "@components/ui/sidebar.tsx";
 import { AppSidebar } from "@components/app-sidebar.tsx";
 import { SiteHeader } from "@components/site-header.tsx";
@@ -197,14 +198,71 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <SidebarProvider>
-        <AppSidebar />
+      <SidebarProvider
+        style={
+          {
+            "--sidebar-width": "calc(var(--spacing) * 72)",
+            "--header-height": "calc(var(--spacing) * 12)",
+          } as React.CSSProperties
+        }
+      >
+        <AppSidebar variant="inset" />
         <SidebarInset>
           <SiteHeader>
+            <div className="flex w-full items-center justify-between gap-4">
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink asChild>
+                      <Link to="/dashboard">Přehled</Link>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Admin</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
+          </SiteHeader>
+          <main className="flex flex-1 flex-col animate-page">
+            <div className="@container/main flex flex-1 flex-col gap-2">
+              <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6">
+                <Card>
+                  <CardHeader>
+                    <Skeleton className="h-8 w-48" />
+                  </CardHeader>
+                  <CardContent>
+                    <Skeleton className="h-64 w-full" />
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
+    );
+  }
+
+  return (
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "calc(var(--spacing) * 72)",
+          "--header-height": "calc(var(--spacing) * 12)",
+        } as React.CSSProperties
+      }
+    >
+      <AppSidebar variant="inset" />
+      <SidebarInset>
+        <SiteHeader>
+          <div className="flex w-full items-center justify-between gap-4">
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/dashboard">Přehled</BreadcrumbLink>
+                  <BreadcrumbLink asChild>
+                    <Link to="/dashboard">Přehled</Link>
+                  </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
@@ -212,64 +270,37 @@ export default function AdminPage() {
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-          </SiteHeader>
-          <div className="p-4 space-y-4">
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-8 w-48" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-64 w-full" />
-              </CardContent>
-            </Card>
           </div>
-        </SidebarInset>
-      </SidebarProvider>
-    );
-  }
-
-  return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <SiteHeader>
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard">Přehled</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Admin</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
         </SiteHeader>
-        <div className="p-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Správa databáze</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="users">
-                <TabsList>
-                  <TabsTrigger value="users">Uživatelé ({users.length})</TabsTrigger>
-                  <TabsTrigger value="customers">Zákazníci ({customers.length})</TabsTrigger>
-                  <TabsTrigger value="invoices">Faktury ({invoices.length})</TabsTrigger>
-                </TabsList>
-                <TabsContent value="users" className="mt-4">
-                  {renderUsersTable()}
-                </TabsContent>
-                <TabsContent value="customers" className="mt-4">
-                  {renderCustomersTable()}
-                </TabsContent>
-                <TabsContent value="invoices" className="mt-4">
-                  {renderInvoicesTable()}
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </div>
+        <main className="flex flex-1 flex-col animate-page">
+          <div className="@container/main flex flex-1 flex-col gap-2">
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Správa databáze</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Tabs defaultValue="users">
+                    <TabsList>
+                      <TabsTrigger value="users">Uživatelé ({users.length})</TabsTrigger>
+                      <TabsTrigger value="customers">Zákazníci ({customers.length})</TabsTrigger>
+                      <TabsTrigger value="invoices">Faktury ({invoices.length})</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="users" className="mt-4">
+                      {renderUsersTable()}
+                    </TabsContent>
+                    <TabsContent value="customers" className="mt-4">
+                      {renderCustomersTable()}
+                    </TabsContent>
+                    <TabsContent value="invoices" className="mt-4">
+                      {renderInvoicesTable()}
+                    </TabsContent>
+                  </Tabs>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </main>
       </SidebarInset>
 
       <AlertDialog open={deleteDialog?.open || false} onOpenChange={(open) => !open && setDeleteDialog(null)}>
