@@ -2,12 +2,14 @@
 using MediatR;
 using FluentValidation;
 using UTB_AP5PW_Invoicer.Application.DTOs;
+using UTB_AP5PW_Invoicer.Application.Features.Users.Commands.ChangeRole;
 using UTB_AP5PW_Invoicer.Application.Features.Users.Commands.Create;
 using UTB_AP5PW_Invoicer.Application.Features.Users.Commands.Update;
 using UTB_AP5PW_Invoicer.Application.Features.Users.Commands.Delete;
 using UTB_AP5PW_Invoicer.Application.Features.Users.Queries.Get;
 using UTB_AP5PW_Invoicer.Application.Features.Users.Queries.List;
 using UTB_AP5PW_Invoicer.Application.Services.Interfaces;
+using UTB_AP5PW_Invoicer.Domain.Entities;
 
 namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
 {
@@ -60,6 +62,11 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Implementations
         public Task<bool> DeleteUserAsync(int userId)
         {
             return _mediator.Send(new DeleteUserCommand(userId));
+        }
+
+        public async Task<bool> ChangeUserRoleAsync(int userId, UserRole role)
+        {
+            return await _mediator.Send(new ChangeRoleCommand(userId, role));
         }
     }
 }

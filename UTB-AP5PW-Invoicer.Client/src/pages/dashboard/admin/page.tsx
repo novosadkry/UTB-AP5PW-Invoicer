@@ -39,6 +39,14 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
+import { useAuth } from "@/hooks/use-auth";
+import {
+  Select,
+  SelectItem,
+  SelectContent,
+  SelectValue,
+  SelectTrigger
+} from "@components/ui/select.tsx";
 
 export default function AdminPage() {
   const [users, setUsers] = useState<UserDto[]>([]);
@@ -50,8 +58,10 @@ export default function AdminPage() {
     type: string;
     id: number;
   } | null>(null);
+  const [roleLoading, setRoleLoading] = useState<Record<number, boolean>>({});
 
   const api = useAxiosAdmin();
+  const { user: currentUser } = useAuth();
 
   useEffect(() => {
     loadAllData();
@@ -79,13 +89,42 @@ export default function AdminPage() {
   async function handleDelete(type: string, id: number) {
     try {
       await api.delete(`/${type}/${id}`);
-      toast.success(`${type} byl úspěšně smazán`, { position: "top-center" });
+      toast.success(`Smazáni proběhlo úspěšně`, { position: "top-center" });
       await loadAllData();
     } catch (error) {
       console.error(`Failed to delete ${type}:`, error);
-      toast.error(`Nepodařilo se smazat ${type}`, { position: "top-center" });
+      toast.error(`Nastala chyba při mazání`, { position: "top-center" });
     } finally {
       setDeleteDialog(null);
+    }
+  }
+
+  async function handleChangeRole(userId: number, newRole: UserDto["role"]) {
+    const user = users.find((u) => u.id === userId);
+    if (!user) return;
+
+    if (!currentUser || Number(currentUser.id) === userId) {
+      toast.error("Nemůžete měnit vlastní roli", { position: "top-center" });
+      return;
+    }
+
+    if (newRole === user.role) {
+      return;
+    }
+
+    setRoleLoading((prev) => ({ ...prev, [userId]: true }));
+
+    try {
+      await api.put(`/users/${userId}/role`, { role: newRole });
+      toast.success("Role uživatele byla úspěšně změněna", { position: "top-center" });
+      setUsers((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
+      );
+    } catch (error: any) {
+      console.error("Failed to change user role:", error);
+      toast.error("Nepodařilo se změnit roli uživatele", { position: "top-center" });
+    } finally {
+      setRoleLoading((prev) => ({ ...prev, [userId]: false }));
     }
   }
 
@@ -102,23 +141,47 @@ export default function AdminPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.map((user) => (
-            <TableRow key={user.id} className="border-t">
-              <TableCell className="p-3">{user.id}</TableCell>
-              <TableCell className="p-3">{user.email}</TableCell>
-              <TableCell className="p-3">{user.fullName}</TableCell>
-              <TableCell className="p-3">{user.role}</TableCell>
-              <TableCell className="p-3">
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setDeleteDialog({ open: true, type: "users", id: user.id })}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
+          {users.map((user) => {
+            const isCurrentUser = currentUser && Number(currentUser.id) === user.id;
+            return (
+              <TableRow key={user.id} className="border-t">
+                <TableCell className="p-3">{user.id}</TableCell>
+                <TableCell className="p-3">{user.email}</TableCell>
+                <TableCell className="p-3">{user.fullName}</TableCell>
+                <TableCell className="p-3">
+                  <Select
+                    value={user.role}
+                    onValueChange={(value) => {
+                      if (isCurrentUser) {
+                        toast.error("Nemůžete měnit vlastní roli", { position: "top-center" });
+                        return;
+                      }
+                      void handleChangeRole(user.id, value as UserDto["role"]);
+                    }}
+                    disabled={isCurrentUser || roleLoading[user.id]}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="user">Uživatel</SelectItem>
+                      <SelectItem value="admin">Administrátor</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </TableCell>
+                <TableCell className="p-3 flex gap-2">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setDeleteDialog({ open: true, type: "users", id: user.id })}
+                    disabled={isCurrentUser!}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>
@@ -130,6 +193,7 @@ export default function AdminPage() {
         <TableHeader className="bg-muted">
           <TableRow>
             <TableHead className="text-left p-3">ID</TableHead>
+            <TableHead className="text-left p-3">Uživatel</TableHead>
             <TableHead className="text-left p-3">Název</TableHead>
             <TableHead className="text-left p-3">IČ</TableHead>
             <TableHead className="text-left p-3">Email</TableHead>
@@ -137,23 +201,27 @@ export default function AdminPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {customers.map((customer) => (
-            <TableRow key={customer.id} className="border-t">
-              <TableCell className="p-3">{customer.id}</TableCell>
-              <TableCell className="p-3">{customer.name}</TableCell>
-              <TableCell className="p-3">{customer.ico || "-"}</TableCell>
-              <TableCell className="p-3">{customer.contactEmail}</TableCell>
-              <TableCell className="p-3">
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setDeleteDialog({ open: true, type: "customers", id: customer.id })}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
+          {customers.map((customer) => {
+            const user = users.find((u) => u.id === customer.userId);
+            return (
+              <TableRow key={customer.id} className="border-t">
+                <TableCell className="p-3">{customer.id}</TableCell>
+                <TableCell className="p-3">{user?.fullName || "-"}</TableCell>
+                <TableCell className="p-3">{customer.name}</TableCell>
+                <TableCell className="p-3">{customer.ico || "-"}</TableCell>
+                <TableCell className="p-3">{customer.contactEmail}</TableCell>
+                <TableCell className="p-3">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setDeleteDialog({ open: true, type: "customers", id: customer.id })}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>
@@ -165,6 +233,7 @@ export default function AdminPage() {
         <TableHeader className="bg-muted">
           <TableRow>
             <TableHead className="text-left p-3">ID</TableHead>
+            <TableHead className="text-left p-3">Uživatel</TableHead>
             <TableHead className="text-left p-3">Číslo faktury</TableHead>
             <TableHead className="text-left p-3">Datum vystavení</TableHead>
             <TableHead className="text-left p-3">Částka</TableHead>
@@ -173,24 +242,28 @@ export default function AdminPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {invoices.map((invoice) => (
-            <TableRow key={invoice.id} className="border-t">
-              <TableCell className="p-3">{invoice.id}</TableCell>
-              <TableCell className="p-3">{invoice.invoiceNumber}</TableCell>
-              <TableCell className="p-3">{new Date(invoice.issueDate).toLocaleDateString('cs-CZ')}</TableCell>
-              <TableCell className="p-3">{invoice.totalAmount.toLocaleString()} Kč</TableCell>
-              <TableCell className="p-3">{invoice.status}</TableCell>
-              <TableCell className="p-3">
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setDeleteDialog({ open: true, type: "invoices", id: invoice.id })}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
+          {invoices.map((invoice) => {
+            const user = users.find((u) => u.id === invoice.userId);
+            return (
+              <TableRow key={invoice.id} className="border-t">
+                <TableCell className="p-3">{invoice.id}</TableCell>
+                <TableCell className="p-3">{user?.fullName || "-"}</TableCell>
+                <TableCell className="p-3">{invoice.invoiceNumber}</TableCell>
+                <TableCell className="p-3">{new Date(invoice.issueDate).toLocaleDateString('cs-CZ')}</TableCell>
+                <TableCell className="p-3">{invoice.totalAmount.toLocaleString()} Kč</TableCell>
+                <TableCell className="p-3">{invoice.status}</TableCell>
+                <TableCell className="p-3">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setDeleteDialog({open: true, type: "invoices", id: invoice.id})}
+                  >
+                    <Trash2 className="w-4 h-4"/>
+                  </Button>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>
@@ -219,7 +292,7 @@ export default function AdminPage() {
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
-                    <BreadcrumbPage>Admin</BreadcrumbPage>
+                    <BreadcrumbPage>Administrace</BreadcrumbPage>
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
@@ -266,7 +339,7 @@ export default function AdminPage() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Admin</BreadcrumbPage>
+                  <BreadcrumbPage>Administrace</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>

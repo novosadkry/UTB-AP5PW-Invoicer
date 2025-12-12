@@ -1,5 +1,6 @@
 export interface Customer {
   id: number;
+  userId: number;
   name: string;
   ico?: string | null;
   dic?: string | null;

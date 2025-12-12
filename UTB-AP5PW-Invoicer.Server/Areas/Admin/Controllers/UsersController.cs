@@ -5,6 +5,7 @@ using UTB_AP5PW_Invoicer.Application.DTOs;
 using UTB_AP5PW_Invoicer.Application.Services.Interfaces;
 using UTB_AP5PW_Invoicer.Server.Areas.Admin.Models;
 using UTB_AP5PW_Invoicer.Server.Areas.Admin.ViewModels;
+using UTB_AP5PW_Invoicer.Server.Extensions;
 
 namespace UTB_AP5PW_Invoicer.Server.Areas.Admin.Controllers
 {
@@ -68,6 +69,27 @@ namespace UTB_AP5PW_Invoicer.Server.Areas.Admin.Controllers
         {
             var result = await _userService.DeleteUserAsync(id);
             if (!result) return BadRequest("Unable to delete user");
+            return Ok();
+        }
+
+        [HttpPut("{id:int}/role")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> ChangeUserRole(int id, [FromBody] ChangeUserRoleModel model)
+        {
+            var user = await _userService.GetUserAsync(id);
+            if (user == null) return NotFound();
+
+            var currentUser = await _userService.GetUserAsync(User.GetUserId());
+            if (currentUser != null && currentUser.Id == user.Id)
+                return BadRequest("Cannot change your own role");
+
+            var result = await _userService.ChangeUserRoleAsync(id, model.Role);
+            if (!result) return BadRequest("Unable to change user role");
+
             return Ok();
         }
     }

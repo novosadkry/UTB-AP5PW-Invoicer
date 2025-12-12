@@ -57,7 +57,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // Add admin menu item if user is admin
   const navMainItems = user?.role === "admin"
     ? [...navMain, {
-        title: "Admin",
+        title: "Administrace",
         url: "/dashboard/admin",
         icon: IconShield,
       }]

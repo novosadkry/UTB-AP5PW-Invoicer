@@ -1,4 +1,5 @@
 ﻿using UTB_AP5PW_Invoicer.Application.DTOs;
+using UTB_AP5PW_Invoicer.Domain.Entities;
 
 namespace UTB_AP5PW_Invoicer.Application.Services.Interfaces
 {
@@ -10,5 +11,6 @@ namespace UTB_AP5PW_Invoicer.Application.Services.Interfaces
         public Task<int> CreateUserAsync(string email, string fullName, string password);
         public Task<bool> UpdateUserAsync(UserDto user);
         public Task<bool> DeleteUserAsync(int userId);
+        public Task<bool> ChangeUserRoleAsync(int userId, UserRole role);
     }
 }

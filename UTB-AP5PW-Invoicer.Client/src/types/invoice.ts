@@ -2,6 +2,7 @@ export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue';
 
 export interface Invoice {
   id: number;
+  userId: number;
   customerId: number | null;
   invoiceNumber: string;
   issueDate: string;
