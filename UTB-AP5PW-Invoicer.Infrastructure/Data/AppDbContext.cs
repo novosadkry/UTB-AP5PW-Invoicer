@@ -12,5 +12,23 @@ namespace UTB_AP5PW_Invoicer.Infrastructure.Data
         public DbSet<InvoiceItem> InvoiceItems { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
+
+            optionsBuilder
+                .UseSeeding((context, _) =>
+                {
+                    if (context is AppDbContext dbContext)
+                        new DataSeeder(dbContext).SeedAsync(CancellationToken.None)
+                            .GetAwaiter().GetResult();
+                })
+                .UseAsyncSeeding(async (context, _, cancellationToken) =>
+                {
+                    if (context is AppDbContext dbContext)
+                        await new DataSeeder(dbContext).SeedAsync(cancellationToken);
+                });
+        }
     }
 }
