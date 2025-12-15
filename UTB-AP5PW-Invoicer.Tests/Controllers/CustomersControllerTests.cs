@@ -99,6 +99,10 @@ namespace UTB_AP5PW_Invoicer.Tests.Controllers
             var mockService = new Mock<ICustomerService>();
             var mockMapper = new Mock<IMapper>();
 
+            mockService
+                .Setup(s => s.DeleteCustomerAsync(It.IsAny<CustomerDto>()))
+                .ReturnsAsync(true);
+
             var controller = new CustomersController(mockService.Object, mockMapper.Object);
             var result = await controller.DeleteCustomer(1);
 
